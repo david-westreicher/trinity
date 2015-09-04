@@ -24,7 +24,6 @@ public class MyGdxGame extends ApplicationAdapter {
     PerspectiveCamera cam;
     ModelBatch mb;
     Viewport viewport;
-    Chunk chunks[][] = new Chunk[3][3];
     static float SIZE = 20;
     private float rat = 1;
     private int frame = 0;
@@ -43,11 +42,8 @@ public class MyGdxGame extends ApplicationAdapter {
         }
     };
     private Vector3 enemy = new Vector3();
+    private ChunkManager chunkManager;
 
-
-    public Chunk getInstance(int x, int y, int absx, int absy) {
-        return new Chunk((int) SIZE, (int) SIZE, x, y, absx, absy);
-    }
 
     @Override
     public void resize(int width, int height) {
@@ -66,40 +62,29 @@ public class MyGdxGame extends ApplicationAdapter {
         cam.far = 100f;
         viewport = new ScreenViewport(cam);
         mb = new ModelBatch();
-        for (int x = 0; x < 3; x++)
-            for (int y = 0; y < 3; y++)
-                chunks[x][y] = getInstance(x, y, x - 1, y - 1);
+        chunkManager = new ChunkManager();
         player = new ModelInstance(new ModelBuilder().createSphere(2, 2, 2, 10, 10, new Material(ColorAttribute.createDiffuse(1, 1, 1, 1)), VertexAttributes.Usage.Position));
         gun = new ModelInstance(new ModelBuilder().createBox(0.5f, 2f, 0.5f, new Material(ColorAttribute.createDiffuse(1, 0, 0, 0)), VertexAttributes.Usage.Position));
         firstPointer = new SaveMouse(0);
         secondPointer = new SaveMouse(1);
     }
 
-    public boolean isStuck(Vector3 pos, int size) {
-        if (size == 0)
-            return (Chunk.getVals(chunks, pos, 0, 0) > Chunk.THRESHOLD);
-        for (int x = -size; x <= size; x++)
-            for (int y = -size; y <= size; y++)
-                if (Chunk.getVals(chunks, pos, x, y) > Chunk.THRESHOLD)
-                    return true;
-        return false;
-    }
 
     public void movePlayer(float x, float y) {
         playertrans.x += x;
         playertrans.y -= y;
-        if (!isStuck(playertrans, 1) || DEBUG) {
+        if (!chunkManager.isStuck(playertrans, 1) || DEBUG) {
             player.transform.setTranslation(playertrans);
             return;
         }
         playertrans.y += y;
-        if (!isStuck(playertrans, 1)) {
+        if (!chunkManager.isStuck(playertrans, 1)) {
             player.transform.setTranslation(playertrans);
             return;
         }
         playertrans.x -= x;
         playertrans.y -= y;
-        if (!isStuck(playertrans, 1)) {
+        if (!chunkManager.isStuck(playertrans, 1)) {
             player.transform.setTranslation(playertrans);
             return;
         }
@@ -129,10 +114,6 @@ public class MyGdxGame extends ApplicationAdapter {
         //Gdx.app.log("game", "" +"");
         cam.position.x += (playertrans.x - cam.position.x) / 5.0f;
         cam.position.y += (playertrans.y - cam.position.y) / 5.0f;
-        if (false)
-            for (Chunk mis[] : chunks)
-                for (Chunk mi : mis)
-                    mi.explode(playertrans, false);
 
         if (secondPointer.update() || isDesktop) {
             //Gdx.app.log("game", secondPointer.rely() + "," + secondPointer.relx());
@@ -157,9 +138,9 @@ public class MyGdxGame extends ApplicationAdapter {
             Bullet b = alivebullets.get(i);
             b.update(0);
             boolean dead = false;
-            if (isStuck(b.position, 0)) {
+            if (chunkManager.isStuck(b.position, 0)) {
                 dead = true;
-                Chunk.explodes(chunks, b.position, false);
+                chunkManager.explode(b.position, false);
             }
             if (dead || Math.abs(b.position.x) > SIZE * 3 || Math.abs(b.position.y) > SIZE * 3) {
                 alivebullets.remove(i);
@@ -168,34 +149,8 @@ public class MyGdxGame extends ApplicationAdapter {
         }
         //Chunk.explodes(chunks, enemy, true);
 
-        if (dx != 0) {
-            Chunk newchunks[][] = new Chunk[3][3];
-            for (int x = (dx > 0 ? 0 : 1); x < (dx > 0 ? 2 : 3); x++)
-                for (int y = 0; y < 3; y++) {
-                    newchunks[x][y] = chunks[x + (dx > 0 ? 1 : -1)][y];
-                    newchunks[x][y].modelinstance.transform.translate(-dx * SIZE, 0, 0);
-                }
-            int x = dx > 0 ? 2 : 0;
-            for (int y = 0; y < 3; y++) {
-                chunks[dx > 0 ? 0 : 2][y].modelinstance.model.dispose();
-                newchunks[x][y] = getInstance(x, y, chunks[x][y].absx + dx, chunks[x][y].absy);
-            }
-            chunks = newchunks;
-        }
-        if (dy != 0) {
-            Chunk newchunks[][] = new Chunk[3][3];
-            for (int x = 0; x < 3; x++)
-                for (int y = (dy > 0 ? 0 : 1); y < (dy > 0 ? 2 : 3); y++) {
-                    newchunks[x][y] = chunks[x][y + (dy > 0 ? 1 : -1)];
-                    newchunks[x][y].modelinstance.transform.translate(0, -dy * SIZE, 0);
-                }
-            int y = dy > 0 ? 2 : 0;
-            for (int x = 0; x < 3; x++) {
-                chunks[x][dy > 0 ? 0 : 2].modelinstance.model.dispose();
-                newchunks[x][y] = getInstance(x, y, chunks[x][y].absx, chunks[x][y].absy + dy);
-            }
-            chunks = newchunks;
-        }
+        chunkManager.updateDirection(dx, dy);
+
         cam.update();
 
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -205,34 +160,15 @@ public class MyGdxGame extends ApplicationAdapter {
         mb.render(gun);
         for (Bullet b : alivebullets)
             mb.render(b.modelInstance);
-        for (Chunk mis[] : chunks)
-            for (Chunk mi : mis) {
-                mi.regenerateMesh();
-                mb.render(mi.modelinstance);
-            }
+        chunkManager.render(mb);
         mb.end();
 
-
-        if (++frame % 100 == 0) {
-
-            StringBuilder sb = new StringBuilder();
-            sb.append("\n");
-            for (int y = 0; y < 3; y++) {
-                for (int x = 0; x < 3; x++) {
-                    sb.append(chunks[x][y].absx + "," + chunks[x][y].absy + "\t");
-                }
-                sb.append("\n");
-            }
-            //Gdx.app.log("game", sb.toString());
-        }
     }
 
     @Override
     public void dispose() {
         mb.dispose();
-        for (Chunk mis[] : chunks)
-            for (Chunk mi : mis)
-                mi.modelinstance.model.dispose();
+        chunkManager.dispose();
         super.dispose();
     }
 

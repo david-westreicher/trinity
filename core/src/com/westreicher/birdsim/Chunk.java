@@ -90,12 +90,6 @@ public class Chunk {
         return modelBuilder.end();
     }
 
-    public static void explodes(Chunk chunks[][], Vector3 pos, boolean isEnemy) {
-        for (Chunk mis[] : chunks)
-            for (Chunk mi : mis)
-                mi.explode(pos, isEnemy);
-    }
-
     public void regenerateMesh() {
         if (!dirtyflag)
             return;

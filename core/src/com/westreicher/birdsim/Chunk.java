@@ -22,7 +22,7 @@ import java.util.Random;
  */
 public class Chunk {
 
-    private static final float NOISE_SCALE = 0.04f;
+    public static final float NOISE_SCALE = 0.035f;
     public static final float THRESHOLD = MyGdxGame.DEBUG ? 0 : 0.55f;
     private final float[][] map;
     private final int w;
@@ -35,7 +35,7 @@ public class Chunk {
     private Vector3 translation = new Vector3();
     private boolean dirtyflag = true;
 
-    public Chunk(int w, int h, int offsetx, int offsety, int absx, int absy) {
+    public Chunk(int w, int h, int absx, int absy) {
         this.r = new Random((absx + "," + absy).hashCode());
         this.w = w;
         this.h = h;
@@ -45,9 +45,10 @@ public class Chunk {
         for (int x = 0; x < w; x++)
             for (int y = 0; y < h; y++)
                 map[x][y] = (float) SimplexNoise.noise((x + absx * w) * NOISE_SCALE, (-y + absy * h) * NOISE_SCALE) / 2.0f + 0.5f;
-        modelinstance = new ModelInstance(generateMesh(), w * (offsetx - 1), h * (offsety - 1), 0);
+        modelinstance = new ModelInstance(generateMesh());
     }
 
+    //TODO optimize the hell out of it
     public Model generateMesh() {
         ModelBuilder modelBuilder = new ModelBuilder();
         modelBuilder.begin();
@@ -58,10 +59,9 @@ public class Chunk {
             mat = new Material(ColorAttribute.createDiffuse(r.nextFloat(), r.nextFloat(), r.nextFloat(), 1));
         else
             mat = new Material(ColorAttribute.createDiffuse(1, 1, 1, 1));
-        meshBuilder = modelBuilder.part("part1", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.ColorUnpacked, mat);
+        meshBuilder = modelBuilder.part("part1", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.ColorPacked, mat);
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                boolean isEnemy = false;
                 Color col;
                 if (MyGdxGame.DEBUG || map[x][y] > 2) {
                     col = new Color(1, 1, 1, 1);
@@ -72,13 +72,13 @@ public class Chunk {
                         r.nextFloat();
                 } else
                     col = new Color(r.nextFloat(), r.nextFloat(), r.nextFloat(), 1);
-                if (map[x][y] > THRESHOLD || isEnemy) {
-                    float scale = isEnemy ? 1 : ((map[x][y] - THRESHOLD) * 2f + 0.1f);
+                if (map[x][y] > THRESHOLD) {
+                    float scale = ((map[x][y] - THRESHOLD) * 1f + 0.1f);
                     col.r *= scale;
                     col.g *= scale;
                     col.b *= scale;
                     //.app.log("game", scale+"");
-                    float z = isEnemy ? 2 : scale * 7;//0;//(float) Math.random();
+                    float z = scale * 7;//0;//(float) Math.random();
                     short lu = meshBuilder.vertex(new Vector3(x, -y, z), null, col, null);
                     short ru = meshBuilder.vertex(new Vector3(x + size, -y, z), null, col, null);
                     short ld = meshBuilder.vertex(new Vector3(x, -y + size, z), null, col, null);
@@ -90,21 +90,18 @@ public class Chunk {
         return modelBuilder.end();
     }
 
-    public void regenerateMesh() {
+    public boolean regenerateMesh() {
         if (!dirtyflag)
-            return;
+            return false;
         modelinstance.model.dispose();
-        Matrix4 trans = modelinstance.transform.cpy();
         r = new Random((absx + "," + absy).hashCode());
-        translation = modelinstance.transform.getTranslation(translation);
         modelinstance = new ModelInstance(generateMesh());
-        modelinstance.transform.set(trans);
+        modelinstance.transform.setToTranslation(translation);
         dirtyflag = false;
+        return true;
     }
 
-    public void explode(Vector3 cam, boolean isEnemy) {
-        dirtyflag = true;
-        int explodedist = 5;
+    public void explode(Vector3 cam, int explodedist) {
         //Gdx.app.log("expl", modelinstance.transform.toString());
         boolean inside = false;
         for (int x = -explodedist; x <= explodedist; x += explodedist)
@@ -114,6 +111,7 @@ public class Chunk {
             }
         if (!inside)
             return;
+        dirtyflag = true;
 
         for (int x = -explodedist; x <= explodedist; x++)
             for (int y = -explodedist; y <= explodedist; y++) {
@@ -121,10 +119,7 @@ public class Chunk {
                 if (dst > explodedist - 1)
                     continue;
                 float val = getVal(cam, x, y);
-                if (isEnemy)
-                    setVal(cam, x, y, 2 + val);
-                else
-                    setVal(cam, x, y, Math.max(val - ((explodedist - 1) / dst) / 20, 0));
+                setVal(cam, x, y, Math.max(val - ((explodedist - 1) / dst) / 50, 0));
                 // setVal(cam, x, y, val - 0.2f);
             }
         //Gdx.app.log("expl", cam.toString() + "," + offsetx + "," + offsety);
@@ -134,7 +129,7 @@ public class Chunk {
 
     private float getVal(Vector3 cam, float x, float y) {
         int realx = (int) (cam.x + w / 2 + x - translation.x);
-        int realy = (int) (-cam.y + h / 2 + y + translation.y);
+        int realy = (int) (-cam.y + h / 2 + y + translation.y + 1);
         if (realx >= 0 && realx < w && realy >= 0 && realy < h)
             return map[realx][realy];
         return -1f;
@@ -142,7 +137,7 @@ public class Chunk {
 
     private void setVal(Vector3 cam, float x, float y, float val) {
         int realx = (int) (cam.x + w / 2 + x - translation.x);
-        int realy = (int) (-cam.y + h / 2 + y + translation.y);
+        int realy = (int) (-cam.y + h / 2 + y + translation.y + 1);
         if (realx >= 0 && realx < w && realy >= 0 && realy < h)
             map[realx][realy] = val;
     }
@@ -150,11 +145,17 @@ public class Chunk {
     public static float getVals(Chunk chunks[][], Vector3 cam, float x, float y) {
         for (Chunk mis[] : chunks)
             for (Chunk mi : mis) {
-                mi.translation = mi.modelinstance.transform.getTranslation(mi.translation);
+                if (mi == null)
+                    continue;
                 float val = mi.getVal(cam, x, y);
                 if (val > 0)
                     return val;
             }
         return -1;
+    }
+
+    public void setTranslation(float realX, float realY) {
+        modelinstance.transform.setTranslation(realX, realY, 0);
+        translation.set(realX, realY, 0);
     }
 }

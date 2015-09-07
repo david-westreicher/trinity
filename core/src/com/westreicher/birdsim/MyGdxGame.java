@@ -3,191 +3,209 @@ package com.westreicher.birdsim;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.FPSLogger;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttributes;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.loader.ObjLoader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-
-import java.util.ArrayList;
+import com.westreicher.birdsim.util.RenderToTexture.DownSampler;
 
 public class MyGdxGame extends ApplicationAdapter {
     public static final Vector3 UPAXIS = new Vector3(0, 0, 1);
     PerspectiveCamera cam;
     ModelBatch mb;
     Viewport viewport;
-    static float SIZE = 20;
+    static float SIZE = 16;
     private float rat = 1;
-    private int frame = 0;
     private static boolean isDesktop;
     public static boolean DEBUG = false;
     private ModelInstance player;
-    private Vector3 playertrans = new Vector3();
     private ModelInstance gun;
     private SaveMouse firstPointer;
     private SaveMouse secondPointer;
-    private ArrayList<Bullet> alivebullets = new ArrayList<Bullet>();
-    private Pool<Bullet> bullets = new Pool<Bullet>() {
-        @Override
-        protected Bullet newObject() {
-            return new Bullet();
-        }
-    };
-    private Vector3 enemy = new Vector3();
     private ChunkManager chunkManager;
+    private FPSLogger fps = new FPSLogger();
+    private SpriteBatch spritebatch;
+    private Texture thumbTex;
+    public static Transform playerTransform;
+    private float delta;
+    private SaveMouse thirdPointer;
+    private DownSampler downs = null;
 
 
     @Override
     public void resize(int width, int height) {
         rat = 1.0f / Math.min(width, height);
         viewport.update(width, height);
+        spritebatch.getProjectionMatrix().setToOrtho2D(0, 0, width, height);
+        if (downs != null)
+            downs.dispose();
+        downs = new DownSampler(width, height);
     }
 
     @Override
     public void create() {
+        Entity.init();
         Gdx.app.log("game", "GL ES 3.0 supported: " + (Gdx.gl30 != null));
         isDesktop = Gdx.app.getType() == Application.ApplicationType.Desktop;
-        DefaultShader.defaultCullFace = 0;
+        //DefaultShader.defaultCullFace = 0;
         cam = new PerspectiveCamera();
-        cam.position.set(0, 0, 25 * (DEBUG ? 4 : 1));
+        cam.position.set(0, 0, 25 * (DEBUG ? 10 : 1.25f));
         cam.near = 0.1f;
-        cam.far = 100f;
+        cam.far = 500f;
         viewport = new ScreenViewport(cam);
+        spritebatch = new SpriteBatch();
+        thumbTex = new Texture(Gdx.files.internal("thumb.png"));
         mb = new ModelBatch();
         chunkManager = new ChunkManager();
-        player = new ModelInstance(new ModelBuilder().createSphere(2, 2, 2, 10, 10, new Material(ColorAttribute.createDiffuse(1, 1, 1, 1)), VertexAttributes.Usage.Position));
-        gun = new ModelInstance(new ModelBuilder().createBox(0.5f, 2f, 0.5f, new Material(ColorAttribute.createDiffuse(1, 0, 0, 0)), VertexAttributes.Usage.Position));
-        firstPointer = new SaveMouse(0);
-        secondPointer = new SaveMouse(1);
+        // player = new ModelInstance(new ModelBuilder().createSphere(2, 2, 2, 10, 10, new Material(ColorAttribute.createDiffuse(1, 1, 1, 1)), VertexAttributes.Usage.Position));
+        player = new ModelInstance(new ObjLoader().loadModel(Gdx.files.internal("player.obj")));
+        gun = new ModelInstance(new ModelBuilder().createBox(0.2f, 0.5f, 0.2f, new Material(ColorAttribute.createDiffuse(1, 0, 0, 0)), VertexAttributes.Usage.Position));
+        firstPointer = new SaveMouse(0, viewport);
+        secondPointer = new SaveMouse(1, viewport);
+        thirdPointer = new SaveMouse(2, viewport);
+        playerTransform = new Transform();
     }
 
 
     public void movePlayer(float x, float y) {
-        playertrans.x += x;
-        playertrans.y -= y;
-        if (!chunkManager.isStuck(playertrans, 1) || DEBUG) {
-            player.transform.setTranslation(playertrans);
+        playerTransform.position.x += x;
+        playerTransform.position.y -= y;
+        if (!chunkManager.isStuck(playerTransform.position, 1) || DEBUG)
             return;
-        }
-        playertrans.y += y;
-        if (!chunkManager.isStuck(playertrans, 1)) {
-            player.transform.setTranslation(playertrans);
+        playerTransform.position.y += y;
+        if (!chunkManager.isStuck(playerTransform.position, 1))
             return;
-        }
-        playertrans.x -= x;
-        playertrans.y -= y;
-        if (!chunkManager.isStuck(playertrans, 1)) {
-            player.transform.setTranslation(playertrans);
+        playerTransform.position.x -= x;
+        playerTransform.position.y -= y;
+        if (!chunkManager.isStuck(playerTransform.position, 1))
             return;
-        }
+        playerTransform.position.y += y;
     }
 
     @Override
     public void render() {
-
+        this.delta = Gdx.graphics.getDeltaTime();
+        fps.log();
         int dx = 0;
         int dy = 0;
         if (Math.abs(cam.position.x) > SIZE / 2)
             dx = (int) Math.signum(cam.position.x);
         if (Math.abs(cam.position.y) > SIZE / 2)
             dy = (int) Math.signum(cam.position.y);
+        Entity.translateAll(-dx * SIZE, -dy * SIZE);
+        chunkManager.updateDirection(dx, dy);
+        Entity.updateall(delta);
         cam.position.x -= dx * SIZE;
         cam.position.y -= dy * SIZE;
-        player.transform.translate(-dx * SIZE, -dy * SIZE, 0);
-        for (Bullet b : alivebullets)
-            b.position.add(-dx * SIZE, -dy * SIZE, 0);
+        playerTransform.position.add(-dx * SIZE, -dy * SIZE, 0);
 
-        playertrans = player.transform.getTranslation(playertrans);
         if (firstPointer.update()) {
             int mousex = firstPointer.relx();
             int mousey = firstPointer.rely();
-            movePlayer(mousex * rat * 1.0f, mousey * rat * 1.0f);
+            float rad = firstPointer.getRadiant();
+            playerTransform.radiant = rad;
+            //movePlayer(mousex * rat * 1.0f, mousey * rat * 1.0f);
+            movePlayer((float) Math.cos(rad) * delta * (DEBUG ? 100 : 10), -(float) Math.sin(rad) * delta * (DEBUG ? 100 : 10));
         }
         //Gdx.app.log("game", "" +"");
-        cam.position.x += (playertrans.x - cam.position.x) / 5.0f;
-        cam.position.y += (playertrans.y - cam.position.y) / 5.0f;
-
+        cam.position.x += (playerTransform.position.x - cam.position.x) / 5.0f;
+        cam.position.y += (playerTransform.position.y - cam.position.y) / 5.0f;
         if (secondPointer.update() || isDesktop) {
             //Gdx.app.log("game", secondPointer.rely() + "," + secondPointer.relx());
             int relx = isDesktop ? 0 : secondPointer.relx();
             int rely = isDesktop ? 1 : secondPointer.rely();
-
-            double radiant = Math.atan2(-rely, relx);
-            float degree = (float) (radiant * 180 / Math.PI) + 90;
-            gun.transform.setToRotation(UPAXIS, degree);
-            gun.transform.setTranslation(playertrans);
-            gun.transform.translate(0, -1.1f, 0);//secondPointer.relx()*rat,secondPointer.rely()*rat,0);
-            if (frame % 5 == 0) {
-                Bullet newb = bullets.obtain();
-                newb.init(playertrans.x, playertrans.y, (float) Math.cos(radiant), (float) Math.sin(radiant), degree);
-                alivebullets.add(newb);
+            float radiant = secondPointer.getRadiant();
+            gun.transform.setToRotationRad(UPAXIS, radiant + (float) Math.PI / 2);
+            gun.transform.setTranslation(playerTransform.position);
+            gun.transform.translate(0, -0.4f, 0);//secondPointer.relx()*rat,secondPointer.rely()*rat,0);
+            if (Gdx.graphics.getFrameId() % 5 == 0) {
+                Entity.shoot(playerTransform.position.x, playerTransform.position.y, (float) Math.cos(radiant), (float) Math.sin(radiant));
             }
         } else {
+            gun.transform.setToRotation(UPAXIS, 0);
             gun.transform.translate(-dx * SIZE, -dy * SIZE, 0);
         }
 
-        for (int i = 0; i < alivebullets.size(); i++) {
-            Bullet b = alivebullets.get(i);
-            b.update(0);
-            boolean dead = false;
-            if (chunkManager.isStuck(b.position, 0)) {
-                dead = true;
-                chunkManager.explode(b.position, false);
-            }
-            if (dead || Math.abs(b.position.x) > SIZE * 3 || Math.abs(b.position.y) > SIZE * 3) {
-                alivebullets.remove(i);
-                bullets.free(b);
-            }
-        }
-        //Chunk.explodes(chunks, enemy, true);
+        if (thirdPointer.update()) {
+            cam.position.z += (200 - cam.position.z) / 10.0f;
+        } else
+            cam.position.z += (25 * (DEBUG ? 10 : 1.8f) - cam.position.z) / 10.0f;
 
-        chunkManager.updateDirection(dx, dy);
+        //Chunk.explodes(chunks, enemy, true);
+        playerTransform.transform(player);
 
         cam.update();
 
+        downs.begin();
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
         mb.begin(cam);
         mb.render(player);
         mb.render(gun);
-        for (Bullet b : alivebullets)
-            mb.render(b.modelInstance);
+        Entity.render(mb);
         chunkManager.render(mb);
         mb.end();
+        downs.end();
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        downs.draw(viewport.getScreenWidth(), viewport.getScreenHeight());
+        drawThumbs();
 
+    }
+
+    private void drawThumbs() {
+        spritebatch.begin();
+        int size = 50;
+        if (firstPointer.isDown)
+            spritebatch.draw(thumbTex, firstPointer.startx - size, viewport.getScreenHeight() - firstPointer.starty - size, size * 2, size * 2, 0, 0, 1, 1);
+        if (secondPointer.isDown)
+            spritebatch.draw(thumbTex, secondPointer.startx - size, viewport.getScreenHeight() - secondPointer.starty - size, size * 2, size * 2, 0, 0, 1, 1);
+        spritebatch.end();
     }
 
     @Override
     public void dispose() {
+        Entity.dispose();
         mb.dispose();
         chunkManager.dispose();
-        super.dispose();
     }
 
     public static class SaveMouse {
         private final int index;
+        private final Viewport v;
         boolean isDown = false;
         int startx = 0;
         int starty = 0;
-        boolean saver = true;
 
-        public SaveMouse(int index) {
+        public SaveMouse(int index, Viewport v) {
             this.index = index;
+            this.v = v;
         }
 
         public boolean update() {
+            int width = v.getScreenWidth();
+            int height = v.getScreenHeight();
             if (Gdx.input.isTouched(index)) {
                 if (!isDown) {
-                    startx = Gdx.input.getX(index);
-                    starty = Gdx.input.getY(index);
+                    int currentx = Gdx.input.getX(index);
+                    int currenty = Gdx.input.getY(index);
+                    if (Math.abs(currentx - width / 2) < width / 2 - 100
+                            && Math.abs(currenty - height / 2) < height / 2 - 100) {
+                        startx = currentx;
+                        starty = currenty;
+                    }
                 }
                 isDown = true;
             } else {
@@ -198,18 +216,29 @@ public class MyGdxGame extends ApplicationAdapter {
 
         public int relx() {
             int ret = (Gdx.input.getX(index) - startx);
-            if (!saver) {
-                startx = Gdx.input.getX(index);
-            }
             return ret;
         }
 
         public int rely() {
             int ret = (Gdx.input.getY(index) - starty);
-            if (!saver)
-                starty = Gdx.input.getY(index);
             return ret;
         }
 
+        public float getRadiant() {
+            return (float) Math.atan2(-rely(), relx());
+        }
+
+    }
+
+    public static class Transform {
+        public Vector3 position = new Vector3();
+        public float scale = 0.4f;
+        public float radiant;
+
+        public void transform(ModelInstance player) {
+            player.transform.setToTranslation(position);
+            player.transform.scl(scale);
+            player.transform.rotateRad(UPAXIS, radiant);
+        }
     }
 }

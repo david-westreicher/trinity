@@ -34,7 +34,7 @@ public class MyGdxGame extends ApplicationAdapter {
     private ModelInstance gun;
     private SaveMouse firstPointer;
     private SaveMouse secondPointer;
-    private ChunkManager chunkManager;
+    public ChunkManager chunkManager;
     private FPSLogger fps = new FPSLogger();
     private SpriteBatch spritebatch;
     private Texture thumbTex;
@@ -42,6 +42,7 @@ public class MyGdxGame extends ApplicationAdapter {
     private float delta;
     private SaveMouse thirdPointer;
     private DownSampler downs = null;
+    public static MyGdxGame single = null;
 
 
     @Override
@@ -56,6 +57,8 @@ public class MyGdxGame extends ApplicationAdapter {
 
     @Override
     public void create() {
+        single = this;
+        Gdx.app.log("game","create");
         Entity.init();
         Gdx.app.log("game", "GL ES 3.0 supported: " + (Gdx.gl30 != null));
         isDesktop = Gdx.app.getType() == Application.ApplicationType.Desktop;
@@ -162,7 +165,6 @@ public class MyGdxGame extends ApplicationAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         downs.draw(viewport.getScreenWidth(), viewport.getScreenHeight());
         drawThumbs();
-
     }
 
     private void drawThumbs() {
@@ -172,6 +174,9 @@ public class MyGdxGame extends ApplicationAdapter {
             spritebatch.draw(thumbTex, firstPointer.startx - size, viewport.getScreenHeight() - firstPointer.starty - size, size * 2, size * 2, 0, 0, 1, 1);
         if (secondPointer.isDown)
             spritebatch.draw(thumbTex, secondPointer.startx - size, viewport.getScreenHeight() - secondPointer.starty - size, size * 2, size * 2, 0, 0, 1, 1);
+        if (thirdPointer.isDown){
+            spritebatch.draw(thumbTex, thirdPointer.startx - size, viewport.getScreenHeight() - thirdPointer.starty - size, size * 2, size * 2, 0, 0, 1, 1);
+        }
         spritebatch.end();
     }
 
@@ -179,6 +184,7 @@ public class MyGdxGame extends ApplicationAdapter {
     public void dispose() {
         Entity.dispose();
         mb.dispose();
+        Gdx.app.log("game","dispose");
         chunkManager.dispose();
     }
 

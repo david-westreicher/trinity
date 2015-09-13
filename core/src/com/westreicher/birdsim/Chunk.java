@@ -33,7 +33,7 @@ public class Chunk {
     private int size = 1;
     public ModelInstance modelinstance;
     private Vector3 translation = new Vector3();
-    private boolean dirtyflag = true;
+    private boolean dirtyflag = false;
 
     public Chunk(int w, int h, int absx, int absy) {
         this.r = new Random((absx + "," + absy).hashCode());
@@ -50,6 +50,7 @@ public class Chunk {
 
     //TODO optimize the hell out of it
     public Model generateMesh() {
+        //Gdx.app.log("game", absx + "," + absy);
         ModelBuilder modelBuilder = new ModelBuilder();
         modelBuilder.begin();
         modelBuilder.node().translation.set(-w / 2.0f, h / 2.0f, 0);

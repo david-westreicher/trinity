@@ -8,11 +8,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.westreicher.birdsim.MyGdxGame;
 
 import java.util.ArrayList;
-
-import javax.xml.soap.Text;
 
 /**
  * Created by david on 9/6/15.
@@ -28,7 +25,7 @@ public class RenderToTexture {
 
     private RenderToTexture(int width, int height, boolean hasDepth) {
         Gdx.app.log("", width + "+" + height);
-        m_fbo = new FrameBuffer(Pixmap.Format.RGB888, width, height, hasDepth);
+        m_fbo = new FrameBuffer(Pixmap.Format.RGB565, width, height, hasDepth);
         Texture colbuf = m_fbo.getColorBufferTexture();
         //colbuf.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         m_fboRegion = new TextureRegion(colbuf);
@@ -56,8 +53,6 @@ public class RenderToTexture {
     }
 
     public static class DownSampler {
-        private final int texSizeLoc;
-        private final float[] texSizeVal = new float[2];
         private final ShaderProgram gathershader;
         public ArrayList<RenderToTexture> texs = new ArrayList<RenderToTexture>();
         private final SpriteBatch downsampleBatch = new SpriteBatch();
@@ -67,13 +62,10 @@ public class RenderToTexture {
                     + "attribute vec4 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
                     + "attribute vec2 " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
                     + "uniform mat4 u_projTrans;\n" //
-                    + "varying vec4 v_color;\n" //
                     + "varying vec2 v_texCoords;\n" //
                     + "\n" //
                     + "void main()\n" //
                     + "{\n" //
-                    + "   v_color = " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
-                    + "   v_color.a = v_color.a * (255.0/254.0);\n" //
                     + "   v_texCoords = " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
                     + "   gl_Position =  u_projTrans * " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
                     + "}\n";
@@ -83,26 +75,14 @@ public class RenderToTexture {
                     + "#else\n" //
                     + "#define LOWP \n" //
                     + "#endif\n" //
-                    + "varying LOWP vec4 v_color;\n" //
                     + "varying vec2 v_texCoords;\n" //
                     + "uniform sampler2D u_texture;\n" //
-                    + "uniform vec2 texSize;\n" //
                     + "uniform int thresh;\n" //
                     + "void main()\n"//
                     + "{\n" //
-                    + "  vec4 col = vec4(0,0,0,0);" //
-                    + "  col+=texture2D(u_texture,v_texCoords+vec2(-1,-1)/texSize);" //
-                    + "  col+=texture2D(u_texture,v_texCoords+vec2(0,-1)/texSize);" //
-                    + "  col+=texture2D(u_texture,v_texCoords+vec2(1,-1)/texSize);" //
-                    + "  col+=texture2D(u_texture,v_texCoords+vec2(1,0)/texSize);" //
-                    + "  col+=texture2D(u_texture,v_texCoords+vec2(1,1)/texSize);" //
-                    + "  col+=texture2D(u_texture,v_texCoords+vec2(0,1)/texSize);" //
-                    + "  col+=texture2D(u_texture,v_texCoords+vec2(-1,1)/texSize);" //
-                    + "  col+=texture2D(u_texture,v_texCoords+vec2(-1,0)/texSize);" //
-                    + "  col+=texture2D(u_texture,v_texCoords);" //
-                    + "  col/=vec4(9);" //
-                    + "  if(thresh<1 && length(col)<1.3)col=vec4(0,0,0,0);" //
-                    + "  gl_FragColor = v_color * col ;\n" //
+                    + "  vec4 col = texture2D(u_texture,v_texCoords);\n" //
+                    + "  if(thresh<1 && length(col)<1.3){gl_FragColor = vec4(0,0,0,0);}\n" //
+                    + "  else{gl_FragColor = col;}\n" //
                     + "}";
 
             ShaderProgram shader = new ShaderProgram(vertexShader, fragmentShader);
@@ -113,9 +93,8 @@ public class RenderToTexture {
 
         public DownSampler(int width, int height) {
             gathershader = createDefaultShader();
-            texSizeLoc = downsampleBatch.getShader().getUniformLocation("texSize");
             downsampleBatch.setBlendFunction(GL20.GL_ONE, GL20.GL_ONE);
-            while (width > 2 && height > 2) {
+            for (int i = 0; i < 10; i++) {
                 RenderToTexture rt = new RenderToTexture(width, height, false);
                 width /= 2;
                 height /= 2;
@@ -143,12 +122,7 @@ public class RenderToTexture {
             for (int i = 1; i < texs.size(); i++) {
                 texs.get(i).begin();
                 RenderToTexture toDraw = texs.get(i - 1);
-                texSizeVal[0] = toDraw.m_fbo.getWidth();
-                texSizeVal[1] = toDraw.m_fbo.getHeight();
-                //texSizeVal[0] = screenWidth;
-                //texSizeVal[1] = screenHeight;
-                gathershader.setUniform2fv("texSize", texSizeVal, 0, 2);
-                gathershader.setUniformi("thresh", i == 1 ? 0 : 1);
+                gathershader.setUniformi("thresh", i - 1);
                 toDraw.draw(downsampleBatch, screenWidth, screenHeight, true);
             }
             texs.get(0).end();

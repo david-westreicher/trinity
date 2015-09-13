@@ -14,8 +14,8 @@ public class ChunkManager {
     private static final Vector3 GRADIENT = new Vector3(1, 0, 0);
     public static final int CHUNKNUMS = 6 + 1;
     private long lastupdate = 0;
-    private static Chunk chunks[][] = new Chunk[CHUNKNUMS][CHUNKNUMS];
-    private static int[] pos = new int[]{0, 0};
+    private Chunk chunks[][] = new Chunk[CHUNKNUMS][CHUNKNUMS];
+    private int[] pos = new int[]{0, 0};
     private Spiral s = new Spiral();
 
     public ChunkManager() {
@@ -30,7 +30,7 @@ public class ChunkManager {
         return new Chunk((int) MyGdxGame.SIZE, (int) MyGdxGame.SIZE, absx, absy);
     }
 
-    public static boolean isStuck(Vector3 pos, int size) {
+    public boolean isStuck(Vector3 pos, int size) {
         if (size == 0)
             return (Chunk.getVals(chunks, pos, 0, 0) > Chunk.THRESHOLD);
         for (int x = -size; x <= size; x++)
@@ -40,7 +40,7 @@ public class ChunkManager {
         return false;
     }
 
-    public static void explode(Vector3 pos, int distance) {
+    public void explode(Vector3 pos, int distance) {
         for (Chunk mis[] : chunks)
             for (Chunk mi : mis)
                 if (mi != null)
@@ -83,10 +83,16 @@ public class ChunkManager {
     }
 
     public void dispose() {
-        for (Chunk mis[] : chunks)
-            for (Chunk mi : mis)
-                if (mi != null)
+        for (int x = 0; x < CHUNKNUMS; x++)
+            for (int y = 0; y < CHUNKNUMS; y++) {
+                Chunk mi = chunks[x][y];
+                if (mi != null) {
                     mi.modelinstance.model.dispose();
+                    chunks[x][y] = null;
+                }
+            }
+        pos[0] = 0;
+        pos[1] = 0;
     }
 
     public void updateDirection(int dx, int dy) {
@@ -131,7 +137,7 @@ public class ChunkManager {
         }
     }
 
-    public static Vector3 getGradient(float x, float y) {
+    public Vector3 getGradient(float x, float y) {
         GRADIENT.set(x, y, 0);
         float h = Chunk.getVals(chunks, GRADIENT, 0, 0);
         float dx = Chunk.getVals(chunks, GRADIENT, 1, 0) - h;

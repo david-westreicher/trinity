@@ -64,6 +64,8 @@ public class Entity {
     }
 
     public static void dispose() {
+        aliveents.clear();
+        ents.clear();
         playerModel.dispose();
         itemModel.dispose();
         bulletModel.dispose();
@@ -116,9 +118,9 @@ public class Entity {
                 break;
             case BULLET:
                 pos.mulAdd(speed, delta * 80f);
-                if (ChunkManager.isStuck(pos, 0)) {
+                if (MyGdxGame.single.chunkManager.isStuck(pos, 0)) {
                     dead = true;
-                    ChunkManager.explode(pos, 4);
+                    MyGdxGame.single.chunkManager.explode(pos, 4);
                 }
                 break;
         }
@@ -133,18 +135,18 @@ public class Entity {
     private boolean tryToMove(float x, float y, boolean simple) {
         pos.x += x;
         pos.y -= y;
-        if (!ChunkManager.isStuck(pos, 1))
+        if (!MyGdxGame.single.chunkManager.isStuck(pos, 1))
             return true;
         pos.y += y;
         if (simple) {
             pos.x -= x;
             return false;
         }
-        if (!ChunkManager.isStuck(pos, 1))
+        if (!MyGdxGame.single.chunkManager.isStuck(pos, 1))
             return true;
         pos.x -= x;
         pos.y -= y;
-        if (!ChunkManager.isStuck(pos, 1))
+        if (!MyGdxGame.single.chunkManager.isStuck(pos, 1))
             return true;
         pos.y += y;
         return false;

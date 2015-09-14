@@ -58,7 +58,7 @@ public class MyGdxGame extends ApplicationAdapter {
     @Override
     public void create() {
         single = this;
-        Gdx.app.log("game","create");
+        Gdx.app.log("game", "create");
         Entity.init();
         Gdx.app.log("game", "GL ES 3.0 supported: " + (Gdx.gl30 != null));
         isDesktop = Gdx.app.getType() == Application.ApplicationType.Desktop;
@@ -83,9 +83,10 @@ public class MyGdxGame extends ApplicationAdapter {
 
 
     public void movePlayer(float x, float y) {
+        playerTransform.position.z = 20;
         playerTransform.position.x += x;
         playerTransform.position.y -= y;
-        if (!chunkManager.isStuck(playerTransform.position, 1) || DEBUG)
+        if (!chunkManager.isStuck(playerTransform.position, 1) || true || DEBUG)
             return;
         playerTransform.position.y += y;
         if (!chunkManager.isStuck(playerTransform.position, 1))
@@ -125,7 +126,7 @@ public class MyGdxGame extends ApplicationAdapter {
         //Gdx.app.log("game", "" +"");
         cam.position.x += (playerTransform.position.x - cam.position.x) / 5.0f;
         cam.position.y += (playerTransform.position.y - cam.position.y) / 5.0f;
-        if (secondPointer.update() || isDesktop) {
+        if (secondPointer.update() || !isDesktop) {
             //Gdx.app.log("game", secondPointer.rely() + "," + secondPointer.relx());
             int relx = isDesktop ? 0 : secondPointer.relx();
             int rely = isDesktop ? 1 : secondPointer.rely();
@@ -134,7 +135,7 @@ public class MyGdxGame extends ApplicationAdapter {
             gun.transform.setTranslation(playerTransform.position);
             gun.transform.translate(0, -0.4f, 0);//secondPointer.relx()*rat,secondPointer.rely()*rat,0);
             if (Gdx.graphics.getFrameId() % 5 == 0) {
-                Entity.shoot(playerTransform.position.x, playerTransform.position.y, (float) Math.cos(radiant), (float) Math.sin(radiant));
+                //Entity.shoot(playerTransform.position.x, playerTransform.position.y, (float) Math.cos(radiant), (float) Math.sin(radiant));
             }
         } else {
             gun.transform.setToRotation(UPAXIS, 0);
@@ -146,17 +147,16 @@ public class MyGdxGame extends ApplicationAdapter {
         } else
             cam.position.z += (25 * (DEBUG ? 10 : 1.8f) - cam.position.z) / 10.0f;
 
-        //Chunk.explodes(chunks, enemy, true);
+        if (Gdx.graphics.getFrameId() % 1 == 0)
+            chunkManager.explode(playerTransform.position, 7);
         playerTransform.transform(player);
 
         cam.update();
 
         downs.begin();
-        Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
         mb.begin(cam);
         mb.render(player);
-        mb.render(gun);
+        //mb.render(gun);
         Entity.render(mb);
         chunkManager.render(mb);
         mb.end();
@@ -174,7 +174,7 @@ public class MyGdxGame extends ApplicationAdapter {
             spritebatch.draw(thumbTex, firstPointer.startx - size, viewport.getScreenHeight() - firstPointer.starty - size, size * 2, size * 2, 0, 0, 1, 1);
         if (secondPointer.isDown)
             spritebatch.draw(thumbTex, secondPointer.startx - size, viewport.getScreenHeight() - secondPointer.starty - size, size * 2, size * 2, 0, 0, 1, 1);
-        if (thirdPointer.isDown){
+        if (thirdPointer.isDown) {
             spritebatch.draw(thumbTex, thirdPointer.startx - size, viewport.getScreenHeight() - thirdPointer.starty - size, size * 2, size * 2, 0, 0, 1, 1);
         }
         spritebatch.end();
@@ -184,7 +184,7 @@ public class MyGdxGame extends ApplicationAdapter {
     public void dispose() {
         Entity.dispose();
         mb.dispose();
-        Gdx.app.log("game","dispose");
+        Gdx.app.log("game", "dispose");
         chunkManager.dispose();
     }
 

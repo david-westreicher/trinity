@@ -18,13 +18,11 @@ public class RenderToTexture {
 
     private final FrameBuffer m_fbo;
     private final TextureRegion m_fboRegion;
-
-    private RenderToTexture(int width, int height) {
-        this(width, height, false);
-    }
+    private boolean hasDepth;
 
     private RenderToTexture(int width, int height, boolean hasDepth) {
         Gdx.app.log("", width + "+" + height);
+        this.hasDepth = hasDepth;
         m_fbo = new FrameBuffer(Pixmap.Format.RGB565, width, height, hasDepth);
         Texture colbuf = m_fbo.getColorBufferTexture();
         //colbuf.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
@@ -33,8 +31,11 @@ public class RenderToTexture {
     }
 
     public void begin() {
-        //Gdx.app.log("bind", m_fbo.getFramebufferHandle() + "");
         m_fbo.begin();
+        if (hasDepth) {
+            Gdx.gl.glClearColor(0, 0, 0, 1);
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+        }
     }
 
     public void end() {
@@ -95,7 +96,7 @@ public class RenderToTexture {
             gathershader = createDefaultShader();
             downsampleBatch.setBlendFunction(GL20.GL_ONE, GL20.GL_ONE);
             for (int i = 0; i < 10; i++) {
-                RenderToTexture rt = new RenderToTexture(width, height, false);
+                RenderToTexture rt = new RenderToTexture(width, height, i == 0);
                 width /= 2;
                 height /= 2;
                 texs.add(rt);
@@ -141,4 +142,5 @@ public class RenderToTexture {
             downsampleBatch.end();
         }
     }
+
 }

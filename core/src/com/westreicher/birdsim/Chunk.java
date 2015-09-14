@@ -42,15 +42,14 @@ public class Chunk {
         this.absx = absx;
         this.absy = absy;
         map = new float[w][h];
-        for (int x = 0; x < w; x++)
-            for (int y = 0; y < h; y++)
-                map[x][y] = (float) SimplexNoise.noise((x + absx * w) * NOISE_SCALE, (-y + absy * h) * NOISE_SCALE) / 2.0f + 0.5f;
+        //for (int x = 0; x < w; x++)
+        //for (int y = 0; y < h; y++)
+        //map[x][y] = (float) SimplexNoise.noise((x + absx * w) * NOISE_SCALE, (-y + absy * h) * NOISE_SCALE) / 2.0f + 0.5f;
         modelinstance = new ModelInstance(generateMesh());
     }
 
     //TODO optimize the hell out of it
     public Model generateMesh() {
-        //Gdx.app.log("game", absx + "," + absy);
         ModelBuilder modelBuilder = new ModelBuilder();
         modelBuilder.begin();
         modelBuilder.node().translation.set(-w / 2.0f, h / 2.0f, 0);
@@ -120,7 +119,8 @@ public class Chunk {
                 if (dst > explodedist - 1)
                     continue;
                 float val = getVal(cam, x, y);
-                setVal(cam, x, y, Math.max(val - ((explodedist - 1) / dst) / 50, 0));
+                if (val != -1f)
+                    setVal(cam, x, y, Math.min(1, Math.max(val + ((explodedist - 1) / dst) / 100, 0)));
                 // setVal(cam, x, y, val - 0.2f);
             }
         //Gdx.app.log("expl", cam.toString() + "," + offsetx + "," + offsety);

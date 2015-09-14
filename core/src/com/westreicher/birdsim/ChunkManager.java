@@ -14,8 +14,7 @@ import com.westreicher.birdsim.util.Spiral;
  */
 public class ChunkManager {
     private static final Vector3 GRADIENT = new Vector3(1, 0, 0);
-    public static final int CHUNKNUMS = 8 + 1;
-    private long lastupdate = 0;
+    public static final int CHUNKNUMS = 40 + 1;
     private Chunk chunks[][] = new Chunk[CHUNKNUMS][CHUNKNUMS];
     private int[] pos = new int[]{0, 0};
     private Spiral s = new Spiral();
@@ -23,15 +22,15 @@ public class ChunkManager {
     private float[] tmpfloat = new float[3];
 
     public ChunkManager() {
-        //for (int x = 0; x < 3; x++)
-        //for (int y = 0; y < 3; y++)
-        // chunks[CHUNKNUMS / 2 - 1][CHUNKNUMS / 2 - 1] = getInstance(0, 0);
-        Gdx.app.log("game", "" + (CHUNKNUMS / 2));
-
-    }
-
-    public Chunk getInstance(int absx, int absy) {
-        return new Chunk((int) MyGdxGame.SIZE, (int) MyGdxGame.SIZE, absx, absy);
+        for (int x = 0; x < CHUNKNUMS; x++) {
+            for (int y = 0; y < CHUNKNUMS; y++) {
+                int realX = (x - (CHUNKNUMS / 2));
+                int realY = (y - (CHUNKNUMS / 2));
+                chunks[x][y] = new Chunk();
+                chunks[x][y].setPos(realX, realY);
+            }
+        }
+        updateTranslations();
     }
 
     public boolean isStuck(Vector3 pos, int size) {
@@ -51,9 +50,9 @@ public class ChunkManager {
                     mi.explode(pos, distance);
     }
 
-    public void render(ModelBatch mb) {
-        long currentFrame = Gdx.graphics.getFrameId();
+    public void render() {
         s.reset();
+        int maxupdates = 10;
         while (true) {
             Vector2 spos = s.next();
             int x = ((int) spos.x) + CHUNKNUMS / 2;
@@ -61,20 +60,11 @@ public class ChunkManager {
             if (x < 0 || y < 0 || x >= CHUNKNUMS || y >= CHUNKNUMS)
                 break;
             Chunk mi = chunks[x][y];
-            if (mi == null) {
-                if (currentFrame - lastupdate > 0) {
-                    chunks[x][y] = getInstance(pos[0] + (int) spos.x, pos[1] + (int) spos.y);
-                    updateTranslations();
-                    lastupdate = currentFrame;
-                    if (x == 0 || y == 0 || y == CHUNKNUMS - 1 || x == CHUNKNUMS - 1) {
-                        //Entity.spawn(new Vector3((x - (CHUNKNUMS / 2)) * MyGdxGame.SIZE,
-                        //        (y - (CHUNKNUMS / 2)) * MyGdxGame.SIZE, 0));
-                    }
-                }
-                break;
-            } else if (mi.regenerateMesh()) {
-                lastupdate = currentFrame;
-                break;
+            if (!mi.isReady) {
+                if (--maxupdates == 0)
+                    break;
+                chunks[x][y].genMesh();
+                updateTranslations();
             }
         }
         shader = ManagedRessources.getShader(ManagedRessources.Shaders.CHUNK);
@@ -83,7 +73,7 @@ public class ChunkManager {
         for (int x = 0; x < CHUNKNUMS; x++) {
             for (int y = 0; y < CHUNKNUMS; y++) {
                 Chunk mi = chunks[x][y];
-                if (mi != null) {
+                if (mi.isReady) {
                     tmpfloat[0] = (x - (CHUNKNUMS / 2)) * MyGdxGame.SIZE - MyGdxGame.SIZE / 2;
                     tmpfloat[1] = (y - (CHUNKNUMS / 2)) * MyGdxGame.SIZE + MyGdxGame.SIZE / 2;
                     shader.setUniform3fv("trans", tmpfloat, 0, 3);
@@ -109,30 +99,34 @@ public class ChunkManager {
 
     public void updateDirection(int dx, int dy) {
         this.pos[0] += dx;
-        this.pos[1] += dy;
         if (dx != 0) {
-            Chunk newchunks[][] = new Chunk[CHUNKNUMS][CHUNKNUMS];
-            for (int x = (dx > 0 ? 0 : 1); x < (dx > 0 ? CHUNKNUMS - 1 : CHUNKNUMS); x++)
-                for (int y = 0; y < CHUNKNUMS; y++) {
-                    newchunks[x][y] = chunks[x + (dx > 0 ? 1 : -1)][y];
-                }
+            int stax = dx > 0 ? 0 : CHUNKNUMS - 1;
+            int endx = dx > 0 ? CHUNKNUMS - 1 : 0;
+            int plus = dx > 0 ? 1 : -1;
+            for (int x = stax; dx > 0 ? x < endx : x > endx; x += plus)
+                for (int y = 0; y < CHUNKNUMS; y++)
+                    chunks[x][y].swap(chunks[x + plus][y]);
             for (int y = 0; y < CHUNKNUMS; y++) {
-                Chunk c = chunks[dx > 0 ? 0 : CHUNKNUMS - 1][y];
-                if (c != null) c.dispose();
+                Chunk c = chunks[endx][y];
+                int realX = (endx - (CHUNKNUMS / 2)) + pos[0];
+                int realY = (y - (CHUNKNUMS / 2)) + pos[1];
+                c.setPos(realX, realY);
             }
-            chunks = newchunks;
         }
+        this.pos[1] += dy;
         if (dy != 0) {
-            Chunk newchunks[][] = new Chunk[CHUNKNUMS][CHUNKNUMS];
+            int stay = dy > 0 ? 0 : CHUNKNUMS - 1;
+            int endy = dy > 0 ? CHUNKNUMS - 1 : 0;
+            int plus = dy > 0 ? 1 : -1;
             for (int x = 0; x < CHUNKNUMS; x++)
-                for (int y = (dy > 0 ? 0 : 1); y < (dy > 0 ? CHUNKNUMS - 1 : CHUNKNUMS); y++) {
-                    newchunks[x][y] = chunks[x][y + (dy > 0 ? 1 : -1)];
-                }
+                for (int y = stay; dy > 0 ? y < endy : y > endy; y += plus)
+                    chunks[x][y].swap(chunks[x][y + plus]);
             for (int x = 0; x < CHUNKNUMS; x++) {
-                Chunk c = chunks[x][dy > 0 ? 0 : CHUNKNUMS - 1];
-                if (c != null) c.dispose();
+                Chunk c = chunks[x][endy];
+                int realX = (x - (CHUNKNUMS / 2)) + pos[0];
+                int realY = (endy - (CHUNKNUMS / 2)) + pos[1];
+                c.setPos(realX, realY);
             }
-            chunks = newchunks;
         }
         updateTranslations();
     }

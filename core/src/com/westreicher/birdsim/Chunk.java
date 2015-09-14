@@ -17,18 +17,25 @@ import java.util.Random;
 public class Chunk {
 
     public static final float NOISE_SCALE = 0.035f;
+    private static final int SIZE = 1;
     public static final float THRESHOLD = MyGdxGame.DEBUG ? 0f : 0.55f;
-    private final float[][] map;
-    private final Vector3[][] col;
-    private final int w;
-    private final int h;
+    private float[][] map = new float[(int) MyGdxGame.SIZE][(int) MyGdxGame.SIZE];
+    private float[][][] col = new float[(int) MyGdxGame.SIZE][(int) MyGdxGame.SIZE][3];
+    private final int w = (int) MyGdxGame.SIZE;
+    private final int h = (int) MyGdxGame.SIZE;
     public Mesh m;
-    private int size = 1;
     private Vector3 translation = new Vector3();
-    private boolean dirtyflag = false;
-    private MaxArray.MaxArrayFloat verts = new MaxArray.MaxArrayFloat(getMaxVerts() * (3 + 3));
-    private MaxArray.MaxArrayShort inds = new MaxArray.MaxArrayShort(getMaxInds());
+    public boolean isReady = false;
+    private final MaxArray.MaxArrayFloat verts = new MaxArray.MaxArrayFloat(getMaxVerts() * (3 + 3));
+    private final MaxArray.MaxArrayShort inds = new MaxArray.MaxArrayShort(getMaxInds());
     private static final Vector3 tmp = new Vector3();
+    private Random rand = new Random();
+
+    public Chunk() {
+        m = new Mesh(false, verts.maxSize(), getMaxInds(),
+                new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
+                new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 3, ShaderProgram.COLOR_ATTRIBUTE));
+    }
 
     private int getMaxVerts() {
         return (int) Math.pow(MyGdxGame.SIZE, 2) * 4;
@@ -38,29 +45,35 @@ public class Chunk {
         return (int) Math.pow(MyGdxGame.SIZE, 2) * 6;
     }
 
-    public Chunk(int w, int h, int absx, int absy) {
-        Random r = new Random((absx + "," + absy).hashCode());
-        this.w = w;
-        this.h = h;
-        map = new float[w][h];
+    public void setPos(int absx, int absy) {
         if (MyGdxGame.DEBUG)
             for (int x = 0; x < w; x++)
                 for (int y = 0; y < h; y++)
                     map[x][y] = (float) SimplexNoise.noise((x + absx * w) * NOISE_SCALE, (-y + absy * h) * NOISE_SCALE) / 2.0f + 0.5f;
 
-        col = new Vector3[w][h];
+        rand.setSeed(getSeed(absx, absy));
         for (int x = 0; x < w; x++)
             for (int y = 0; y < h; y++)
-                col[x][y] = new Vector3(r.nextFloat(), r.nextFloat(), r.nextFloat());
-        genMesh();
+                for (int z = 0; z < 3; z++)
+                    col[x][y][z] = rand.nextFloat();
+        isReady = false;
     }
 
-    private void genMesh() {
-        if (m == null) {
-            m = new Mesh(false, verts.maxSize(), getMaxInds(),
-                    new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
-                    new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 3, ShaderProgram.COLOR_ATTRIBUTE));
+    private long getSeed(long x, long y) {
+        long p = 0;
+        if (y * y >= x * x) {
+            p = 4 * y * y - y - x;
+            if (y < x)
+                p -= 2 * (y - x);
+        } else {
+            p = 4 * x * x - y - x;
+            if (y < x)
+                p += 2 * (y - x);
         }
+        return p;
+    }
+
+    public void genMesh() {
         verts.reset();
         inds.reset();
         for (int y = 0; y < h; y++) {
@@ -74,25 +87,18 @@ public class Chunk {
                 tmp.scl(scale);
                 verts.add(x, -y, z);
                 verts.add(tmp.x, tmp.y, tmp.z);
-                verts.add(x + size, -y, z);
+                verts.add(x + SIZE, -y, z);
                 verts.add(tmp.x, tmp.y, tmp.z);
-                verts.add(x, -y + size, z);
+                verts.add(x, -y + SIZE, z);
                 verts.add(tmp.x, tmp.y, tmp.z);
-                verts.add(x + size, -y + size, z);
+                verts.add(x + SIZE, -y + SIZE, z);
                 verts.add(tmp.x, tmp.y, tmp.z);
                 inds.add(startIndex, (short) (startIndex + 1), (short) (startIndex + 2), (short) (startIndex + 2), (short) (startIndex + 3), (short) (startIndex + 1));
             }
         }
         m.setVertices(verts.arr, 0, verts.size());
         m.setIndices(inds.arr, 0, inds.size());
-    }
-
-    public boolean regenerateMesh() {
-        if (!dirtyflag)
-            return false;
-        genMesh();
-        dirtyflag = false;
-        return true;
+        isReady = true;
     }
 
     public void explode(Vector3 cam, int explodedist) {
@@ -105,7 +111,7 @@ public class Chunk {
             }
         if (!inside)
             return;
-        dirtyflag = true;
+        isReady = false;
 
         for (int x = -explodedist; x <= explodedist; x++)
             for (int y = -explodedist; y <= explodedist; y++) {
@@ -157,4 +163,18 @@ public class Chunk {
         m.dispose();
     }
 
+    public void swap(Chunk other) {
+        Mesh tmpm = m;
+        m = other.m;
+        other.m = tmpm;
+        boolean tmpIsReady = isReady;
+        isReady = other.isReady;
+        other.isReady = tmpIsReady;
+        float[][] tmpmap = map;
+        map = other.map;
+        other.map = tmpmap;
+        float[][][] tmpcol = col;
+        col = other.col;
+        other.col = tmpcol;
+    }
 }

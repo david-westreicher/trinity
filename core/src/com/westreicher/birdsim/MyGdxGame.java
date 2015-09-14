@@ -122,7 +122,7 @@ public class MyGdxGame extends ApplicationAdapter {
             float rad = firstPointer.getRadiant();
             playerTransform.radiant = rad;
             //movePlayer(mousex * rat * 1.0f, mousey * rat * 1.0f);
-            movePlayer((float) Math.cos(rad) * delta * (DEBUG ? 100 : 10), -(float) Math.sin(rad) * delta * (DEBUG ? 100 : 10));
+            movePlayer((float) Math.cos(rad) * delta * (DEBUG ? 200 : 10), -(float) Math.sin(rad) * delta * (DEBUG ? 200 : 10));
         }
         //Gdx.app.log("game", "" +"");
         cam.position.x += (playerTransform.position.x - cam.position.x) / 5.0f;
@@ -146,7 +146,7 @@ public class MyGdxGame extends ApplicationAdapter {
         if (thirdPointer.update()) {
             cam.position.z += (200 - cam.position.z) / 10.0f;
         } else
-            cam.position.z += (25 * (DEBUG ? 10 : 1.8f) - cam.position.z) / 10.0f;
+            cam.position.z += (25 * (DEBUG ? 20 : 1.8f) - cam.position.z) / 10.0f;
 
         if (!DEBUG && Gdx.graphics.getFrameId() % 2 == 0)
             chunkManager.explode(playerTransform.position, 7);
@@ -162,7 +162,7 @@ public class MyGdxGame extends ApplicationAdapter {
         mb.render(player);
         Entity.render(mb);
         mb.end();
-        chunkManager.render(mb);
+        chunkManager.render();
         //downs.draw(viewport.getScreenWidth(), viewport.getScreenHeight());
         drawThumbs();
     }

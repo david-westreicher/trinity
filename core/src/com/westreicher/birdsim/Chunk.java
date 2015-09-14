@@ -43,9 +43,10 @@ public class Chunk {
         this.w = w;
         this.h = h;
         map = new float[w][h];
-        for (int x = 0; x < w; x++)
-            for (int y = 0; y < h; y++)
-                map[x][y] = (float) SimplexNoise.noise((x + absx * w) * NOISE_SCALE, (-y + absy * h) * NOISE_SCALE) / 2.0f + 0.5f;
+        if (MyGdxGame.DEBUG)
+            for (int x = 0; x < w; x++)
+                for (int y = 0; y < h; y++)
+                    map[x][y] = (float) SimplexNoise.noise((x + absx * w) * NOISE_SCALE, (-y + absy * h) * NOISE_SCALE) / 2.0f + 0.5f;
 
         col = new Vector3[w][h];
         for (int x = 0; x < w; x++)

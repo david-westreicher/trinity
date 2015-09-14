@@ -14,7 +14,7 @@ import com.westreicher.birdsim.util.Spiral;
  */
 public class ChunkManager {
     private static final Vector3 GRADIENT = new Vector3(1, 0, 0);
-    public static final int CHUNKNUMS = 6 + 1;
+    public static final int CHUNKNUMS = 8 + 1;
     private long lastupdate = 0;
     private Chunk chunks[][] = new Chunk[CHUNKNUMS][CHUNKNUMS];
     private int[] pos = new int[]{0, 0};

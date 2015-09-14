@@ -122,7 +122,7 @@ public class MyGdxGame extends ApplicationAdapter {
             float rad = firstPointer.getRadiant();
             playerTransform.radiant = rad;
             //movePlayer(mousex * rat * 1.0f, mousey * rat * 1.0f);
-            movePlayer((float) Math.cos(rad) * delta * (DEBUG ? 20 : 10), -(float) Math.sin(rad) * delta * (DEBUG ? 20 : 10));
+            movePlayer((float) Math.cos(rad) * delta * (DEBUG ? 100 : 10), -(float) Math.sin(rad) * delta * (DEBUG ? 100 : 10));
         }
         //Gdx.app.log("game", "" +"");
         cam.position.x += (playerTransform.position.x - cam.position.x) / 5.0f;
@@ -146,7 +146,7 @@ public class MyGdxGame extends ApplicationAdapter {
         if (thirdPointer.update()) {
             cam.position.z += (200 - cam.position.z) / 10.0f;
         } else
-            cam.position.z += (25 * (DEBUG ? 2 : 1.8f) - cam.position.z) / 10.0f;
+            cam.position.z += (25 * (DEBUG ? 10 : 1.8f) - cam.position.z) / 10.0f;
 
         if (!DEBUG && Gdx.graphics.getFrameId() % 2 == 0)
             chunkManager.explode(playerTransform.position, 7);
@@ -158,11 +158,11 @@ public class MyGdxGame extends ApplicationAdapter {
         //downs.end();
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-        //mb.begin(cam);
-        //mb.render(player);
-        //Entity.render(mb);
+        mb.begin(cam);
+        mb.render(player);
+        Entity.render(mb);
+        mb.end();
         chunkManager.render(mb);
-        //mb.end();
         //downs.draw(viewport.getScreenWidth(), viewport.getScreenHeight());
         drawThumbs();
     }

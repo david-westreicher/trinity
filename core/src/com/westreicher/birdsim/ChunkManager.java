@@ -1,10 +1,12 @@
 package com.westreicher.birdsim;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.westreicher.birdsim.util.SimplexNoise;
+import com.westreicher.birdsim.util.ManagedRessources;
 import com.westreicher.birdsim.util.Spiral;
 
 /**
@@ -17,6 +19,8 @@ public class ChunkManager {
     private Chunk chunks[][] = new Chunk[CHUNKNUMS][CHUNKNUMS];
     private int[] pos = new int[]{0, 0};
     private Spiral s = new Spiral();
+    private ShaderProgram shader;
+    private float[] tmpfloat = new float[3];
 
     public ChunkManager() {
         //for (int x = 0; x < 3; x++)
@@ -63,8 +67,8 @@ public class ChunkManager {
                     updateTranslations();
                     lastupdate = currentFrame;
                     if (x == 0 || y == 0 || y == CHUNKNUMS - 1 || x == CHUNKNUMS - 1) {
-                        Entity.spawn(new Vector3((x - (CHUNKNUMS / 2)) * MyGdxGame.SIZE,
-                                (y - (CHUNKNUMS / 2)) * MyGdxGame.SIZE, 0));
+                        //Entity.spawn(new Vector3((x - (CHUNKNUMS / 2)) * MyGdxGame.SIZE,
+                        //        (y - (CHUNKNUMS / 2)) * MyGdxGame.SIZE, 0));
                     }
                 }
                 break;
@@ -73,13 +77,21 @@ public class ChunkManager {
                 break;
             }
         }
+        shader = ManagedRessources.getShader(ManagedRessources.Shaders.CHUNK);
+        shader.begin();
+        shader.setUniformMatrix("u_projTrans", MyGdxGame.single.cam.combined);
         for (int x = 0; x < CHUNKNUMS; x++) {
             for (int y = 0; y < CHUNKNUMS; y++) {
                 Chunk mi = chunks[x][y];
-                if (mi != null)
-                    mb.render(mi.modelinstance);
+                if (mi != null) {
+                    tmpfloat[0] = (x - (CHUNKNUMS / 2)) * MyGdxGame.SIZE - MyGdxGame.SIZE / 2;
+                    tmpfloat[1] = (y - (CHUNKNUMS / 2)) * MyGdxGame.SIZE + MyGdxGame.SIZE / 2;
+                    shader.setUniform3fv("trans", tmpfloat, 0, 3);
+                    mi.m.render(shader, GL20.GL_TRIANGLES);
+                }
             }
         }
+        shader.end();
     }
 
     public void dispose() {
@@ -87,7 +99,7 @@ public class ChunkManager {
             for (int y = 0; y < CHUNKNUMS; y++) {
                 Chunk mi = chunks[x][y];
                 if (mi != null) {
-                    mi.modelinstance.model.dispose();
+                    mi.dispose();
                     chunks[x][y] = null;
                 }
             }
@@ -106,7 +118,7 @@ public class ChunkManager {
                 }
             for (int y = 0; y < CHUNKNUMS; y++) {
                 Chunk c = chunks[dx > 0 ? 0 : CHUNKNUMS - 1][y];
-                if (c != null) c.modelinstance.model.dispose();
+                if (c != null) c.dispose();
             }
             chunks = newchunks;
         }
@@ -118,7 +130,7 @@ public class ChunkManager {
                 }
             for (int x = 0; x < CHUNKNUMS; x++) {
                 Chunk c = chunks[x][dy > 0 ? 0 : CHUNKNUMS - 1];
-                if (c != null) c.modelinstance.model.dispose();
+                if (c != null) c.dispose();
             }
             chunks = newchunks;
         }

@@ -1,18 +1,12 @@
 package com.westreicher.birdsim;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
-import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.Matrix4;
+import com.westreicher.birdsim.util.MaxArray;
 import com.westreicher.birdsim.util.SimplexNoise;
 
 import java.util.Random;
@@ -23,80 +17,79 @@ import java.util.Random;
 public class Chunk {
 
     public static final float NOISE_SCALE = 0.035f;
-    public static final float THRESHOLD = MyGdxGame.DEBUG ? 0 : 0.55f;
+    public static final float THRESHOLD = MyGdxGame.DEBUG ? 0f : 0.55f;
     private final float[][] map;
+    private final Vector3[][] col;
     private final int w;
     private final int h;
-    public final int absx;
-    public final int absy;
-    private Random r;
+    public Mesh m;
     private int size = 1;
-    public ModelInstance modelinstance;
     private Vector3 translation = new Vector3();
     private boolean dirtyflag = false;
+    private MaxArray.MaxArrayFloat verts = new MaxArray.MaxArrayFloat(getMaxVerts() * (3 + 3));
+    private MaxArray.MaxArrayShort inds = new MaxArray.MaxArrayShort(getMaxInds());
+    private static final Vector3 tmp = new Vector3();
 
-    public Chunk(int w, int h, int absx, int absy) {
-        this.r = new Random((absx + "," + absy).hashCode());
-        this.w = w;
-        this.h = h;
-        this.absx = absx;
-        this.absy = absy;
-        map = new float[w][h];
-        //for (int x = 0; x < w; x++)
-        //for (int y = 0; y < h; y++)
-        //map[x][y] = (float) SimplexNoise.noise((x + absx * w) * NOISE_SCALE, (-y + absy * h) * NOISE_SCALE) / 2.0f + 0.5f;
-        modelinstance = new ModelInstance(generateMesh());
+    private int getMaxVerts() {
+        return (int) Math.pow(MyGdxGame.SIZE, 2) * 4;
     }
 
-    //TODO optimize the hell out of it
-    public Model generateMesh() {
-        ModelBuilder modelBuilder = new ModelBuilder();
-        modelBuilder.begin();
-        modelBuilder.node().translation.set(-w / 2.0f, h / 2.0f, 0);
-        MeshPartBuilder meshBuilder;
-        Material mat;
-        if (MyGdxGame.DEBUG)
-            mat = new Material(ColorAttribute.createDiffuse(r.nextFloat(), r.nextFloat(), r.nextFloat(), 1));
-        else
-            mat = new Material(ColorAttribute.createDiffuse(1, 1, 1, 1));
-        meshBuilder = modelBuilder.part("part1", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.ColorPacked, mat);
+    private int getMaxInds() {
+        return (int) Math.pow(MyGdxGame.SIZE, 2) * 6;
+    }
+
+    public Chunk(int w, int h, int absx, int absy) {
+        Random r = new Random((absx + "," + absy).hashCode());
+        this.w = w;
+        this.h = h;
+        map = new float[w][h];
+        for (int x = 0; x < w; x++)
+            for (int y = 0; y < h; y++)
+                map[x][y] = (float) SimplexNoise.noise((x + absx * w) * NOISE_SCALE, (-y + absy * h) * NOISE_SCALE) / 2.0f + 0.5f;
+
+        col = new Vector3[w][h];
+        for (int x = 0; x < w; x++)
+            for (int y = 0; y < h; y++)
+                col[x][y] = new Vector3(r.nextFloat(), r.nextFloat(), r.nextFloat());
+        genMesh();
+    }
+
+    private void genMesh() {
+        if (m == null) {
+            m = new Mesh(false, verts.maxSize(), getMaxInds(),
+                    new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
+                    new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 3, ShaderProgram.COLOR_ATTRIBUTE));
+        }
+        verts.reset();
+        inds.reset();
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                Color col;
-                if (MyGdxGame.DEBUG || map[x][y] > 2) {
-                    col = new Color(1, 1, 1, 1);
-                    //isEnemy = true;
-                    //Gdx.app.log("name", map[x][y] + "");
-                    //map[x][y] -= 2;
-                    for (int i = 0; i < 3; i++)
-                        r.nextFloat();
-                } else
-                    col = new Color(r.nextFloat(), r.nextFloat(), r.nextFloat(), 1);
-                if (map[x][y] > THRESHOLD) {
-                    float scale = ((map[x][y] - THRESHOLD) * 1f + 0.1f);
-                    col.r *= scale;
-                    col.g *= scale;
-                    col.b *= scale;
-                    //.app.log("game", scale+"");
-                    float z = scale * 7;//0;//(float) Math.random();
-                    short lu = meshBuilder.vertex(new Vector3(x, -y, z), null, col, null);
-                    short ru = meshBuilder.vertex(new Vector3(x + size, -y, z), null, col, null);
-                    short ld = meshBuilder.vertex(new Vector3(x, -y + size, z), null, col, null);
-                    short rd = meshBuilder.vertex(new Vector3(x + size, -y + size, z), null, col, null);
-                    meshBuilder.rect(lu, ru, rd, ld);
-                }
+                if (map[x][y] <= THRESHOLD)
+                    continue;
+                float scale = ((map[x][y] - THRESHOLD) * 1f + 0.1f);
+                float z = scale * 7;//0;//(float) Math.random();
+                short startIndex = (short) (verts.pointer / 6);
+                tmp.set(col[x][y]);
+                tmp.scl(scale);
+                verts.add(x, -y, z);
+                verts.add(tmp.x, tmp.y, tmp.z);
+                verts.add(x + size, -y, z);
+                verts.add(tmp.x, tmp.y, tmp.z);
+                verts.add(x, -y + size, z);
+                verts.add(tmp.x, tmp.y, tmp.z);
+                verts.add(x + size, -y + size, z);
+                verts.add(tmp.x, tmp.y, tmp.z);
+                inds.add(startIndex, (short) (startIndex + 1), (short) (startIndex + 2), (short) (startIndex + 2), (short) (startIndex + 3), (short) (startIndex + 1));
             }
         }
-        return modelBuilder.end();
+        m.setVertices(verts.arr, 0, verts.size());
+        m.setIndices(inds.arr, 0, inds.size());
     }
 
     public boolean regenerateMesh() {
         if (!dirtyflag)
             return false;
-        modelinstance.model.dispose();
-        r = new Random((absx + "," + absy).hashCode());
-        modelinstance = new ModelInstance(generateMesh());
-        modelinstance.transform.setToTranslation(translation);
+        genMesh();
         dirtyflag = false;
         return true;
     }
@@ -156,7 +149,11 @@ public class Chunk {
     }
 
     public void setTranslation(float realX, float realY) {
-        modelinstance.transform.setTranslation(realX, realY, 0);
         translation.set(realX, realY, 0);
     }
+
+    public void dispose() {
+        m.dispose();
+    }
+
 }

@@ -14,11 +14,11 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.loader.ObjLoader;
-import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.westreicher.birdsim.util.ManagedRessources;
 import com.westreicher.birdsim.util.RenderToTexture.DownSampler;
 
 public class MyGdxGame extends ApplicationAdapter {
@@ -29,7 +29,7 @@ public class MyGdxGame extends ApplicationAdapter {
     static float SIZE = 16;
     private float rat = 1;
     private static boolean isDesktop;
-    public static boolean DEBUG = false;
+    public static boolean DEBUG = true;
     private ModelInstance player;
     private ModelInstance gun;
     private SaveMouse firstPointer;
@@ -58,6 +58,7 @@ public class MyGdxGame extends ApplicationAdapter {
     @Override
     public void create() {
         single = this;
+        ManagedRessources.init();
         Gdx.app.log("game", "create");
         Entity.init();
         Gdx.app.log("game", "GL ES 3.0 supported: " + (Gdx.gl30 != null));
@@ -121,7 +122,7 @@ public class MyGdxGame extends ApplicationAdapter {
             float rad = firstPointer.getRadiant();
             playerTransform.radiant = rad;
             //movePlayer(mousex * rat * 1.0f, mousey * rat * 1.0f);
-            movePlayer((float) Math.cos(rad) * delta * (DEBUG ? 100 : 10), -(float) Math.sin(rad) * delta * (DEBUG ? 100 : 10));
+            movePlayer((float) Math.cos(rad) * delta * (DEBUG ? 20 : 10), -(float) Math.sin(rad) * delta * (DEBUG ? 20 : 10));
         }
         //Gdx.app.log("game", "" +"");
         cam.position.x += (playerTransform.position.x - cam.position.x) / 5.0f;
@@ -145,25 +146,24 @@ public class MyGdxGame extends ApplicationAdapter {
         if (thirdPointer.update()) {
             cam.position.z += (200 - cam.position.z) / 10.0f;
         } else
-            cam.position.z += (25 * (DEBUG ? 10 : 1.8f) - cam.position.z) / 10.0f;
+            cam.position.z += (25 * (DEBUG ? 2 : 1.8f) - cam.position.z) / 10.0f;
 
-        if (Gdx.graphics.getFrameId() % 1 == 0)
+        if (!DEBUG && Gdx.graphics.getFrameId() % 2 == 0)
             chunkManager.explode(playerTransform.position, 7);
         playerTransform.transform(player);
 
         cam.update();
 
-        downs.begin();
-        mb.begin(cam);
-        mb.render(player);
-        //mb.render(gun);
-        Entity.render(mb);
-        chunkManager.render(mb);
-        mb.end();
-        downs.end();
+        //downs.begin();
+        //downs.end();
         Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        downs.draw(viewport.getScreenWidth(), viewport.getScreenHeight());
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+        //mb.begin(cam);
+        //mb.render(player);
+        //Entity.render(mb);
+        chunkManager.render(mb);
+        //mb.end();
+        //downs.draw(viewport.getScreenWidth(), viewport.getScreenHeight());
         drawThumbs();
     }
 

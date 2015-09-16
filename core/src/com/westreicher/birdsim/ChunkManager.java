@@ -74,17 +74,17 @@ public class ChunkManager {
         shader = ManagedRessources.getShader(ManagedRessources.Shaders.CHUNK);
         shader.begin();
         shader.setUniformMatrix("u_projTrans", cam.combined);
-        if (MyGdxGame.POST_PROCESSING) {
+        if (Config.POST_PROCESSING) {
             shader.setUniformf("virtualcam", virtualcam);
             shader.setUniformf("maxdstsqinv", 1f / (140f * 140f));
         }
-        shader.setUniformf("pointsize", 6);
+        shader.setUniformf("pointsize", Config.POST_PROCESSING ? 8 : 10);
         for (int x = 0; x < CHUNKNUMS; x++) {
             for (int y = 0; y < CHUNKNUMS; y++) {
                 Chunk mi = chunks[x][y];
                 if (mi.isReady && mi.shouldDraw) {
-                    tmpfloat[0] = (x - (CHUNKNUMS / 2)) * MyGdxGame.SIZE - MyGdxGame.SIZE / 2;
-                    tmpfloat[1] = (y - (CHUNKNUMS / 2)) * MyGdxGame.SIZE + MyGdxGame.SIZE / 2;
+                    tmpfloat[0] = (x - (CHUNKNUMS / 2)) * Config.TILES_PER_CHUNK - Config.TILES_PER_CHUNK / 2;
+                    tmpfloat[1] = (y - (CHUNKNUMS / 2)) * Config.TILES_PER_CHUNK + Config.TILES_PER_CHUNK / 2;
                     shader.setUniform3fv("trans", tmpfloat, 0, 3);
                     mi.m.render(shader, GL20.GL_POINTS);
                 }
@@ -152,8 +152,8 @@ public class ChunkManager {
         for (int x = 0; x < CHUNKNUMS; x++) {
             for (int y = 0; y < CHUNKNUMS; y++) {
                 if (chunks[x][y] != null) {
-                    float realX = (x - (CHUNKNUMS / 2)) * MyGdxGame.SIZE;
-                    float realY = (y - (CHUNKNUMS / 2)) * MyGdxGame.SIZE;
+                    float realX = (x - (CHUNKNUMS / 2)) * Config.TILES_PER_CHUNK;
+                    float realY = (y - (CHUNKNUMS / 2)) * Config.TILES_PER_CHUNK;
                     chunks[x][y].setTranslation(realX, realY);
                 }
             }

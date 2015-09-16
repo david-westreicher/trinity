@@ -22,14 +22,11 @@ import com.westreicher.birdsim.util.ManagedRessources;
 import com.westreicher.birdsim.util.RenderToTexture.DownSampler;
 
 public class MyGdxGame extends ApplicationAdapter {
-    public static final boolean POST_PROCESSING = true;
-    public static final boolean DEBUG = true;
     public static boolean isDesktop;
     public static final Vector3 UPAXIS = new Vector3(0, 0, 1);
     private PerspectiveCamera cam;
     ModelBatch mb;
     Viewport viewport;
-    static float SIZE = 16;
     private float rat = 1;
     private ModelInstance player;
     private ModelInstance gun;
@@ -67,7 +64,7 @@ public class MyGdxGame extends ApplicationAdapter {
         Gdx.app.log("game", "GL ES 3.0 supported: " + (Gdx.gl30 != null));
         //DefaultShader.defaultCullFace = 0;
         cam = new PerspectiveCamera();
-        cam.position.set(0, 0, 25 * (DEBUG ? 10 : 1.25f));
+        cam.position.set(0, 0, 25 * (Config.DEBUG ? 10 : 1.25f));
         cam.near = 100f;
         cam.far = 500f;
         viewport = new ScreenViewport(cam);
@@ -89,7 +86,7 @@ public class MyGdxGame extends ApplicationAdapter {
         playerTransform.position.z = 20;
         playerTransform.position.x += x;
         playerTransform.position.y -= y;
-        if (!chunkManager.isStuck(playerTransform.position, 1) || true || DEBUG)
+        if (!chunkManager.isStuck(playerTransform.position, 1) || true || Config.DEBUG)
             return;
         playerTransform.position.y += y;
         if (!chunkManager.isStuck(playerTransform.position, 1))
@@ -107,16 +104,16 @@ public class MyGdxGame extends ApplicationAdapter {
         fps.log();
         int dx = 0;
         int dy = 0;
-        if (Math.abs(virtualcam.x) > SIZE / 2)
+        if (Math.abs(virtualcam.x) > Config.TILES_PER_CHUNK / 2.0)
             dx = (int) Math.signum(virtualcam.x);
-        if (Math.abs(virtualcam.y) > SIZE / 2)
+        if (Math.abs(virtualcam.y) > Config.TILES_PER_CHUNK / 2.0)
             dy = (int) Math.signum(virtualcam.y);
-        Entity.translateAll(-dx * SIZE, -dy * SIZE);
+        Entity.translateAll(-dx * Config.TILES_PER_CHUNK, -dy * Config.TILES_PER_CHUNK);
         chunkManager.updateDirection(dx, dy);
         Entity.updateall(delta);
-        virtualcam.x -= dx * SIZE;
-        virtualcam.y -= dy * SIZE;
-        playerTransform.position.add(-dx * SIZE, -dy * SIZE, 0);
+        virtualcam.x -= dx * Config.TILES_PER_CHUNK;
+        virtualcam.y -= dy * Config.TILES_PER_CHUNK;
+        playerTransform.position.add(-dx * Config.TILES_PER_CHUNK, -dy * Config.TILES_PER_CHUNK, 0);
 
         if (firstPointer.update()) {
             int mousex = firstPointer.relx();
@@ -142,15 +139,15 @@ public class MyGdxGame extends ApplicationAdapter {
             }
         } else {
             gun.transform.setToRotation(UPAXIS, 0);
-            gun.transform.translate(-dx * SIZE, -dy * SIZE, 0);
+            gun.transform.translate(-dx * Config.TILES_PER_CHUNK, -dy * Config.TILES_PER_CHUNK, 0);
         }
 
         if (!thirdPointer.update()) {
             cam.position.z += (250 - cam.position.z) / 10.0f;
         } else
-            cam.position.z += (25 * (DEBUG ? 2 : 1.8f) - cam.position.z) / 10.0f;
+            cam.position.z += (25 * (Config.DEBUG ? 2 : 1.8f) - cam.position.z) / 10.0f;
 
-        if (!DEBUG && Gdx.graphics.getFrameId() % 2 == 0)
+        if (!Config.DEBUG && Gdx.graphics.getFrameId() % 2 == 0)
             chunkManager.explode(playerTransform.position, 7);
         playerTransform.transform(player);
 

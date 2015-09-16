@@ -124,8 +124,8 @@ public class Entity {
                 }
                 break;
         }
-        if (Math.abs(pos.x) > MyGdxGame.SIZE * ChunkManager.CHUNKNUMS / 2 ||
-                Math.abs(pos.y) > MyGdxGame.SIZE * ChunkManager.CHUNKNUMS / 2)
+        if (Math.abs(pos.x) > Config.TILES_PER_CHUNK * ChunkManager.CHUNKNUMS / 2 ||
+                Math.abs(pos.y) > Config.TILES_PER_CHUNK * ChunkManager.CHUNKNUMS / 2)
             dead = true;
         this.modelInstance.transform.setToTranslation(pos);
         this.modelInstance.transform.scl(scale);

@@ -2,6 +2,7 @@ package com.westreicher.birdsim.util;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.MyGdxGame;
 
 import java.util.HashMap;
@@ -62,7 +63,7 @@ public class ManagedRessources {
                 + "varying vec3 col;\n" //
                 + "uniform mat4 u_projTrans;\n" //
                 + "uniform vec3 trans;\n" //
-                + (MyGdxGame.POST_PROCESSING ? ""//
+                + (Config.POST_PROCESSING ? ""//
                 + "  uniform vec3 virtualcam;\n"//
                 + "  varying float dst;\n" : "")//
                 + "uniform float pointsize;\n" //
@@ -71,13 +72,14 @@ public class ManagedRessources {
                 + "void main()\n" //
                 + "{\n" //
                 + "  vec3 pos = " + ShaderProgram.POSITION_ATTRIBUTE + "+trans;\n" //
-                + (MyGdxGame.POST_PROCESSING ? ""//
+                + (Config.POST_PROCESSING ? ""//
                 + "    dst = length(pos-vec3(virtualcam.xy,0.0));\n" //
                 + "    pos.z+=(1.0-(dst*dst*maxdstsqinv))*100.0;\n" : "")//
                 + "  gl_Position =  u_projTrans * vec4(pos,1.0);\n" //
                 + "  vec3 ndc = gl_Position.xyz / gl_Position.w ;\n"  // perspective divide.
                 + "  float zDist = 1.0 - ndc.z;\n" // 1 is close (right up in your face,)// 0 is far (at the far plane)
-                + "  gl_PointSize = pointsize * zDist;\n" // between 0 and 50 now.
+                //+ "  gl_PointSize = pointsize * zDist;\n" // between 0 and 50 now.
+                + "  gl_PointSize = pointsize;\n" // between 0 and 50 now.
                 + "  col =  " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
                 + "}\n";
     }

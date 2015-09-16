@@ -22,14 +22,15 @@ import com.westreicher.birdsim.util.ManagedRessources;
 import com.westreicher.birdsim.util.RenderToTexture.DownSampler;
 
 public class MyGdxGame extends ApplicationAdapter {
+    public static final boolean POST_PROCESSING = true;
+    public static final boolean DEBUG = true;
+    public static boolean isDesktop;
     public static final Vector3 UPAXIS = new Vector3(0, 0, 1);
-    PerspectiveCamera cam;
+    private PerspectiveCamera cam;
     ModelBatch mb;
     Viewport viewport;
     static float SIZE = 16;
     private float rat = 1;
-    private static boolean isDesktop;
-    public static boolean DEBUG = true;
     private ModelInstance player;
     private ModelInstance gun;
     private SaveMouse firstPointer;
@@ -43,6 +44,7 @@ public class MyGdxGame extends ApplicationAdapter {
     private SaveMouse thirdPointer;
     private DownSampler downs = null;
     public static MyGdxGame single = null;
+    public Vector3 virtualcam = new Vector3();
 
 
     @Override
@@ -57,16 +59,16 @@ public class MyGdxGame extends ApplicationAdapter {
 
     @Override
     public void create() {
+        isDesktop = Gdx.app.getType() == Application.ApplicationType.Desktop;
         single = this;
         ManagedRessources.init();
         Gdx.app.log("game", "create");
         Entity.init();
         Gdx.app.log("game", "GL ES 3.0 supported: " + (Gdx.gl30 != null));
-        isDesktop = Gdx.app.getType() == Application.ApplicationType.Desktop;
         //DefaultShader.defaultCullFace = 0;
         cam = new PerspectiveCamera();
         cam.position.set(0, 0, 25 * (DEBUG ? 10 : 1.25f));
-        cam.near = 0.1f;
+        cam.near = 100f;
         cam.far = 500f;
         viewport = new ScreenViewport(cam);
         spritebatch = new SpriteBatch();
@@ -105,15 +107,15 @@ public class MyGdxGame extends ApplicationAdapter {
         fps.log();
         int dx = 0;
         int dy = 0;
-        if (Math.abs(cam.position.x) > SIZE / 2)
-            dx = (int) Math.signum(cam.position.x);
-        if (Math.abs(cam.position.y) > SIZE / 2)
-            dy = (int) Math.signum(cam.position.y);
+        if (Math.abs(virtualcam.x) > SIZE / 2)
+            dx = (int) Math.signum(virtualcam.x);
+        if (Math.abs(virtualcam.y) > SIZE / 2)
+            dy = (int) Math.signum(virtualcam.y);
         Entity.translateAll(-dx * SIZE, -dy * SIZE);
         chunkManager.updateDirection(dx, dy);
         Entity.updateall(delta);
-        cam.position.x -= dx * SIZE;
-        cam.position.y -= dy * SIZE;
+        virtualcam.x -= dx * SIZE;
+        virtualcam.y -= dy * SIZE;
         playerTransform.position.add(-dx * SIZE, -dy * SIZE, 0);
 
         if (firstPointer.update()) {
@@ -121,12 +123,12 @@ public class MyGdxGame extends ApplicationAdapter {
             int mousey = firstPointer.rely();
             float rad = firstPointer.getRadiant();
             playerTransform.radiant = rad;
-            //movePlayer(mousex * rat * 1.0f, mousey * rat * 1.0f);
-            movePlayer((float) Math.cos(rad) * delta * (DEBUG ? 200 : 10), -(float) Math.sin(rad) * delta * (DEBUG ? 200 : 10));
+            movePlayer(mousex * delta * 2.0f, mousey * delta * 2.0f);
+            //movePlayer((float) Math.cos(rad) * delta * (DEBUG ? 400 : 10), -(float) Math.sin(rad) * delta * (DEBUG ? 400 : 10));
         }
         //Gdx.app.log("game", "" +"");
-        cam.position.x += (playerTransform.position.x - cam.position.x) / 5.0f;
-        cam.position.y += (playerTransform.position.y - cam.position.y) / 5.0f;
+        virtualcam.x += (playerTransform.position.x - virtualcam.x) / 5.0f;
+        virtualcam.y += (playerTransform.position.y - virtualcam.y) / 5.0f;
         if (secondPointer.update() || !isDesktop) {
             //Gdx.app.log("game", secondPointer.rely() + "," + secondPointer.relx());
             int relx = isDesktop ? 0 : secondPointer.relx();
@@ -143,26 +145,29 @@ public class MyGdxGame extends ApplicationAdapter {
             gun.transform.translate(-dx * SIZE, -dy * SIZE, 0);
         }
 
-        if (thirdPointer.update()) {
-            cam.position.z += (200 - cam.position.z) / 10.0f;
+        if (!thirdPointer.update()) {
+            cam.position.z += (250 - cam.position.z) / 10.0f;
         } else
-            cam.position.z += (25 * (DEBUG ? 20 : 1.8f) - cam.position.z) / 10.0f;
+            cam.position.z += (25 * (DEBUG ? 2 : 1.8f) - cam.position.z) / 10.0f;
 
         if (!DEBUG && Gdx.graphics.getFrameId() % 2 == 0)
             chunkManager.explode(playerTransform.position, 7);
         playerTransform.transform(player);
 
+        //cam.position.set(virtualcam.x, virtualcam.y - 200, cam.position.z);
+        //cam.lookAt(cam.position.x, cam.position.y + 150, 0);
+        cam.position.set(virtualcam.x, virtualcam.y, cam.position.z);
         cam.update();
 
         //downs.begin();
         //downs.end();
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-        mb.begin(cam);
-        mb.render(player);
-        Entity.render(mb);
-        mb.end();
-        chunkManager.render();
+        //mb.begin(cam);
+        //mb.render(player);
+        //Entity.render(mb);
+        //mb.end();
+        chunkManager.render(cam, virtualcam);
         //downs.draw(viewport.getScreenWidth(), viewport.getScreenHeight());
         drawThumbs();
     }
@@ -182,6 +187,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
     @Override
     public void dispose() {
+        ManagedRessources.dispose();
         Entity.dispose();
         mb.dispose();
         Gdx.app.log("game", "dispose");

@@ -1,6 +1,8 @@
 package com.westreicher.birdsim;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
@@ -14,7 +16,7 @@ import com.westreicher.birdsim.util.Spiral;
  */
 public class ChunkManager {
     private static final Vector3 GRADIENT = new Vector3(1, 0, 0);
-    public static final int CHUNKNUMS = 40 + 1;
+    public static final int CHUNKNUMS = (MyGdxGame.isDesktop ? 12 : 7) * 2 + 1;
     private Chunk chunks[][] = new Chunk[CHUNKNUMS][CHUNKNUMS];
     private int[] pos = new int[]{0, 0};
     private Spiral s = new Spiral();
@@ -50,9 +52,9 @@ public class ChunkManager {
                     mi.explode(pos, distance);
     }
 
-    public void render() {
+    public void render(Camera cam, Vector3 virtualcam) {
         s.reset();
-        int maxupdates = 10;
+        int maxupdates = MyGdxGame.isDesktop ? 20 : 5;
         while (true) {
             Vector2 spos = s.next();
             int x = ((int) spos.x) + CHUNKNUMS / 2;
@@ -61,27 +63,36 @@ public class ChunkManager {
                 break;
             Chunk mi = chunks[x][y];
             if (!mi.isReady) {
-                if (--maxupdates == 0)
+                if (maxupdates == 0)
                     break;
-                chunks[x][y].genMesh();
-                updateTranslations();
+                if (chunks[x][y].genMesh()) maxupdates -= 1;
+                //updateTranslations();
             }
         }
+        Gdx.gl20.glEnable(GL20.GL_DEPTH_TEST);
+        Gdx.gl20.glEnable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);
         shader = ManagedRessources.getShader(ManagedRessources.Shaders.CHUNK);
         shader.begin();
-        shader.setUniformMatrix("u_projTrans", MyGdxGame.single.cam.combined);
+        shader.setUniformMatrix("u_projTrans", cam.combined);
+        if (MyGdxGame.POST_PROCESSING) {
+            shader.setUniformf("virtualcam", virtualcam);
+            shader.setUniformf("maxdstsqinv", 1f / (140f * 140f));
+        }
+        shader.setUniformf("pointsize", 6);
         for (int x = 0; x < CHUNKNUMS; x++) {
             for (int y = 0; y < CHUNKNUMS; y++) {
                 Chunk mi = chunks[x][y];
-                if (mi.isReady) {
+                if (mi.isReady && mi.shouldDraw) {
                     tmpfloat[0] = (x - (CHUNKNUMS / 2)) * MyGdxGame.SIZE - MyGdxGame.SIZE / 2;
                     tmpfloat[1] = (y - (CHUNKNUMS / 2)) * MyGdxGame.SIZE + MyGdxGame.SIZE / 2;
                     shader.setUniform3fv("trans", tmpfloat, 0, 3);
-                    mi.m.render(shader, GL20.GL_TRIANGLES);
+                    mi.m.render(shader, GL20.GL_POINTS);
                 }
             }
         }
         shader.end();
+        Gdx.gl20.glDisable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);
+        Gdx.gl20.glDisable(GL20.GL_DEPTH_TEST);
     }
 
     public void dispose() {
@@ -105,7 +116,7 @@ public class ChunkManager {
             int plus = dx > 0 ? 1 : -1;
             for (int x = stax; dx > 0 ? x < endx : x > endx; x += plus)
                 for (int y = 0; y < CHUNKNUMS; y++)
-                    chunks[x][y].swap(chunks[x + plus][y]);
+                    swap(x, y, x + plus, y);
             for (int y = 0; y < CHUNKNUMS; y++) {
                 Chunk c = chunks[endx][y];
                 int realX = (endx - (CHUNKNUMS / 2)) + pos[0];
@@ -120,7 +131,7 @@ public class ChunkManager {
             int plus = dy > 0 ? 1 : -1;
             for (int x = 0; x < CHUNKNUMS; x++)
                 for (int y = stay; dy > 0 ? y < endy : y > endy; y += plus)
-                    chunks[x][y].swap(chunks[x][y + plus]);
+                    swap(x, y, x, y + plus);
             for (int x = 0; x < CHUNKNUMS; x++) {
                 Chunk c = chunks[x][endy];
                 int realX = (x - (CHUNKNUMS / 2)) + pos[0];
@@ -129,6 +140,12 @@ public class ChunkManager {
             }
         }
         updateTranslations();
+    }
+
+    private void swap(int x1, int y1, int x2, int y2) {
+        Chunk tmp = chunks[x1][y1];
+        chunks[x1][y1] = chunks[x2][y2];
+        chunks[x2][y2] = tmp;
     }
 
     private void updateTranslations() {

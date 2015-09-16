@@ -35,9 +35,19 @@ public class MaxArray {
             arr = new float[maxsize];
         }
 
-        public void add(float... xs) {
-            for (int i = 0; i < xs.length; i++)
-                arr[pointer++] = xs[i];
+        public void add(float x1) {
+            arr[pointer++] = x1;
+        }
+
+        public void add(float x1, float x2) {
+            arr[pointer++] = x1;
+            arr[pointer++] = x2;
+        }
+
+        public void add(float x1, float x2, float x3) {
+            arr[pointer++] = x1;
+            arr[pointer++] = x2;
+            arr[pointer++] = x3;
         }
 
     }
@@ -50,9 +60,19 @@ public class MaxArray {
             arr = new short[maxsize];
         }
 
-        public void add(short... xs) {
-            for (int i = 0; i < xs.length; i++)
-                arr[pointer++] = xs[i];
+        public void add(short x1) {
+            arr[pointer++] = x1;
+        }
+
+        public void add(short x1, short x2) {
+            arr[pointer++] = x1;
+            arr[pointer++] = x2;
+        }
+
+        public void add(short x1, short x2, short x3) {
+            arr[pointer++] = x1;
+            arr[pointer++] = x2;
+            arr[pointer++] = x3;
         }
 
     }

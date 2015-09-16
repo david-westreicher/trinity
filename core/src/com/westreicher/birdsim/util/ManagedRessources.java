@@ -1,6 +1,8 @@
 package com.westreicher.birdsim.util;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.westreicher.birdsim.MyGdxGame;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,10 +14,7 @@ public class ManagedRessources {
     private static ManagedRessources singl;
 
     public static void init() {
-        if (singl == null)
-            singl = new ManagedRessources();
-        else
-            throw new RuntimeException("whaat");
+        singl = new ManagedRessources();
     }
 
     private HashMap<Shaders, ShaderProgram> shadermap = new HashMap<Shaders, ShaderProgram>();
@@ -36,6 +35,7 @@ public class ManagedRessources {
                 case CHUNK:
                     vert = getChunkVert();
                     frag = getChunkFrag();
+                    logShader(vert, frag);
                     break;
             }
             ShaderProgram sp = new ShaderProgram(vert, frag);
@@ -46,6 +46,15 @@ public class ManagedRessources {
         return shadermap.get(s);
     }
 
+    private void logShader(String vert, String frag) {
+        Gdx.app.log("shader", "#########vert##########");
+        int linenum = 0;
+        for (String line : vert.split("\n")) {
+            linenum++;
+            Gdx.app.log("shader", linenum + ":\t" + line);
+        }
+    }
+
     private String getChunkVert() {
         return ""//
                 + "attribute vec3 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
@@ -53,11 +62,23 @@ public class ManagedRessources {
                 + "varying vec3 col;\n" //
                 + "uniform mat4 u_projTrans;\n" //
                 + "uniform vec3 trans;\n" //
+                + (MyGdxGame.POST_PROCESSING ? ""//
+                + "  uniform vec3 virtualcam;\n"//
+                + "  varying float dst;\n" : "")//
+                + "uniform float pointsize;\n" //
+                + "uniform float maxdstsqinv;\n" //
                 + "\n" //
                 + "void main()\n" //
                 + "{\n" //
-                + "   gl_Position =  u_projTrans * vec4(" + ShaderProgram.POSITION_ATTRIBUTE + "+trans,1);\n" //
-                + "   col =  " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
+                + "  vec3 pos = " + ShaderProgram.POSITION_ATTRIBUTE + "+trans;\n" //
+                + (MyGdxGame.POST_PROCESSING ? ""//
+                + "    dst = length(pos-vec3(virtualcam.xy,0.0));\n" //
+                + "    pos.z+=(1.0-(dst*dst*maxdstsqinv))*100.0;\n" : "")//
+                + "  gl_Position =  u_projTrans * vec4(pos,1.0);\n" //
+                + "  vec3 ndc = gl_Position.xyz / gl_Position.w ;\n"  // perspective divide.
+                + "  float zDist = 1.0 - ndc.z;\n" // 1 is close (right up in your face,)// 0 is far (at the far plane)
+                + "  gl_PointSize = pointsize * zDist;\n" // between 0 and 50 now.
+                + "  col =  " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
                 + "}\n";
     }
 
@@ -76,10 +97,12 @@ public class ManagedRessources {
                 + "}";
     }
 
-    public void dispose() {
-        for (Map.Entry<Shaders, ShaderProgram> entries : shadermap.entrySet()) {
+    public static void dispose() {
+        if (singl == null)
+            return;
+        for (Map.Entry<Shaders, ShaderProgram> entries : singl.shadermap.entrySet()) {
             entries.getValue().dispose();
         }
-        shadermap.clear();
+        singl.shadermap.clear();
     }
 }

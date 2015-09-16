@@ -1,5 +1,6 @@
 package com.westreicher.birdsim;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
@@ -16,23 +17,47 @@ import java.util.Random;
  */
 public class Chunk {
 
-    public static final float NOISE_SCALE = 0.035f;
+    private enum Tiles {
+        SAND(0.929f, 0.788f, 0.686f),
+        GRASS(0.271f, 0.545f, 0f),
+        MOUNTAIN(0.612f, 0.667f, 0.776f),
+        SNOW(0.9f, 0.9f, 0.9f),
+        WATER(0.251f, 0.643f, 0.875f),
+        DARKWATER(0.1f, 0.3f, 0.4f),
+        REALLYDARKWATER(0.05f, 0.1f, 0.2f);
+
+        private final float[] col;
+
+        Tiles(float r, float g, float b) {
+            this.col = new float[]{r, g, b};
+        }
+    }
+
+    ;
+
+    private static final double NOISE_SCALE = 0.5;
+    private static int NOISE_OCTAVES = 9;
     private static final int SIZE = 1;
-    public static final float THRESHOLD = MyGdxGame.DEBUG ? 0f : 0.55f;
+    public static final float THRESHOLD = MyGdxGame.DEBUG ? -10f : 0.55f;
     private float[][] map = new float[(int) MyGdxGame.SIZE][(int) MyGdxGame.SIZE];
-    private float[][][] col = new float[(int) MyGdxGame.SIZE][(int) MyGdxGame.SIZE][3];
     private final int w = (int) MyGdxGame.SIZE;
     private final int h = (int) MyGdxGame.SIZE;
     public Mesh m;
     private Vector3 translation = new Vector3();
     public boolean isReady = false;
     private final MaxArray.MaxArrayFloat verts = new MaxArray.MaxArrayFloat(getMaxVerts() * (3 + 3));
-    private final MaxArray.MaxArrayShort inds = new MaxArray.MaxArrayShort(getMaxInds());
+    //private final MaxArray.MaxArrayShort inds = new MaxArray.MaxArrayShort(getMaxInds());
     private static final Vector3 tmp = new Vector3();
     private Random rand = new Random();
+    public boolean shouldDraw;
+    private int absx;
+    private int absy;
 
     public Chunk() {
-        m = new Mesh(false, verts.maxSize(), getMaxInds(),
+        /*m = new Mesh(false, verts.maxSize(), getMaxInds(),
+                new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
+                new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 3, ShaderProgram.COLOR_ATTRIBUTE));*/
+        m = new Mesh(false, verts.maxSize(), 0,
                 new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
                 new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 3, ShaderProgram.COLOR_ATTRIBUTE));
     }
@@ -45,18 +70,46 @@ public class Chunk {
         return (int) Math.pow(MyGdxGame.SIZE, 2) * 6;
     }
 
-    public void setPos(int absx, int absy) {
-        if (MyGdxGame.DEBUG)
-            for (int x = 0; x < w; x++)
-                for (int y = 0; y < h; y++)
-                    map[x][y] = (float) SimplexNoise.noise((x + absx * w) * NOISE_SCALE, (-y + absy * h) * NOISE_SCALE) / 2.0f + 0.5f;
+    public float getNoise(float x, float y, float octave) {
+        double mul = Math.pow(octave, 2);
+        float noise = (float) (mul * SimplexNoise.noise(x * NOISE_SCALE / mul, y * NOISE_SCALE / mul));
+        return noise;
+    }
 
+    public float getNoise(float x, float y) {
+        float noise = 0;
+        for (int i = 10; i > 10 - NOISE_OCTAVES; i--)
+            noise += getNoise(x, y, i);
+        return noise / ((float) Math.pow(10, 2));
+    }
+
+    public void setPos(int absx, int absy) {
         rand.setSeed(getSeed(absx, absy));
-        for (int x = 0; x < w; x++)
+        for (int x = 0; x < w; x += 2)
+            for (int y = 0; y < h; y += 2)
+                map[x][y] = getNoise((x + absx * w), (-y + absy * h));
+        {
+            int xlast = w - 1;
             for (int y = 0; y < h; y++)
-                for (int z = 0; z < 3; z++)
-                    col[x][y][z] = rand.nextFloat();
+                map[xlast][y] = getNoise((xlast + absx * w), (-y + absy * h));
+        }
+        {
+            int ylast = h - 1;
+            for (int x = 0; x < w; x++)
+                map[x][ylast] = getNoise((x + absx * w), (-ylast + absy * h));
+        }
+        for (int x = 0; x < w; x += 2)
+            for (int y = 1; y < h - 1; y += 2)
+                map[x][y] = (map[x][y - 1] + map[x][y + 1]) / 2f;
+        for (int x = 1; x < w - 1; x += 2)
+            for (int y = 0; y < h; y += 2)
+                map[x][y] = (map[x - 1][y] + map[x + 1][y]) / 2f;
+        for (int x = 1; x < w - 1; x += 2)
+            for (int y = 1; y < h; y += 2)
+                map[x][y] = (map[x - 1][y] + map[x + 1][y]) / 2f;
         isReady = false;
+        this.absx = absx;
+        this.absy = absy;
     }
 
     private long getSeed(long x, long y) {
@@ -73,18 +126,30 @@ public class Chunk {
         return p;
     }
 
-    public void genMesh() {
+    public boolean genMesh() {
         verts.reset();
-        inds.reset();
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
+        //inds.reset();
+        for (int x = 0; x < w; x++) {
+            for (int y = 0; y < h; y++) {
                 if (map[x][y] <= THRESHOLD)
                     continue;
-                float scale = ((map[x][y] - THRESHOLD) * 1f + 0.1f);
-                float z = scale * 7;//0;//(float) Math.random();
-                short startIndex = (short) (verts.pointer / 6);
-                tmp.set(col[x][y]);
-                tmp.scl(scale);
+                float scale = map[x][y];
+                float z = Math.max(0, scale * 20);
+                tmp.set(getCol(scale));
+                float dark = 0;
+                if (scale > 0)
+                    for (int x1 = x - 1; x1 <= x; x1++) {
+                        for (int y1 = y - 1; y1 <= y; y1++) {
+                            float diff = ((x1 < 0 || y1 < 0) ? getNoise((x1 + absx * w), (-y1 + absy * h)) : map[x1][y1]) - scale;
+                            if (diff > 0)
+                                dark += diff * 4;
+                        }
+                    }
+                else
+                    dark = -scale / 4f;
+                //Gdx.app.log("dark", "" + dark);
+                tmp.scl(1 - dark);
+                /*short startIndex = (short) (verts.pointer / 6);
                 verts.add(x, -y, z);
                 verts.add(tmp.x, tmp.y, tmp.z);
                 verts.add(x + SIZE, -y, z);
@@ -93,12 +158,37 @@ public class Chunk {
                 verts.add(tmp.x, tmp.y, tmp.z);
                 verts.add(x + SIZE, -y + SIZE, z);
                 verts.add(tmp.x, tmp.y, tmp.z);
-                inds.add(startIndex, (short) (startIndex + 1), (short) (startIndex + 2), (short) (startIndex + 2), (short) (startIndex + 3), (short) (startIndex + 1));
+                inds.add(startIndex, (short) (startIndex + 1), (short) (startIndex + 2));
+                inds.add((short) (startIndex + 2), (short) (startIndex + 3), (short) (startIndex + 1));*/
+                verts.add(x + 0.5f, -y + 0.5f, z);
+                verts.add(tmp.x, tmp.y, tmp.z);
             }
         }
-        m.setVertices(verts.arr, 0, verts.size());
-        m.setIndices(inds.arr, 0, inds.size());
+        shouldDraw = verts.size() > 0;
+        if (shouldDraw) {
+            m.setVertices(verts.arr, 0, verts.size());
+            //m.setIndices(inds.arr, 0, inds.size());
+            //Gdx.app.log("empty", "empty");
+        }
         isReady = true;
+        return shouldDraw;
+    }
+
+    private float[] getCol(float scale) {
+        if (scale < -1.4)
+            return Tiles.REALLYDARKWATER.col;
+        if (scale < -0.9)
+            return Tiles.DARKWATER.col;
+        else if (scale < 0)
+            return Tiles.WATER.col;
+        else if (scale < 0.2)
+            return Tiles.SAND.col;
+        else if (scale < 0.9)
+            return Tiles.GRASS.col;
+        else if (scale < 1.4)
+            return Tiles.MOUNTAIN.col;
+        else
+            return Tiles.SNOW.col;
     }
 
     public void explode(Vector3 cam, int explodedist) {
@@ -163,18 +253,4 @@ public class Chunk {
         m.dispose();
     }
 
-    public void swap(Chunk other) {
-        Mesh tmpm = m;
-        m = other.m;
-        other.m = tmpm;
-        boolean tmpIsReady = isReady;
-        isReady = other.isReady;
-        other.isReady = tmpIsReady;
-        float[][] tmpmap = map;
-        map = other.map;
-        other.map = tmpmap;
-        float[][][] tmpcol = col;
-        col = other.col;
-        other.col = tmpcol;
-    }
 }

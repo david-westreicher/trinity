@@ -82,7 +82,7 @@ public class RenderToTexture {
                     + "void main()\n"//
                     + "{\n" //
                     + "  vec4 col = texture2D(u_texture,v_texCoords);\n" //
-                    + "  if(thresh<1 && length(col)<1.3){gl_FragColor = vec4(0,0,0,0);}\n" //
+                    + "  if(thresh<1 && length(col)<1.8){gl_FragColor = vec4(0,0,0,0);}\n" //
                     + "  else{gl_FragColor = col;}\n" //
                     + "}";
 

@@ -16,12 +16,14 @@ import com.westreicher.birdsim.util.Spiral;
  */
 public class ChunkManager {
     private static final Vector3 GRADIENT = new Vector3(1, 0, 0);
-    public static final int CHUNKNUMS = (MyGdxGame.isDesktop ? 12 : 7) * 2 + 1;
+    public static final float OUTSIDE = -10.0f;
+    public static final int CHUNKNUMS = Config.CHUNKNUMS;
     private Chunk chunks[][] = new Chunk[CHUNKNUMS][CHUNKNUMS];
     private int[] pos = new int[]{0, 0};
     private Spiral s = new Spiral();
     private ShaderProgram shader;
     private float[] tmpfloat = new float[3];
+    private static final TileResult TILE_RESULT = new TileResult();
 
     public ChunkManager() {
         for (int x = 0; x < CHUNKNUMS; x++) {
@@ -54,7 +56,7 @@ public class ChunkManager {
 
     public void render(Camera cam, Vector3 virtualcam) {
         s.reset();
-        int maxupdates = MyGdxGame.isDesktop ? 20 : 5;
+        int maxupdates = MyGdxGame.isDesktop ? 20 : 4;
         while (true) {
             Vector2 spos = s.next();
             int x = ((int) spos.x) + CHUNKNUMS / 2;
@@ -78,7 +80,7 @@ public class ChunkManager {
             shader.setUniformf("virtualcam", virtualcam);
             shader.setUniformf("maxdstsqinv", 1f / (140f * 140f));
         }
-        shader.setUniformf("pointsize", Config.POST_PROCESSING ? 8 : 10);
+        shader.setUniformf("pointsize", Config.POST_PROCESSING ? 7 : 10);
         for (int x = 0; x < CHUNKNUMS; x++) {
             for (int y = 0; y < CHUNKNUMS; y++) {
                 Chunk mi = chunks[x][y];
@@ -168,5 +170,68 @@ public class ChunkManager {
         GRADIENT.set(-dx, dy, 0);
         GRADIENT.nor();
         return GRADIENT;
+    }
+
+    public void explode2(Vector3 position, float dist) {
+        if (dist == 0) {
+            setValRel(position.x, position.y, 0.99f);
+            return;
+        }
+        float distsq = dist * dist;
+        for (float x = -dist; x <= dist; x++) {
+            for (float y = -dist; y <= dist; y++) {
+                float distfac = (x * x + y * y) / distsq;
+                if (distfac < 1)
+                    setValRel(x + position.x, y + position.y, distfac * 0.2f + 0.8f);
+            }
+        }
+    }
+
+    public float getVal(float posx, float posy) {
+        TileResult tr = setTileResult(posx, posy);
+        return tr.c == null ? OUTSIDE : tr.c.getVal(tr.innerx, tr.innery);
+    }
+
+    public float getValAbs(int x, int y, float absx, float absy) {
+        TileResult tr = setTileResult(x + (absx - pos[0]) * Config.TILES_PER_CHUNK - CHUNKNUMS / 2, y + (absy - pos[1]) * Config.TILES_PER_CHUNK - CHUNKNUMS / 2);
+        return tr.c == null ? OUTSIDE : tr.c.getVal(tr.innerx, tr.innery);
+    }
+
+    public void setValRel(float posx, float posy, float percent) {
+        TileResult tr = setTileResult(posx, posy);
+        if (tr.c != null) tr.c.setVal(tr.innerx, tr.innery, percent);
+    }
+
+    private TileResult setTileResult(float posx, float posy) {
+        float tpc = (float) Config.TILES_PER_CHUNK;
+        float xoffset = posx + tpc / 2.0f;
+        float yoffset = posy + tpc / 2.0f;
+        int divx = (int) Math.floor(xoffset / tpc);
+        int divy = (int) Math.floor(yoffset / tpc);
+        while (xoffset >= Config.TILES_PER_CHUNK)
+            xoffset -= Config.TILES_PER_CHUNK;
+        while (xoffset < 0)
+            xoffset += Config.TILES_PER_CHUNK;
+        while (yoffset >= Config.TILES_PER_CHUNK)
+            yoffset -= Config.TILES_PER_CHUNK;
+        while (yoffset < 0)
+            yoffset += Config.TILES_PER_CHUNK;
+        int innerx = (int) (xoffset);
+        int innery = Config.TILES_PER_CHUNK - (int) (yoffset) - 1;
+        int xChunk = divx + (CHUNKNUMS / 2);
+        int yChunk = divy + (CHUNKNUMS / 2);
+        if (xChunk < 0 || yChunk < 0 || xChunk >= CHUNKNUMS || yChunk >= CHUNKNUMS)
+            TILE_RESULT.c = null;
+        else
+            TILE_RESULT.c = chunks[xChunk][yChunk];
+        TILE_RESULT.innerx = innerx;
+        TILE_RESULT.innery = innery;
+        return TILE_RESULT;
+    }
+
+    private static class TileResult {
+        public Chunk c;
+        public int innerx;
+        public int innery;
     }
 }

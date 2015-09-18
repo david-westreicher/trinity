@@ -64,8 +64,7 @@ public class ManagedRessources {
                 + "uniform mat4 u_projTrans;\n" //
                 + "uniform vec3 trans;\n" //
                 + (Config.POST_PROCESSING ? ""//
-                + "  uniform vec3 virtualcam;\n"//
-                + "  varying float dst;\n" : "")//
+                + "  uniform vec3 virtualcam;\n" : "")//
                 + "uniform float pointsize;\n" //
                 + "uniform float maxdstsqinv;\n" //
                 + "\n" //
@@ -73,11 +72,11 @@ public class ManagedRessources {
                 + "{\n" //
                 + "  vec3 pos = " + ShaderProgram.POSITION_ATTRIBUTE + "+trans;\n" //
                 + (Config.POST_PROCESSING ? ""//
-                + "    dst = length(pos-vec3(virtualcam.xy,0.0));\n" //
-                + "    pos.z+=(1.0-(dst*dst*maxdstsqinv))*100.0;\n" : "")//
+                + "    float dst = length(pos-vec3(virtualcam.xy,0.0));\n" //
+                + "    pos.z+=(1.0-(dst*dst*maxdstsqinv))*140.0;\n" : "")//
                 + "  gl_Position =  u_projTrans * vec4(pos,1.0);\n" //
-                + "  vec3 ndc = gl_Position.xyz / gl_Position.w ;\n"  // perspective divide.
-                + "  float zDist = 1.0 - ndc.z;\n" // 1 is close (right up in your face,)// 0 is far (at the far plane)
+                //+ "  vec3 ndc = gl_Position.xyz / gl_Position.w ;\n"  // perspective divide.
+                //+ "  float zDist = 1.0 - ndc.z;\n" // 1 is close (right up in your face,)// 0 is far (at the far plane)
                 //+ "  gl_PointSize = pointsize * zDist;\n" // between 0 and 50 now.
                 + "  gl_PointSize = pointsize;\n" // between 0 and 50 now.
                 + "  col =  " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //

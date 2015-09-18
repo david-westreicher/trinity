@@ -65,7 +65,7 @@ public class MyGdxGame extends ApplicationAdapter {
         //DefaultShader.defaultCullFace = 0;
         cam = new PerspectiveCamera();
         cam.position.set(0, 0, 25 * (Config.DEBUG ? 10 : 1.25f));
-        cam.near = 100f;
+        cam.near = 10f;
         cam.far = 500f;
         viewport = new ScreenViewport(cam);
         spritebatch = new SpriteBatch();
@@ -73,7 +73,8 @@ public class MyGdxGame extends ApplicationAdapter {
         mb = new ModelBatch();
         chunkManager = new ChunkManager();
         // player = new ModelInstance(new ModelBuilder().createSphere(2, 2, 2, 10, 10, new Material(ColorAttribute.createDiffuse(1, 1, 1, 1)), VertexAttributes.Usage.Position));
-        player = new ModelInstance(new ObjLoader().loadModel(Gdx.files.internal("player.obj")));
+        //player = new ModelInstance(new ObjLoader().loadModel(Gdx.files.internal("player.obj")));
+        player = new ModelInstance(new ModelBuilder().createBox(1f, 1f, 1f, new Material(ColorAttribute.createDiffuse(1, 0, 0, 0)), VertexAttributes.Usage.Position));
         gun = new ModelInstance(new ModelBuilder().createBox(0.2f, 0.5f, 0.2f, new Material(ColorAttribute.createDiffuse(1, 0, 0, 0)), VertexAttributes.Usage.Position));
         firstPointer = new SaveMouse(0, viewport);
         secondPointer = new SaveMouse(1, viewport);
@@ -83,7 +84,6 @@ public class MyGdxGame extends ApplicationAdapter {
 
 
     public void movePlayer(float x, float y) {
-        playerTransform.position.z = 20;
         playerTransform.position.x += x;
         playerTransform.position.y -= y;
         if (!chunkManager.isStuck(playerTransform.position, 1) || true || Config.DEBUG)
@@ -120,7 +120,7 @@ public class MyGdxGame extends ApplicationAdapter {
             int mousey = firstPointer.rely();
             float rad = firstPointer.getRadiant();
             playerTransform.radiant = rad;
-            movePlayer(mousex * delta * 2.0f, mousey * delta * 2.0f);
+            movePlayer(mousex * delta * Config.MOVE_SPEED, mousey * delta * Config.MOVE_SPEED);
             //movePlayer((float) Math.cos(rad) * delta * (DEBUG ? 400 : 10), -(float) Math.sin(rad) * delta * (DEBUG ? 400 : 10));
         }
         //Gdx.app.log("game", "" +"");
@@ -145,26 +145,27 @@ public class MyGdxGame extends ApplicationAdapter {
         if (!thirdPointer.update()) {
             cam.position.z += (250 - cam.position.z) / 10.0f;
         } else
-            cam.position.z += (25 * (Config.DEBUG ? 2 : 1.8f) - cam.position.z) / 10.0f;
+            cam.position.z += (25 * (Config.DEBUG ? 5 : 1.8f) - cam.position.z) / 10.0f;
 
-        if (!Config.DEBUG && Gdx.graphics.getFrameId() % 2 == 0)
-            chunkManager.explode(playerTransform.position, 7);
+        //chunkManager.explode2(playerTransform.position, 15);
+        playerTransform.position.z = chunkManager.getVal(playerTransform.position.x, playerTransform.position.y) + 145;
         playerTransform.transform(player);
 
-        //cam.position.set(virtualcam.x, virtualcam.y - 200, cam.position.z);
-        //cam.lookAt(cam.position.x, cam.position.y + 150, 0);
+        //cam.position.set(virtualcam.x, virtualcam.y - 50, cam.position.z);
+        //cam.lookAt(cam.position.x, cam.position.y + 200, 0);
         cam.position.set(virtualcam.x, virtualcam.y, cam.position.z);
         cam.update();
 
-        //downs.begin();
-        //downs.end();
-        Gdx.gl.glClearColor(0, 0, 0, 1);
+        //Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClearColor(0.251f, 0.643f, 0.875f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-        //mb.begin(cam);
-        //mb.render(player);
+        //downs.begin();
+        mb.begin(cam);
+        mb.render(player);
         //Entity.render(mb);
-        //mb.end();
+        mb.end();
         chunkManager.render(cam, virtualcam);
+        //downs.end();
         //downs.draw(viewport.getScreenWidth(), viewport.getScreenHeight());
         drawThumbs();
     }
@@ -241,7 +242,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
     public static class Transform {
         public Vector3 position = new Vector3();
-        public float scale = 0.4f;
+        public float scale = 4;
         public float radiant;
 
         public void transform(ModelInstance player) {

@@ -1,6 +1,7 @@
 package com.westreicher.birdsim;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
@@ -16,6 +17,7 @@ import java.util.Random;
  * Created by david on 8/24/15.
  */
 public class Chunk {
+
 
     private enum Tiles {
         SAND(0.929f, 0.788f, 0.686f),
@@ -36,7 +38,7 @@ public class Chunk {
     ;
 
     private static final double NOISE_SCALE = 0.5;
-    private static int NOISE_OCTAVES = 9;
+    private static int NOISE_OCTAVES = 10;
     private static final int SIZE = Config.TILES_PER_CHUNK;
     public static final float THRESHOLD = Config.DEBUG ? -10f : 0.55f;
     private float[][] map = new float[SIZE][SIZE];
@@ -49,11 +51,12 @@ public class Chunk {
     public boolean shouldDraw;
     private int absx;
     private int absy;
+    private float randdark;
 
     public Chunk() {
         m = new Mesh(false, verts.maxSize(), 0,
                 new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
-                new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 3, ShaderProgram.COLOR_ATTRIBUTE));
+                new VertexAttribute(VertexAttributes.Usage.ColorPacked, 3, ShaderProgram.COLOR_ATTRIBUTE));
     }
 
     private int getMaxVerts() {
@@ -68,13 +71,36 @@ public class Chunk {
 
     public float getNoise(float x, float y) {
         float noise = 0;
-        for (int i = 10; i > 10 - NOISE_OCTAVES; i--)
+        for (int i = 10; i > 10 - NOISE_OCTAVES; i -= 2)
             noise += getNoise(x, y, i);
-        return noise / ((float) Math.pow(10, 2));
+        return noise / ((float) Math.pow(8, 2));
     }
+
+    public void clear() {
+        for (int x = 0; x < SIZE; x += 1)
+            for (int y = 0; y < SIZE; y += 1)
+                map[x][y] = 0;
+        isReady = false;
+    }
+
+    public float getVal(int x, int y) {
+        if (x < 0 || y < 0 || x >= SIZE || y >= SIZE)
+            Gdx.app.log("WRONG", x + "," + y);
+        else
+            return Math.max(0, map[x][y] * 20);
+        return 0;
+    }
+
+    public void setVal(int x, int y, float percent) {
+        map[x][y] *= percent;
+        isReady = false;
+    }
+
 
     public void setPos(int absx, int absy) {
         rand.setSeed(getSeed(absx, absy));
+        randdark = (float) rand.nextDouble();
+        randdark = (float) rand.nextDouble();
         for (int x = 0; x < SIZE; x += 2)
             for (int y = 0; y < SIZE; y += 2)
                 map[x][y] = getNoise((x + absx * SIZE), (-y + absy * SIZE));
@@ -118,25 +144,38 @@ public class Chunk {
 
     public boolean genMesh() {
         verts.reset();
+        ChunkManager chunkman = MyGdxGame.single.chunkManager;
         for (int x = 0; x < SIZE; x++) {
             for (int y = 0; y < SIZE; y++) {
                 float scale = map[x][y];
+                if (!MyGdxGame.isDesktop && scale > -1 && scale < 0)
+                    continue;
                 float z = Math.max(0, scale * 20);
                 tmp.set(getCol(scale));
-                float dark = 0;
+                float dark = 0;//randdark;
                 if (scale > 0)
-                    for (int x1 = x - 2; x1 <= x; x1++) {
-                        for (int y1 = y - 2; y1 <= y; y1++) {
-                            float diff = ((x1 < 0 || y1 < 0) ? getNoise((x1 + absx * SIZE), (-y1 + absy * SIZE)) : map[x1][y1]) - scale;
+                    for (int x1 = x - 1; x1 <= x; x1++) {
+                        for (int y1 = y - 1; y1 <= y; y1++) {
+                            float diff = -scale;
+                            if (x1 < 0 || y1 < 0) {
+                                //TODO fetch from neighbouring chunk
+                                float neighborval = 0;//chunkman.getValAbs(x1, y1, absx, absy);
+                                if (neighborval == ChunkManager.OUTSIDE)
+                                    diff += getNoise((x1 + absx * SIZE), (-y1 + absy * SIZE));
+                                else
+                                    diff += neighborval;
+                                //MyGdxGame.single.chunkManager.setValRel(absx * SIZE - SIZE / 2, absy * SIZE - SIZE / 2, 2);
+                            } else
+                                diff += map[x1][y1];
                             if (diff > 0)
                                 dark += diff * 0.6f;
                         }
                     }
                 else
-                    dark = -scale / 4f;
+                    dark += -scale * 0.25f;
                 tmp.scl(1 - dark);
-                verts.add(x + 0.5f, -y + 0.5f, z);
-                verts.add(tmp.x, tmp.y, tmp.z);
+                verts.add(x + 0.5f, -y - 0.5f, z);
+                verts.add(Color.toFloatBits(tmp.x, tmp.y, tmp.z, 1f));
             }
         }
         shouldDraw = verts.size() > 0;
@@ -147,11 +186,12 @@ public class Chunk {
     }
 
     private float[] getCol(float scale) {
-        if (scale < -1.4)
+        /*if (scale < -1.4)
             return Tiles.REALLYDARKWATER.col;
         if (scale < -0.9)
             return Tiles.DARKWATER.col;
-        else if (scale < 0)
+        else*/
+        if (scale <= 0)
             return Tiles.WATER.col;
         else if (scale < 0.2)
             return Tiles.SAND.col;

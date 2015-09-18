@@ -147,7 +147,7 @@ public class MyGdxGame extends ApplicationAdapter {
         } else
             cam.position.z += (25 * (Config.DEBUG ? 5 : 1.8f) - cam.position.z) / 10.0f;
 
-        //chunkManager.explode2(playerTransform.position, 15);
+        chunkManager.explode2(playerTransform.position, 15);
         playerTransform.position.z = chunkManager.getVal(playerTransform.position.x, playerTransform.position.y) + 145;
         playerTransform.transform(player);
 

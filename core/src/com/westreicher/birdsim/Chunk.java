@@ -40,11 +40,10 @@ public class Chunk {
     private static final double NOISE_SCALE = 0.5;
     private static int NOISE_OCTAVES = 10;
     private static final int SIZE = Config.TILES_PER_CHUNK;
-    public static final float THRESHOLD = Config.DEBUG ? -10f : 0.55f;
     private float[][] map = new float[SIZE][SIZE];
     public Mesh m;
     public boolean isReady = false;
-    private final MaxArray.MaxArrayFloat verts = new MaxArray.MaxArrayFloat(getMaxVerts() * (3 + 3));
+    public final MaxArray.MaxArrayFloat verts = new MaxArray.MaxArrayFloat((int) Math.pow(Config.TILES_PER_CHUNK, 2) * 2);
     private static final Vector3 tmp = new Vector3();
     private Random rand = new Random();
     public boolean shouldDraw;
@@ -54,12 +53,8 @@ public class Chunk {
 
     public Chunk() {
         m = new Mesh(false, verts.maxSize(), 0,
-                new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
+                new VertexAttribute(VertexAttributes.Usage.ColorPacked, 3, ShaderProgram.POSITION_ATTRIBUTE),
                 new VertexAttribute(VertexAttributes.Usage.ColorPacked, 3, ShaderProgram.COLOR_ATTRIBUTE));
-    }
-
-    private int getMaxVerts() {
-        return (int) Math.pow(Config.TILES_PER_CHUNK, 2) * 4;
     }
 
     public float getNoise(float x, float y, float octave) {
@@ -83,15 +78,16 @@ public class Chunk {
     }
 
     public float getVal(int x, int y) {
-        if (x < 0 || y < 0 || x >= SIZE || y >= SIZE)
-            Gdx.app.log("WRONG", x + "," + y);
-        else
-            return Math.max(0, map[x][y] * 20);
-        return 0;
+        return Math.max(0, map[x][y] * Config.TERRAIN_HEIGHT);
     }
 
-    public void setVal(int x, int y, float percent) {
+    public void mulVal(int x, int y, float percent) {
         map[x][y] *= percent;
+        isReady = false;
+    }
+
+    public void addVal(int x, int y, float val) {
+        map[x][y] += val;
         isReady = false;
     }
 
@@ -147,14 +143,13 @@ public class Chunk {
         for (int x = 0; x < SIZE; x++) {
             for (int y = 0; y < SIZE; y++) {
                 float scale = map[x][y];
-                if (!MyGdxGame.isDesktop && scale > -1 && scale < 0)
-                    continue;
-                float z = Math.max(0, scale * 20);
+                //if (!MyGdxGame.isDesktop && scale > -1 && scale < 0)
+                //    continue;
                 tmp.set(getCol(scale));
                 float dark = 0;//randdark;
                 if (scale > 0)
-                    for (int x1 = x - 1; x1 <= x; x1++) {
-                        for (int y1 = y - 1; y1 <= y; y1++) {
+                    for (int x1 = x - 2; x1 <= x; x1++) {
+                        for (int y1 = y - 2; y1 <= y; y1++) {
                             float diff = -scale;
                             if (x1 < 0 || y1 < 0) {
                                 //TODO fetch from neighbouring chunk
@@ -172,8 +167,11 @@ public class Chunk {
                     }
                 else
                     dark += -scale * 0.25f;
-                tmp.scl(1 - dark);
-                verts.add(x + 0.5f, -y - 0.5f, z);
+                tmp.scl(Math.max(0, 1 - dark));
+                float z = Math.min(1, Math.max(0, scale * (1.0f / 2.5f)));
+                // x,y,z should be in range 0-1 (min-max)
+                //TODO could encode occlusion + colormap uv in alpha
+                verts.add(Color.toFloatBits((float) x / SIZE, (float) (SIZE - y - 1) / SIZE, z, 1f));
                 verts.add(Color.toFloatBits(tmp.x, tmp.y, tmp.z, 1f));
             }
         }

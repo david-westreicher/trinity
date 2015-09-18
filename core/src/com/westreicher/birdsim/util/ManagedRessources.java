@@ -67,12 +67,15 @@ public class ManagedRessources {
                 + "  uniform vec3 virtualcam;\n" : "")//
                 + "uniform float pointsize;\n" //
                 + "uniform float maxdstsqinv;\n" //
+                + "uniform float chunksize;\n" //
+                + "uniform float heightscale;\n" //
                 + "\n" //
                 + "void main()\n" //
                 + "{\n" //
-                + "  vec3 pos = " + ShaderProgram.POSITION_ATTRIBUTE + "+trans;\n" //
+                + "  vec3 pos = " + ShaderProgram.POSITION_ATTRIBUTE + "*chunksize + trans;\n" //
+                + "  pos.z *= heightscale;\n" //
                 + (Config.POST_PROCESSING ? ""//
-                + "    float dst = length(pos-vec3(virtualcam.xy,0.0));\n" //
+                + "    float dst = length(pos.xy-virtualcam.xy);\n" //
                 + "    pos.z+=(1.0-(dst*dst*maxdstsqinv))*140.0;\n" : "")//
                 + "  gl_Position =  u_projTrans * vec4(pos,1.0);\n" //
                 //+ "  vec3 ndc = gl_Position.xyz / gl_Position.w ;\n"  // perspective divide.

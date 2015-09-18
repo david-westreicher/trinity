@@ -6,7 +6,8 @@ package com.westreicher.birdsim;
 public class Config {
     public static final boolean POST_PROCESSING = true;
     public static final boolean DEBUG = true;
-    public static final int TILES_PER_CHUNK = 16;
-    public static final int CHUNKNUMS = (MyGdxGame.isDesktop ? 11 : 8) * 2 + 1;
-    public static final float MOVE_SPEED = 1f;
+    public static final int TILES_PER_CHUNK = 32;
+    public static final int CHUNKNUMS = (MyGdxGame.isDesktop ? 5 : 3) * 2 + 1;
+    public static final float MOVE_SPEED = 0.2f;
+    public static final float TERRAIN_HEIGHT = 15f;
 }

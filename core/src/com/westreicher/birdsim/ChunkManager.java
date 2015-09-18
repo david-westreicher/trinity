@@ -4,6 +4,7 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
@@ -37,7 +38,7 @@ public class ChunkManager {
 
     public void render(Camera cam, Vector3 virtualcam) {
         s.reset();
-        int maxupdates = MyGdxGame.isDesktop ? 20 : 4;
+        int maxupdates = MyGdxGame.isDesktop ? 20 : 5;
         while (true) {
             Vector2 spos = s.next();
             int x = ((int) spos.x) + CHUNKNUMS / 2;
@@ -60,13 +61,15 @@ public class ChunkManager {
             shader.setUniformf("virtualcam", virtualcam);
             shader.setUniformf("maxdstsqinv", 1f / (140f * 140f));
         }
-        shader.setUniformf("pointsize", Config.POST_PROCESSING ? 7 : 10);
+        shader.setUniformf("pointsize", 10);
+        shader.setUniformf("chunksize", Config.TILES_PER_CHUNK);
+        shader.setUniformf("heightscale", 2.5f * Config.TERRAIN_HEIGHT / Config.TILES_PER_CHUNK);
         for (int x = 0; x < CHUNKNUMS; x++) {
             for (int y = 0; y < CHUNKNUMS; y++) {
                 Chunk mi = chunks[x][y];
                 if (mi.isReady && mi.shouldDraw) {
                     tmpfloat[0] = (x - (CHUNKNUMS / 2)) * Config.TILES_PER_CHUNK - Config.TILES_PER_CHUNK / 2;
-                    tmpfloat[1] = (y - (CHUNKNUMS / 2)) * Config.TILES_PER_CHUNK + Config.TILES_PER_CHUNK / 2;
+                    tmpfloat[1] = (y - (CHUNKNUMS / 2)) * Config.TILES_PER_CHUNK - Config.TILES_PER_CHUNK / 2;
                     shader.setUniform3fv("trans", tmpfloat, 0, 3);
                     mi.m.render(shader, GL20.GL_POINTS);
                 }
@@ -131,17 +134,22 @@ public class ChunkManager {
 
     public void explode2(Vector3 position, float dist) {
         if (dist == 0) {
-            setValRel(position.x, position.y, 0.99f);
+            addVal(position.x, position.y, -0.01f);
             return;
         }
         float distsq = dist * dist;
         for (float x = -dist; x <= dist; x++) {
             for (float y = -dist; y <= dist; y++) {
                 float distfac = (x * x + y * y) / distsq;
-                if (distfac < 1)
-                    setValRel(x + position.x, y + position.y, distfac * 0.2f + 0.8f);
+                if (getVal(x + position.x, y + position.y) > 0 && distfac < 1)
+                    addVal(x + position.x, y + position.y, (distfac - 1) / 50f);
             }
         }
+    }
+
+    private void addVal(float posx, float posy, float val) {
+        TileResult tr = setTileResult(posx, posy);
+        if (tr.c != null) tr.c.addVal(tr.innerx, tr.innery, val);
     }
 
     public float getVal(Vector3 pos) {
@@ -158,9 +166,9 @@ public class ChunkManager {
         return tr.c == null ? OUTSIDE : tr.c.getVal(tr.innerx, tr.innery);
     }
 
-    public void setValRel(float posx, float posy, float percent) {
+    public void mulVal(float posx, float posy, float percent) {
         TileResult tr = setTileResult(posx, posy);
-        if (tr.c != null) tr.c.setVal(tr.innerx, tr.innery, percent);
+        if (tr.c != null) tr.c.mulVal(tr.innerx, tr.innery, percent);
     }
 
     private TileResult setTileResult(float posx, float posy) {

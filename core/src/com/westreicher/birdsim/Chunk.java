@@ -43,7 +43,6 @@ public class Chunk {
     public static final float THRESHOLD = Config.DEBUG ? -10f : 0.55f;
     private float[][] map = new float[SIZE][SIZE];
     public Mesh m;
-    private Vector3 translation = new Vector3();
     public boolean isReady = false;
     private final MaxArray.MaxArrayFloat verts = new MaxArray.MaxArrayFloat(getMaxVerts() * (3 + 3));
     private static final Vector3 tmp = new Vector3();
@@ -201,64 +200,6 @@ public class Chunk {
             return Tiles.MOUNTAIN.col;
         else
             return Tiles.SNOW.col;
-    }
-
-    public void explode(Vector3 cam, int explodedist) {
-        //Gdx.app.log("expl", modelinstance.transform.toString());
-        boolean inside = false;
-        for (int x = -explodedist; x <= explodedist; x += explodedist)
-            for (int y = -explodedist; y <= explodedist; y += explodedist) {
-                if (getVal(cam, x, y) != -1f)
-                    inside = true;
-            }
-        if (!inside)
-            return;
-        isReady = false;
-
-        for (int x = -explodedist; x <= explodedist; x++)
-            for (int y = -explodedist; y <= explodedist; y++) {
-                float dst = Vector2.dst(0, 0, x, y);
-                if (dst > explodedist - 1)
-                    continue;
-                float val = getVal(cam, x, y);
-                if (val != -1f)
-                    setVal(cam, x, y, Math.min(1, Math.max(val + ((explodedist - 1) / dst) / 100, 0)));
-                // setVal(cam, x, y, val - 0.2f);
-            }
-        //Gdx.app.log("expl", cam.toString() + "," + offsetx + "," + offsety);
-        //Gdx.app.log("expl", cam.toString() + "," + modelinstance.transform.getTranslation(new Vector3()).toString());
-        //regenerateMesh();
-    }
-
-    private float getVal(Vector3 cam, float x, float y) {
-        int realx = (int) (cam.x + SIZE / 2 + x - translation.x);
-        int realy = (int) (-cam.y + SIZE / 2 + y + translation.y + 1);
-        if (realx >= 0 && realx < SIZE && realy >= 0 && realy < SIZE)
-            return map[realx][realy];
-        return -1f;
-    }
-
-    private void setVal(Vector3 cam, float x, float y, float val) {
-        int realx = (int) (cam.x + SIZE / 2 + x - translation.x);
-        int realy = (int) (-cam.y + SIZE / 2 + y + translation.y + 1);
-        if (realx >= 0 && realx < SIZE && realy >= 0 && realy < SIZE)
-            map[realx][realy] = val;
-    }
-
-    public static float getVals(Chunk chunks[][], Vector3 cam, float x, float y) {
-        for (Chunk mis[] : chunks)
-            for (Chunk mi : mis) {
-                if (mi == null)
-                    continue;
-                float val = mi.getVal(cam, x, y);
-                if (val > 0)
-                    return val;
-            }
-        return -1;
-    }
-
-    public void setTranslation(float realX, float realY) {
-        translation.set(realX, realY, 0);
     }
 
     public void dispose() {

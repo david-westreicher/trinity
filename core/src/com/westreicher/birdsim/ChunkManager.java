@@ -15,7 +15,6 @@ import com.westreicher.birdsim.util.Spiral;
  * Created by david on 9/4/15.
  */
 public class ChunkManager {
-    private static final Vector3 GRADIENT = new Vector3(1, 0, 0);
     public static final float OUTSIDE = -10.0f;
     public static final int CHUNKNUMS = Config.CHUNKNUMS;
     private Chunk chunks[][] = new Chunk[CHUNKNUMS][CHUNKNUMS];
@@ -34,24 +33,6 @@ public class ChunkManager {
                 chunks[x][y].setPos(realX, realY);
             }
         }
-        updateTranslations();
-    }
-
-    public boolean isStuck(Vector3 pos, int size) {
-        if (size == 0)
-            return (Chunk.getVals(chunks, pos, 0, 0) > Chunk.THRESHOLD);
-        for (int x = -size; x <= size; x++)
-            for (int y = -size; y <= size; y++)
-                if (Chunk.getVals(chunks, pos, x, y) > Chunk.THRESHOLD)
-                    return true;
-        return false;
-    }
-
-    public void explode(Vector3 pos, int distance) {
-        for (Chunk mis[] : chunks)
-            for (Chunk mi : mis)
-                if (mi != null)
-                    mi.explode(pos, distance);
     }
 
     public void render(Camera cam, Vector3 virtualcam) {
@@ -68,7 +49,6 @@ public class ChunkManager {
                 if (maxupdates == 0)
                     break;
                 if (chunks[x][y].genMesh()) maxupdates -= 1;
-                //updateTranslations();
             }
         }
         Gdx.gl20.glEnable(GL20.GL_DEPTH_TEST);
@@ -141,35 +121,12 @@ public class ChunkManager {
                 c.setPos(realX, realY);
             }
         }
-        updateTranslations();
     }
 
     private void swap(int x1, int y1, int x2, int y2) {
         Chunk tmp = chunks[x1][y1];
         chunks[x1][y1] = chunks[x2][y2];
         chunks[x2][y2] = tmp;
-    }
-
-    private void updateTranslations() {
-        for (int x = 0; x < CHUNKNUMS; x++) {
-            for (int y = 0; y < CHUNKNUMS; y++) {
-                if (chunks[x][y] != null) {
-                    float realX = (x - (CHUNKNUMS / 2)) * Config.TILES_PER_CHUNK;
-                    float realY = (y - (CHUNKNUMS / 2)) * Config.TILES_PER_CHUNK;
-                    chunks[x][y].setTranslation(realX, realY);
-                }
-            }
-        }
-    }
-
-    public Vector3 getGradient(float x, float y) {
-        GRADIENT.set(x, y, 0);
-        float h = Chunk.getVals(chunks, GRADIENT, 0, 0);
-        float dx = Chunk.getVals(chunks, GRADIENT, 1, 0) - h;
-        float dy = Chunk.getVals(chunks, GRADIENT, 0, 1) - h;
-        GRADIENT.set(-dx, dy, 0);
-        GRADIENT.nor();
-        return GRADIENT;
     }
 
     public void explode2(Vector3 position, float dist) {
@@ -185,6 +142,10 @@ public class ChunkManager {
                     setValRel(x + position.x, y + position.y, distfac * 0.2f + 0.8f);
             }
         }
+    }
+
+    public float getVal(Vector3 pos) {
+        return getVal(pos.x, pos.y);
     }
 
     public float getVal(float posx, float posy) {

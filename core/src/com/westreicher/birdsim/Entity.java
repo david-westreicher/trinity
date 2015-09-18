@@ -20,10 +20,12 @@ import java.util.ArrayList;
  */
 public class Entity {
 
+
     public enum Type {ENEMY, BULLET, ITEM}
 
     ;
 
+    private static ChunkManager chunkManager;
     private static final Vector3 TMPVEC = new Vector3();
     private static Model playerModel;
     private static Model itemModel;
@@ -61,9 +63,11 @@ public class Entity {
         playerModel = new ObjLoader().loadModel(Gdx.files.internal("player.obj"));
         itemModel = new ModelBuilder().createBox(0.2f, 0.5f, 0.2f, new Material(ColorAttribute.createDiffuse(1, 1, 1, 0)), VertexAttributes.Usage.Position);
         bulletModel = new ModelBuilder().createBox(1, 1, 1, new Material(ColorAttribute.createDiffuse(1, 1, 1, 0)), VertexAttributes.Usage.Position);
+        chunkManager = MyGdxGame.single.chunkManager;
     }
 
     public static void dispose() {
+        chunkManager = null;
         aliveents.clear();
         ents.clear();
         playerModel.dispose();
@@ -118,9 +122,9 @@ public class Entity {
                 break;
             case BULLET:
                 pos.mulAdd(speed, delta * 80f);
-                if (MyGdxGame.single.chunkManager.isStuck(pos, 0)) {
+                if (chunkManager.getVal(pos) > 0) {
                     dead = true;
-                    MyGdxGame.single.chunkManager.explode(pos, 4);
+                    chunkManager.explode2(pos, 4);
                 }
                 break;
         }
@@ -135,18 +139,18 @@ public class Entity {
     private boolean tryToMove(float x, float y, boolean simple) {
         pos.x += x;
         pos.y -= y;
-        if (!MyGdxGame.single.chunkManager.isStuck(pos, 1))
+        if (chunkManager.getVal(pos) > 0)
             return true;
         pos.y += y;
         if (simple) {
             pos.x -= x;
             return false;
         }
-        if (!MyGdxGame.single.chunkManager.isStuck(pos, 1))
+        if (chunkManager.getVal(pos) > 0)
             return true;
         pos.x -= x;
         pos.y -= y;
-        if (!MyGdxGame.single.chunkManager.isStuck(pos, 1))
+        if (chunkManager.getVal(pos) > 0)
             return true;
         pos.y += y;
         return false;

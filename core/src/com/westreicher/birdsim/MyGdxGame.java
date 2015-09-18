@@ -86,14 +86,14 @@ public class MyGdxGame extends ApplicationAdapter {
     public void movePlayer(float x, float y) {
         playerTransform.position.x += x;
         playerTransform.position.y -= y;
-        if (!chunkManager.isStuck(playerTransform.position, 1) || true || Config.DEBUG)
+        if (chunkManager.getVal(playerTransform.position) > 0 || true || Config.DEBUG)
             return;
         playerTransform.position.y += y;
-        if (!chunkManager.isStuck(playerTransform.position, 1))
+        if (chunkManager.getVal(playerTransform.position) > 0)
             return;
         playerTransform.position.x -= x;
         playerTransform.position.y -= y;
-        if (!chunkManager.isStuck(playerTransform.position, 1))
+        if (chunkManager.getVal(playerTransform.position) > 0)
             return;
         playerTransform.position.y += y;
     }

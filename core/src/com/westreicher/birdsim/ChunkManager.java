@@ -11,17 +11,18 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.westreicher.birdsim.util.ManagedRessources;
 import com.westreicher.birdsim.util.Spiral;
+import com.westreicher.birdsim.util.BatchShaderProgram;
 
 /**
  * Created by david on 9/4/15.
  */
 public class ChunkManager {
     public static final float OUTSIDE = -10.0f;
-    public static final int CHUNKNUMS = Config.CHUNKNUMS;
+    private static final int CHUNKNUMS = Config.CHUNKNUMS;
     private Chunk chunks[][] = new Chunk[CHUNKNUMS][CHUNKNUMS];
     private int[] pos = new int[]{0, 0};
     private Spiral s = new Spiral();
-    private ShaderProgram shader;
+    private BatchShaderProgram shader;
     private float[] tmpfloat = new float[3];
     private static final TileResult TILE_RESULT = new TileResult();
 
@@ -38,7 +39,7 @@ public class ChunkManager {
 
     public void render(Camera cam, Vector3 virtualcam) {
         s.reset();
-        int maxupdates = MyGdxGame.isDesktop ? 20 : 5;
+        int maxupdates = 1;
         while (true) {
             Vector2 spos = s.next();
             int x = ((int) spos.x) + CHUNKNUMS / 2;
@@ -47,9 +48,13 @@ public class ChunkManager {
                 break;
             Chunk mi = chunks[x][y];
             if (!mi.isReady) {
-                if (maxupdates == 0)
+                if (chunks[x][y].genMesh()) {
+                    maxupdates -= 1;
+                    if (x == 0 || y == 0 || x == CHUNKNUMS - 1 || y == CHUNKNUMS - 1)
+                        Entity.spawn(new Vector3(spos.x * Config.TILES_PER_CHUNK, spos.y * Config.TILES_PER_CHUNK, 0), mi.rand);
+                }
+                if (maxupdates <= 0)
                     break;
-                if (chunks[x][y].genMesh()) maxupdates -= 1;
             }
         }
         Gdx.gl20.glEnable(GL20.GL_DEPTH_TEST);
@@ -61,13 +66,14 @@ public class ChunkManager {
             shader.setUniformf("virtualcam", virtualcam);
             shader.setUniformf("maxdstsqinv", 1f / (140f * 140f));
         }
-        shader.setUniformf("pointsize", 10);
+        shader.setUniformf("pointsize", MyGdxGame.isDesktop ? 10 : 4);
         shader.setUniformf("chunksize", Config.TILES_PER_CHUNK);
         shader.setUniformf("heightscale", 2.5f * Config.TERRAIN_HEIGHT / Config.TILES_PER_CHUNK);
+        shader.bind();
         for (int x = 0; x < CHUNKNUMS; x++) {
             for (int y = 0; y < CHUNKNUMS; y++) {
                 Chunk mi = chunks[x][y];
-                if (mi.isReady && mi.shouldDraw) {
+                if (mi.shouldDraw) {
                     tmpfloat[0] = (x - (CHUNKNUMS / 2)) * Config.TILES_PER_CHUNK - Config.TILES_PER_CHUNK / 2;
                     tmpfloat[1] = (y - (CHUNKNUMS / 2)) * Config.TILES_PER_CHUNK - Config.TILES_PER_CHUNK / 2;
                     shader.setUniform3fv("trans", tmpfloat, 0, 3);
@@ -75,6 +81,7 @@ public class ChunkManager {
                 }
             }
         }
+        shader.unbind();
         shader.end();
         Gdx.gl20.glDisable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);
         Gdx.gl20.glDisable(GL20.GL_DEPTH_TEST);
@@ -134,7 +141,7 @@ public class ChunkManager {
 
     public void explode2(Vector3 position, float dist) {
         if (dist == 0) {
-            addVal(position.x, position.y, -0.01f);
+            addVal(position.x, position.y, -0.5f);
             return;
         }
         float distsq = dist * dist;
@@ -142,7 +149,7 @@ public class ChunkManager {
             for (float y = -dist; y <= dist; y++) {
                 float distfac = (x * x + y * y) / distsq;
                 if (getVal(x + position.x, y + position.y) > 0 && distfac < 1)
-                    addVal(x + position.x, y + position.y, (distfac - 1) / 50f);
+                    addVal(x + position.x, y + position.y, (distfac - 1) / 2f);
             }
         }
     }

@@ -3,6 +3,9 @@ package com.westreicher.birdsim;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.FPSLogger;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
@@ -20,6 +23,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.westreicher.birdsim.util.ManagedRessources;
 import com.westreicher.birdsim.util.RenderToTexture.DownSampler;
+import com.westreicher.birdsim.util.SoundPlayer;
 
 public class MyGdxGame extends ApplicationAdapter {
     public static boolean isDesktop;
@@ -30,8 +34,8 @@ public class MyGdxGame extends ApplicationAdapter {
     private float rat = 1;
     private ModelInstance player;
     private ModelInstance gun;
-    private SaveMouse firstPointer;
-    private SaveMouse secondPointer;
+    private RelInput firstPointer;
+    private RelInput secondPointer;
     public ChunkManager chunkManager;
     private FPSLogger fps = new FPSLogger();
     private SpriteBatch spritebatch;
@@ -42,6 +46,8 @@ public class MyGdxGame extends ApplicationAdapter {
     private DownSampler downs = null;
     public static MyGdxGame single = null;
     public Vector3 virtualcam = new Vector3();
+
+    private SoundPlayer soundplayer;
 
 
     @Override
@@ -60,7 +66,6 @@ public class MyGdxGame extends ApplicationAdapter {
         single = this;
         ManagedRessources.init();
         Gdx.app.log("game", "create");
-        Entity.init();
         Gdx.app.log("game", "GL ES 3.0 supported: " + (Gdx.gl30 != null));
         //DefaultShader.defaultCullFace = 0;
         cam = new PerspectiveCamera();
@@ -73,27 +78,30 @@ public class MyGdxGame extends ApplicationAdapter {
         mb = new ModelBatch();
         chunkManager = new ChunkManager();
         // player = new ModelInstance(new ModelBuilder().createSphere(2, 2, 2, 10, 10, new Material(ColorAttribute.createDiffuse(1, 1, 1, 1)), VertexAttributes.Usage.Position));
-        //player = new ModelInstance(new ObjLoader().loadModel(Gdx.files.internal("player.obj")));
-        player = new ModelInstance(new ModelBuilder().createBox(1f, 1f, 1f, new Material(ColorAttribute.createDiffuse(1, 0, 0, 0)), VertexAttributes.Usage.Position));
+        player = new ModelInstance(new ObjLoader().loadModel(Gdx.files.internal("player.obj")));
+        player.materials.get(0).set(ColorAttribute.createDiffuse(Color.RED));
+        //player = new ModelInstance(new ModelBuilder().createBox(1f, 1f, 1f, new Material(ColorAttribute.createDiffuse(1, 0, 0, 0)), VertexAttributes.Usage.Position));
         gun = new ModelInstance(new ModelBuilder().createBox(0.2f, 0.5f, 0.2f, new Material(ColorAttribute.createDiffuse(1, 0, 0, 0)), VertexAttributes.Usage.Position));
-        firstPointer = new SaveMouse(0, viewport);
-        secondPointer = new SaveMouse(1, viewport);
+        firstPointer = isDesktop ? new Keyboard(0) : new SaveMouse(0, viewport);
+        secondPointer = isDesktop ? new Keyboard(1) : new SaveMouse(1, viewport);
         thirdPointer = new SaveMouse(2, viewport);
         playerTransform = new Transform();
+        Entity.init();
+        soundplayer = new SoundPlayer();
     }
 
 
     public void movePlayer(float x, float y) {
         playerTransform.position.x += x;
         playerTransform.position.y -= y;
-        if (chunkManager.getVal(playerTransform.position) > 0 || true || Config.DEBUG)
+        if (chunkManager.getVal(playerTransform.position) <= 0)
             return;
         playerTransform.position.y += y;
-        if (chunkManager.getVal(playerTransform.position) > 0)
+        if (chunkManager.getVal(playerTransform.position) <= 0)
             return;
         playerTransform.position.x -= x;
         playerTransform.position.y -= y;
-        if (chunkManager.getVal(playerTransform.position) > 0)
+        if (chunkManager.getVal(playerTransform.position) <= 0)
             return;
         playerTransform.position.y += y;
     }
@@ -108,11 +116,11 @@ public class MyGdxGame extends ApplicationAdapter {
             dx = (int) Math.signum(virtualcam.x);
         if (Math.abs(virtualcam.y) > Config.TILES_PER_CHUNK / 2.0)
             dy = (int) Math.signum(virtualcam.y);
+        virtualcam.x -= dx * Config.TILES_PER_CHUNK;
+        virtualcam.y -= dy * Config.TILES_PER_CHUNK;
         Entity.translateAll(-dx * Config.TILES_PER_CHUNK, -dy * Config.TILES_PER_CHUNK);
         chunkManager.updateDirection(dx, dy);
         Entity.updateall(delta);
-        virtualcam.x -= dx * Config.TILES_PER_CHUNK;
-        virtualcam.y -= dy * Config.TILES_PER_CHUNK;
         playerTransform.position.add(-dx * Config.TILES_PER_CHUNK, -dy * Config.TILES_PER_CHUNK, 0);
 
         if (firstPointer.update()) {
@@ -120,13 +128,13 @@ public class MyGdxGame extends ApplicationAdapter {
             int mousey = firstPointer.rely();
             float rad = firstPointer.getRadiant();
             playerTransform.radiant = rad;
-            movePlayer(mousex * delta * Config.MOVE_SPEED, mousey * delta * Config.MOVE_SPEED);
-            //movePlayer((float) Math.cos(rad) * delta * (DEBUG ? 400 : 10), -(float) Math.sin(rad) * delta * (DEBUG ? 400 : 10));
+            //movePlayer(mousex * delta * Config.MOVE_SPEED, mousey * delta * Config.MOVE_SPEED);
+            movePlayer((float) Math.cos(rad) * delta * Config.MOVE_SPEED, -(float) Math.sin(rad) * delta * Config.MOVE_SPEED);
         }
         //Gdx.app.log("game", "" +"");
         virtualcam.x += (playerTransform.position.x - virtualcam.x) / 5.0f;
         virtualcam.y += (playerTransform.position.y - virtualcam.y) / 5.0f;
-        if (secondPointer.update() || !isDesktop) {
+        if (secondPointer.update()) {
             //Gdx.app.log("game", secondPointer.rely() + "," + secondPointer.relx());
             int relx = isDesktop ? 0 : secondPointer.relx();
             int rely = isDesktop ? 1 : secondPointer.rely();
@@ -134,20 +142,16 @@ public class MyGdxGame extends ApplicationAdapter {
             gun.transform.setToRotationRad(UPAXIS, radiant + (float) Math.PI / 2);
             gun.transform.setTranslation(playerTransform.position);
             gun.transform.translate(0, -0.4f, 0);//secondPointer.relx()*rat,secondPointer.rely()*rat,0);
-            if (Gdx.graphics.getFrameId() % 5 == 0) {
-                //Entity.shoot(playerTransform.position.x, playerTransform.position.y, (float) Math.cos(radiant), (float) Math.sin(radiant));
+            if (Gdx.graphics.getFrameId() % 10 == 0) {
+                Entity.shoot(playerTransform.position.x, playerTransform.position.y, (float) Math.cos(radiant), (float) Math.sin(radiant), Entity.ColorAttr.RED, null);
             }
         } else {
             gun.transform.setToRotation(UPAXIS, 0);
             gun.transform.translate(-dx * Config.TILES_PER_CHUNK, -dy * Config.TILES_PER_CHUNK, 0);
         }
+        cam.position.z += ((thirdPointer.update() ? 200 : 250) - cam.position.z) / 10.0f;
 
-        if (!thirdPointer.update()) {
-            cam.position.z += (250 - cam.position.z) / 10.0f;
-        } else
-            cam.position.z += (25 * (Config.DEBUG ? 5 : 1.8f) - cam.position.z) / 10.0f;
-
-        chunkManager.explode2(playerTransform.position, 15);
+        //chunkManager.explode2(playerTransform.position, isDesktop ? 15 : 7);
         playerTransform.position.z = chunkManager.getVal(playerTransform.position.x, playerTransform.position.y) + 145;
         playerTransform.transform(player);
 
@@ -156,27 +160,29 @@ public class MyGdxGame extends ApplicationAdapter {
         cam.position.set(virtualcam.x, virtualcam.y, cam.position.z);
         cam.update();
 
-        //Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClearColor(0.251f, 0.643f, 0.875f, 1);
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        //Gdx.gl.glClearColor(0.251f, 0.643f, 0.875f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-        //downs.begin();
+        if (isDesktop) downs.begin();
         mb.begin(cam);
         mb.render(player);
-        //Entity.render(mb);
+        Entity.render(mb);
         mb.end();
         chunkManager.render(cam, virtualcam);
-        //downs.end();
-        //downs.draw(viewport.getScreenWidth(), viewport.getScreenHeight());
+        if (isDesktop) {
+            downs.end();
+            downs.draw(viewport.getScreenWidth(), viewport.getScreenHeight());
+        }
         drawThumbs();
     }
 
     private void drawThumbs() {
         spritebatch.begin();
         int size = 50;
-        if (firstPointer.isDown)
-            spritebatch.draw(thumbTex, firstPointer.startx - size, viewport.getScreenHeight() - firstPointer.starty - size, size * 2, size * 2, 0, 0, 1, 1);
-        if (secondPointer.isDown)
-            spritebatch.draw(thumbTex, secondPointer.startx - size, viewport.getScreenHeight() - secondPointer.starty - size, size * 2, size * 2, 0, 0, 1, 1);
+        if (firstPointer.isDown())
+            spritebatch.draw(thumbTex, firstPointer.getStartX() - size, viewport.getScreenHeight() - firstPointer.getStartY() - size, size * 2, size * 2, 0, 0, 1, 1);
+        if (secondPointer.isDown())
+            spritebatch.draw(thumbTex, secondPointer.getStartX() - size, viewport.getScreenHeight() - secondPointer.getStartY() - size, size * 2, size * 2, 0, 0, 1, 1);
         if (thirdPointer.isDown) {
             spritebatch.draw(thumbTex, thirdPointer.startx - size, viewport.getScreenHeight() - thirdPointer.starty - size, size * 2, size * 2, 0, 0, 1, 1);
         }
@@ -190,9 +196,96 @@ public class MyGdxGame extends ApplicationAdapter {
         mb.dispose();
         Gdx.app.log("game", "dispose");
         chunkManager.dispose();
+        soundplayer.dispose();
     }
 
-    public static class SaveMouse {
+    public void playSound(SoundPlayer.Sounds s, Vector3 pos) {
+        soundplayer.play(s, pos);
+    }
+
+    public static interface RelInput {
+        public boolean update();
+
+        public int relx();
+
+        public int rely();
+
+        public boolean isDown();
+
+        public float getRadiant();
+
+        int getStartY();
+
+        int getStartX();
+    }
+
+    public static class Keyboard implements RelInput {
+        private static final int KEYS[][] = new int[][]{
+                new int[]{Input.Keys.A, Input.Keys.LEFT},//LEFT
+                new int[]{Input.Keys.W, Input.Keys.UP},//UP
+                new int[]{Input.Keys.D, Input.Keys.RIGHT},//RIGHT
+                new int[]{Input.Keys.S, Input.Keys.DOWN},//DOWN
+        };
+        private static final int DELTAS[][] = new int[][]{
+                new int[]{-1, 0},//LEFT
+                new int[]{0, 1},//UP
+                new int[]{1, 0},//UP
+                new int[]{0, -1},//DOWN
+        };
+        private final int controls;
+        private int deltay;
+        private int deltax;
+        private boolean isDown;
+
+        public Keyboard(int controls) {
+            this.controls = controls;
+        }
+
+        @Override
+        public boolean update() {
+            deltax = 0;
+            deltay = 0;
+            for (int i = 0; i < KEYS.length; i++)
+                if (Gdx.input.isKeyPressed(KEYS[i][controls])) {
+                    deltax += DELTAS[i][0];
+                    deltay += DELTAS[i][1];
+                }
+            isDown = deltax != 0 || deltay != 0;
+            return isDown;
+        }
+
+        @Override
+        public int relx() {
+            return deltax;
+        }
+
+        @Override
+        public int rely() {
+            return -deltay;
+        }
+
+        @Override
+        public boolean isDown() {
+            return isDown;
+        }
+
+        @Override
+        public float getRadiant() {
+            return (float) Math.atan2(-rely(), relx());
+        }
+
+        @Override
+        public int getStartY() {
+            return -100;
+        }
+
+        @Override
+        public int getStartX() {
+            return -100;
+        }
+    }
+
+    public static class SaveMouse implements RelInput {
         private final int index;
         private final Viewport v;
         boolean isDown = false;
@@ -224,6 +317,12 @@ public class MyGdxGame extends ApplicationAdapter {
             return isDown;
         }
 
+
+        @Override
+        public boolean isDown() {
+            return isDown;
+        }
+
         public int relx() {
             int ret = (Gdx.input.getX(index) - startx);
             return ret;
@@ -238,11 +337,21 @@ public class MyGdxGame extends ApplicationAdapter {
             return (float) Math.atan2(-rely(), relx());
         }
 
+        @Override
+        public int getStartY() {
+            return starty;
+        }
+
+        @Override
+        public int getStartX() {
+            return startx;
+        }
+
     }
 
     public static class Transform {
         public Vector3 position = new Vector3();
-        public float scale = 4;
+        public float scale = 1;
         public float radiant;
 
         public void transform(ModelInstance player) {

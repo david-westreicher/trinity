@@ -45,7 +45,7 @@ public class Chunk {
     public boolean isReady = false;
     public final MaxArray.MaxArrayFloat verts = new MaxArray.MaxArrayFloat((int) Math.pow(Config.TILES_PER_CHUNK, 2) * 2);
     private static final Vector3 tmp = new Vector3();
-    private Random rand = new Random();
+    public Random rand = new Random();
     public boolean shouldDraw;
     private int absx;
     private int absy;
@@ -119,6 +119,7 @@ public class Chunk {
             for (int y = 1; y < SIZE; y += 2)
                 map[x][y] = (map[x - 1][y] + map[x + 1][y]) / 2f;
         isReady = false;
+        shouldDraw = false;
         this.absx = absx;
         this.absy = absy;
     }
@@ -146,18 +147,18 @@ public class Chunk {
                 //if (!MyGdxGame.isDesktop && scale > -1 && scale < 0)
                 //    continue;
                 tmp.set(getCol(scale));
-                float dark = 0;//randdark;
-                if (scale > 0)
+                if (scale > 0) {
+                    float dark = 0;//randdark;
                     for (int x1 = x - 2; x1 <= x; x1++) {
                         for (int y1 = y - 2; y1 <= y; y1++) {
                             float diff = -scale;
                             if (x1 < 0 || y1 < 0) {
                                 //TODO fetch from neighbouring chunk
-                                float neighborval = 0;//chunkman.getValAbs(x1, y1, absx, absy);
-                                if (neighborval == ChunkManager.OUTSIDE)
-                                    diff += getNoise((x1 + absx * SIZE), (-y1 + absy * SIZE));
-                                else
-                                    diff += neighborval;
+                                //float neighborval = 0;//chunkman.getValAbs(x1, y1, absx, absy);
+                                //if (neighborval == ChunkManager.OUTSIDE)
+                                diff += getNoise((x1 + absx * SIZE), (-y1 + absy * SIZE));
+                                //else
+                                //    diff += neighborval;
                                 //MyGdxGame.single.chunkManager.setValRel(absx * SIZE - SIZE / 2, absy * SIZE - SIZE / 2, 2);
                             } else
                                 diff += map[x1][y1];
@@ -165,9 +166,9 @@ public class Chunk {
                                 dark += diff * 0.6f;
                         }
                     }
-                else
-                    dark += -scale * 0.25f;
-                tmp.scl(Math.max(0, 1 - dark));
+                    tmp.scl(Math.max(0, 1 - dark));
+                } else
+                    tmp.scl(Math.min(1, 0.5f - scale * 0.25f));
                 float z = Math.min(1, Math.max(0, scale * (1.0f / 2.5f)));
                 // x,y,z should be in range 0-1 (min-max)
                 //TODO could encode occlusion + colormap uv in alpha

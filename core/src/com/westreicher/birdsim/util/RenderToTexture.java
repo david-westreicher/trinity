@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.westreicher.birdsim.MyGdxGame;
 
 import java.util.ArrayList;
 
@@ -82,7 +83,7 @@ public class RenderToTexture {
                     + "void main()\n"//
                     + "{\n" //
                     + "  vec4 col = texture2D(u_texture,v_texCoords);\n" //
-                    + "  if(thresh<1 && length(col)<1.8){gl_FragColor = vec4(0,0,0,0);}\n" //
+                    + "  if(thresh<1 && col.r<1.0){gl_FragColor = vec4(0,0,0,0);}\n" //
                     + "  else{gl_FragColor = col;}\n" //
                     + "}";
 
@@ -95,7 +96,7 @@ public class RenderToTexture {
         public DownSampler(int width, int height) {
             gathershader = createDefaultShader();
             downsampleBatch.setBlendFunction(GL20.GL_ONE, GL20.GL_ONE);
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < (MyGdxGame.isDesktop ? 9 : 3); i++) {
                 RenderToTexture rt = new RenderToTexture(width, height, i == 0);
                 width /= 2;
                 height /= 2;

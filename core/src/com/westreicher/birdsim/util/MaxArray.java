@@ -1,5 +1,7 @@
 package com.westreicher.birdsim.util;
 
+import com.westreicher.birdsim.Entity;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,5 +77,18 @@ public class MaxArray {
             arr[pointer++] = x3;
         }
 
+    }
+
+    public static class MaxArrayEntity extends MaxArray {
+        public final Entity[] arr;
+
+        public MaxArrayEntity(int maxsize) {
+            super(maxsize);
+            arr = new Entity[maxsize];
+        }
+
+        public void add(Entity x1) {
+            arr[pointer++] = x1;
+        }
     }
 }

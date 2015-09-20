@@ -96,11 +96,14 @@ public class RenderToTexture {
         public DownSampler(int width, int height) {
             gathershader = createDefaultShader();
             downsampleBatch.setBlendFunction(GL20.GL_ONE, GL20.GL_ONE);
-            for (int i = 0; i < (MyGdxGame.isDesktop ? 9 : 3); i++) {
-                RenderToTexture rt = new RenderToTexture(width, height, i == 0);
+            int first = 0;
+            while (true) {
+                RenderToTexture rt = new RenderToTexture(width, height, first++ == 0);
+                texs.add(rt);
                 width /= 2;
                 height /= 2;
-                texs.add(rt);
+                if (width <= 2 || height <= 2)
+                    break;
             }
         }
 

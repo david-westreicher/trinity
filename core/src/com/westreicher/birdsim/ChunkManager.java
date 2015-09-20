@@ -25,6 +25,7 @@ public class ChunkManager {
     private BatchShaderProgram shader;
     private float[] tmpfloat = new float[3];
     private static final TileResult TILE_RESULT = new TileResult();
+    private float pointsize;
 
     public ChunkManager() {
         for (int x = 0; x < CHUNKNUMS; x++) {
@@ -66,7 +67,7 @@ public class ChunkManager {
             shader.setUniformf("virtualcam", virtualcam);
             shader.setUniformf("maxdstsqinv", 1f / (140f * 140f));
         }
-        shader.setUniformf("pointsize", MyGdxGame.isDesktop ? 10 : 4);
+        shader.setUniformf("pointsize", pointsize);
         shader.setUniformf("chunksize", Config.TILES_PER_CHUNK);
         shader.setUniformf("heightscale", 2.5f * Config.TERRAIN_HEIGHT / Config.TILES_PER_CHUNK);
         shader.bind();
@@ -203,6 +204,10 @@ public class ChunkManager {
         TILE_RESULT.innerx = innerx;
         TILE_RESULT.innery = innery;
         return TILE_RESULT;
+    }
+
+    public void resize(int width, int height) {
+        this.pointsize = (Math.max(width, height) / 200f);
     }
 
     private static class TileResult {

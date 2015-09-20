@@ -58,6 +58,7 @@ public class MyGdxGame extends ApplicationAdapter {
         if (downs != null)
             downs.dispose();
         downs = new DownSampler(width, height);
+        chunkManager.resize(width, height);
     }
 
     @Override

@@ -24,9 +24,9 @@ public class SoundPlayer {
     }
 
     public SoundPlayer() {
-        for (Sounds s : Sounds.values()) {
-            map.put(s, Gdx.audio.newSound(Gdx.files.internal(s.file)));
-        }
+        //for (Sounds s : Sounds.values()) {
+        //    map.put(s, Gdx.audio.newSound(Gdx.files.internal(s.file)));
+        //}
     }
 
     public void play(Sounds s, Vector3 pos) {

@@ -26,7 +26,7 @@ public class Entity {
 
     private int lives;
 
-    public enum Type {ENEMY, BULLET, ITEM}
+    private enum Type {ENEMY, BULLET, ITEM}
 
     ;
 
@@ -41,7 +41,6 @@ public class Entity {
 
     ;
 
-    private static final Vector3 TMPVEC = new Vector3();
     private static final float EDGE = Config.TILES_PER_CHUNK * Config.CHUNKNUMS / 2;
     private static Model playerModel;
     private static Model itemModel;
@@ -59,7 +58,7 @@ public class Entity {
     private Entity parent;
     private float size = 1;
     private MaxArray.MaxArrayEntity collisions = new MaxArray.MaxArrayEntity(10);
-    public static Pool<Entity> ents = new Pool<Entity>() {
+    private static Pool<Entity> ents = new Pool<Entity>() {
         @Override
         protected Entity newObject() {
             return new Entity();
@@ -124,6 +123,7 @@ public class Entity {
                 m = itemModel;
                 break;
         }
+        //TODO don't allocate new modelinstances
         this.modelInstance = new ModelInstance(m);
         modelInstance.materials.get(0).set(col.attr);
         aliveents.add(this);
@@ -158,15 +158,20 @@ public class Entity {
                 break;
         }
 
-        //TODO optimize Z projection
 
         float orig = chunkManager.getVal(pos);
-        float dstx = pos.x - MyGdxGame.single.virtualcam.x;
-        float dsty = pos.y - MyGdxGame.single.virtualcam.y;
-        float dstsq = dstx * dstx + dsty * dsty;
-        float dstfrac = (dstsq / (140f * 140f));
-        visible = dstfrac <= 1;
-        pos.z = orig + (1.0f - dstfrac) * 140.0f + 5;
+        if (Config.POST_PROCESSING) {
+            //TODO optimize Z projection
+            float dstx = pos.x - MyGdxGame.single.virtualcam.x;
+            float dsty = pos.y - MyGdxGame.single.virtualcam.y;
+            float dstsq = dstx * dstx + dsty * dsty;
+            float dstfrac = (dstsq / (140f * 140f));
+            visible = dstfrac <= 1;
+            pos.z = orig + (1.0f - dstfrac) * 140.0f + 5;
+        } else {
+            visible = true;
+            pos.z = orig + 5;
+        }
         if (Math.abs(pos.x) > EDGE || Math.abs(pos.y) > EDGE)
             dead = true;
         this.modelInstance.transform.setToTranslation(pos);
@@ -233,9 +238,11 @@ public class Entity {
     }
 
     public static void render(ModelBatch mb) {
-        for (Entity e : aliveents) {
-            if (e.visible)
-                mb.render(e.modelInstance);
+        //TODO Use custom rendering instead of modelinstances?
+        for (int i = 0; i < aliveents.size(); i++) {
+            Entity ent = aliveents.get(i);
+            if (ent.visible)
+                mb.render(ent.modelInstance);
         }
     }
 
@@ -266,13 +273,13 @@ public class Entity {
                 ents.free(e);
             }
         }
-
     }
 
 
     public static void translateAll(float x, float y) {
-        for (Entity e : aliveents)
-            e.translate(x, y);
+        for (int i = 0; i < aliveents.size(); i++) {
+            aliveents.get(i).translate(x, y);
+        }
     }
 
     private void translate(float x, float y) {

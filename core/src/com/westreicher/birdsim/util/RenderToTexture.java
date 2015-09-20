@@ -132,8 +132,8 @@ public class RenderToTexture {
             downsampleBatch.enableBlending();
             downsampleBatch.setShader(null);
             if (true)
-                for (RenderToTexture tex : texs)
-                    tex.draw(downsampleBatch, screenWidth, screenHeight, false);
+                for (int i = 0; i < texs.size(); i++)
+                    texs.get(i).draw(downsampleBatch, screenWidth, screenHeight, false);
             else {
                 int tex = ((int) Gdx.graphics.getFrameId() / 100) % texs.size();
                 if (Gdx.graphics.getFrameId() % 100 == 1)

@@ -1,7 +1,5 @@
 package com.westreicher.birdsim;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.FPSLogger;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Vector3;
 import com.westreicher.birdsim.util.InputHelper;
@@ -11,10 +9,7 @@ import com.westreicher.birdsim.util.InputHelper;
  */
 public class GameLoop {
     private final ChunkManager chunkManager;
-    private final InputHelper thirdPointer;
-    private final MyGdxGame.Transform playerTransform;
-    private final InputHelper firstPointer;
-    private final InputHelper secondPointer;
+    private final Entity player;
     private PerspectiveCamera cam;
     private Vector3 virtualcam;
     private long skipTicks = 33333333;
@@ -24,18 +19,15 @@ public class GameLoop {
     private long currenttick;
     private float fps;
 
-    public GameLoop(Vector3 virtualcam, PerspectiveCamera cam, ChunkManager chunkManager, MyGdxGame.Transform playerTransform, InputHelper firstPointer, InputHelper secondPointer, InputHelper thirdPointer) {
+    public GameLoop(Vector3 virtualcam, PerspectiveCamera cam, ChunkManager chunkManager) {
         this.virtualcam = virtualcam;
         this.cam = cam;
         this.chunkManager = chunkManager;
-        this.playerTransform = playerTransform;
-        this.firstPointer = firstPointer;
-        this.secondPointer = secondPointer;
-        this.thirdPointer = thirdPointer;
         nextTick = System.nanoTime();
         interpolation = 0;
         currenttick = 0;
-        setFPS(45);
+        setFPS(50);
+        player = Entity.spawnPlayer();
     }
 
     public void setFPS(float fps) {
@@ -53,14 +45,13 @@ public class GameLoop {
             nextTick += skipTicks;
             loops++;
             currenttick++;
+            //TODO GWT compat??
             currentTime = System.nanoTime();
         }
         interpolation = (float) (currentTime + skipTicks - nextTick) / skipTicks;
     }
 
     private void logic() {
-        float delta = 1f / fps;
-
         int dx = 0;
         int dy = 0;
         if (Math.abs(virtualcam.x) > Config.TILES_PER_CHUNK / 2.0)
@@ -69,37 +60,16 @@ public class GameLoop {
             dy = (int) Math.signum(virtualcam.y);
         virtualcam.x -= dx * Config.TILES_PER_CHUNK;
         virtualcam.y -= dy * Config.TILES_PER_CHUNK;
-        playerTransform.position.add(-dx * Config.TILES_PER_CHUNK, -dy * Config.TILES_PER_CHUNK, 0);
         Entity.translateAll(-dx * Config.TILES_PER_CHUNK, -dy * Config.TILES_PER_CHUNK);
         chunkManager.updateDirection(dx, dy);
-        Entity.updateall(delta, currenttick);
+        Entity.updateall(currenttick);
 
-        if (firstPointer.update()) {
-            int mousex = firstPointer.relx();
-            int mousey = firstPointer.rely();
-            float rad = firstPointer.getRadiant();
-            playerTransform.radiant = rad;
-            //movePlayer(mousex * delta * Config.MOVE_SPEED, mousey * delta * Config.MOVE_SPEED);
-            movePlayer((float) Math.cos(rad) * delta * Config.MOVE_SPEED, -(float) Math.sin(rad) * delta * Config.MOVE_SPEED);
-        }
-        //Gdx.app.log("game", "" +"");
-        float xspeed = 0;
-        float yspeed = 0;
-        if (secondPointer.update()) {
-            float radiant = secondPointer.getRadiant();
-            xspeed = (float) Math.cos(radiant);
-            yspeed = (float) Math.sin(radiant);
-            if (currenttick % 10 == 0) {
-                Entity.shoot(playerTransform.position.x, playerTransform.position.y, xspeed, yspeed, Entity.ColorAttr.RED, null);
-            }
-        }
-        virtualcam.x += (playerTransform.position.x + xspeed * 0 - virtualcam.x) / 10.0f;
-        virtualcam.y += (playerTransform.position.y + yspeed * 0 - virtualcam.y) / 10.0f;
-        cam.far = thirdPointer.update() ? 180 : 250;
+        virtualcam.x += (player.pos.x - virtualcam.x) / 10.0f;
+        virtualcam.y += (player.pos.y - virtualcam.y) / 10.0f;
+        cam.far = InputHelper.thirdPointer.update() ? 180 : 250;
         cam.position.z += (cam.far - cam.position.z) / 10.0f;
 
         //chunkManager.explode2(playerTransform.position, isDesktop ? 15 : 7);
-        playerTransform.position.z = chunkManager.getVal(playerTransform.position.x, playerTransform.position.y) * Config.TERRAIN_HEIGHT + 145;
 
         //cam.position.set(virtualcam.x, virtualcam.y - 50, cam.position.z);
         //cam.lookAt(cam.position.x, cam.position.y + 200, 0);
@@ -107,18 +77,7 @@ public class GameLoop {
         cam.update();
     }
 
-    public void movePlayer(float x, float y) {
-        playerTransform.position.x += x;
-        playerTransform.position.y -= y;
-        if (chunkManager.getVal(playerTransform.position) <= 0)
-            return;
-        playerTransform.position.y += y;
-        if (chunkManager.getVal(playerTransform.position) <= 0)
-            return;
-        playerTransform.position.x -= x;
-        playerTransform.position.y -= y;
-        if (chunkManager.getVal(playerTransform.position) <= 0)
-            return;
-        playerTransform.position.y += y;
+    private float getInterpolation() {
+        return interpolation;
     }
 }

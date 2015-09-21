@@ -11,6 +11,16 @@ import com.westreicher.birdsim.Config;
  */
 public abstract class InputHelper {
 
+    public static InputHelper firstPointer;
+    public static InputHelper secondPointer;
+    public static InputHelper thirdPointer;
+
+    public static void init(boolean isDesktop, Viewport viewport) {
+        firstPointer = isDesktop ? new Keyboard(0) : new SaveMouse(0, viewport);
+        secondPointer = isDesktop ? new Keyboard(1) : new SaveMouse(1, viewport);
+        thirdPointer = new SaveMouse(2, viewport);
+    }
+
     private boolean isDown;
     protected int startX;
     protected int startY;

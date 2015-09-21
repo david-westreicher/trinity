@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g3d.loader.ObjLoader;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pool;
+import com.westreicher.birdsim.util.InputHelper;
 import com.westreicher.birdsim.util.MaxArray;
 import com.westreicher.birdsim.util.SoundPlayer;
 
@@ -26,7 +27,7 @@ public class Entity {
 
     private int lives;
 
-    private enum Type {ENEMY, BULLET, ITEM}
+    private enum Type {ENEMY, BULLET, ITEM, PLAYER}
 
     ;
 
@@ -42,12 +43,13 @@ public class Entity {
     ;
 
     private static final float EDGE = Config.TILES_PER_CHUNK * Config.CHUNKNUMS / 2;
+    private static final ColorAttr[] colors = ColorAttr.values();
     private static final Vector3 TMP_VEC3 = new Vector3();
     private static Model playerModel;
     private static Model itemModel;
     private static Model bulletModel;
     private Vector3 speed = new Vector3();
-    private Vector3 pos = new Vector3();
+    public Vector3 pos = new Vector3();
     private float scale = 1f;
     private boolean visible;
     private ModelInstance modelInstance;
@@ -59,6 +61,7 @@ public class Entity {
     private Entity parent;
     private float size = 1;
     private MaxArray.MaxArrayEntity collisions = new MaxArray.MaxArrayEntity(10);
+    private static MaxArray.MaxArrayEntity players = new MaxArray.MaxArrayEntity(4);
     private static Pool<Entity> ents = new Pool<Entity>() {
         @Override
         protected Entity newObject() {
@@ -70,7 +73,14 @@ public class Entity {
         if (!Config.SPAWN_STUFF || rand.nextDouble() > 0.1)
             return;
         Entity e = ents.obtain();
-        e.init(rand.nextDouble() > 0.2 ? Type.ITEM : Type.ENEMY, x, y, ColorAttr.values()[(int) (Math.random() * (ColorAttr.values().length - 1)) + 1], 0, 0, null);
+        e.init(rand.nextDouble() > 0.2 ? Type.ITEM : Type.ENEMY, x, y, colors[(int) (Math.random() * (colors.length - 1)) + 1], 0, 0, null);
+    }
+
+    public static Entity spawnPlayer() {
+        Entity e = ents.obtain();
+        e.init(Type.PLAYER, 0, 0, colors[0], 0, 0, null);
+        players.add(e);
+        return e;
     }
 
     public static void shoot(float x, float y, float xspeed, float yspeed, ColorAttr col, Entity parent) {
@@ -123,15 +133,21 @@ public class Entity {
                 size = 3;
                 m = itemModel;
                 break;
+            case PLAYER:
+                this.speed.set(0, 0, 0);
+                scale = 1f;
+                size = 8;
+                m = playerModel;
+                break;
         }
         //TODO don't allocate new modelinstances
         this.modelInstance = new ModelInstance(m);
         modelInstance.materials.get(0).set(col.attr);
         aliveents.add(this);
-        update(0, 0);
+        update(0);
     }
 
-    private void update(float delta, long tick) {
+    private void update(long tick) {
         ChunkManager chunkManager = MyGdxGame.single.chunkManager;
         switch (type) {
             case ENEMY:
@@ -141,7 +157,7 @@ public class Entity {
                 }
                 radiant = -(float) Math.atan2(speed.y, speed.x);
                 if (tick % 50 == 0) {
-                    TMP_VEC3.set(MyGdxGame.playerTransform.position).sub(pos);
+                    TMP_VEC3.set(players.arr[0].pos).sub(pos);
                     TMP_VEC3.nor();
                     TMP_VEC3.scl(1f);
                     shoot(pos.x, pos.y, TMP_VEC3.x, TMP_VEC3.y, col, this);
@@ -150,11 +166,30 @@ public class Entity {
                     dead = true;
                 break;
             case BULLET:
-                pos.mulAdd(speed, delta * 160f);
+                pos.mulAdd(speed, 3);
                 if (chunkManager.getVal(pos) > 0) {
                     dead = true;
                     MyGdxGame.single.playSound(SoundPlayer.Sounds.SHOT2, pos);
                     chunkManager.explode2(pos, 10);
+                }
+                break;
+            case PLAYER:
+                InputHelper firstPointer = InputHelper.firstPointer;
+                InputHelper secondPointer = InputHelper.secondPointer;
+                if (firstPointer.update()) {
+                    float rad = firstPointer.getRadiant();
+                    this.radiant = rad;
+                    //movePlayer(mousex * delta * Config.MOVE_SPEED, mousey * delta * Config.MOVE_SPEED);
+                    tryToMove((float) Math.cos(rad) * Config.MOVE_SPEED, -(float) Math.sin(rad) * Config.MOVE_SPEED, false);
+                }
+                //Gdx.app.log("game", "" +"");
+                if (secondPointer.update()) {
+                    float radiant = secondPointer.getRadiant();
+                    float xspeed = (float) Math.cos(radiant);
+                    float yspeed = (float) Math.sin(radiant);
+                    if (tick % 10 == 0) {
+                        Entity.shoot(pos.x, pos.y, xspeed, yspeed, Entity.ColorAttr.RED, null);
+                    }
                 }
                 break;
         }
@@ -247,10 +282,10 @@ public class Entity {
         }
     }
 
-    public static void updateall(float delta, long tick) {
+    public static void updateall(long tick) {
         for (int i = 0; i < aliveents.size(); i++) {
             Entity ent = aliveents.get(i);
-            ent.update(delta, tick);
+            ent.update(tick);
             ent.collisions.reset();
         }
         for (int i = 0; i < aliveents.size() - 1; i++) {

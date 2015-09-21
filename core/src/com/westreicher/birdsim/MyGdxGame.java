@@ -17,10 +17,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.westreicher.birdsim.util.InputHelper;
-import com.westreicher.birdsim.util.Keyboard;
 import com.westreicher.birdsim.util.ManagedRessources;
 import com.westreicher.birdsim.util.RenderToTexture.DownSampler;
-import com.westreicher.birdsim.util.SaveMouse;
 import com.westreicher.birdsim.util.SoundPlayer;
 
 public class MyGdxGame extends ApplicationAdapter {
@@ -30,14 +28,11 @@ public class MyGdxGame extends ApplicationAdapter {
     Viewport viewport;
     private float rat = 1;
     private ModelInstance player;
-    private InputHelper firstPointer;
-    private InputHelper secondPointer;
     public ChunkManager chunkManager;
     private FPSLogger fps = new FPSLogger();
     private SpriteBatch spritebatch;
     private Texture thumbTex;
     public static Transform playerTransform;
-    private InputHelper thirdPointer;
     private DownSampler downs = null;
     public static MyGdxGame single = null;
     public Vector3 virtualcam = new Vector3();
@@ -77,13 +72,11 @@ public class MyGdxGame extends ApplicationAdapter {
         player = new ModelInstance(new ObjLoader().loadModel(Gdx.files.internal("player.obj")));
         player.materials.get(0).set(ColorAttribute.createDiffuse(Color.RED));
         //player = new ModelInstance(new ModelBuilder().createBox(1f, 1f, 1f, new Material(ColorAttribute.createDiffuse(1, 0, 0, 0)), VertexAttributes.Usage.Position));
-        firstPointer = isDesktop ? new Keyboard(0) : new SaveMouse(0, viewport);
-        secondPointer = isDesktop ? new Keyboard(1) : new SaveMouse(1, viewport);
-        thirdPointer = new SaveMouse(2, viewport);
         playerTransform = new Transform();
         Entity.init();
         soundplayer = new SoundPlayer();
-        gameloop = new GameLoop(virtualcam, cam, chunkManager, playerTransform, firstPointer, secondPointer, thirdPointer);
+        InputHelper.init(isDesktop, viewport);
+        gameloop = new GameLoop(virtualcam, cam, chunkManager);
     }
 
 
@@ -110,6 +103,9 @@ public class MyGdxGame extends ApplicationAdapter {
     }
 
     private void drawThumbs() {
+        InputHelper firstPointer = InputHelper.firstPointer;
+        InputHelper secondPointer = InputHelper.secondPointer;
+        InputHelper thirdPointer = InputHelper.thirdPointer;
         spritebatch.begin();
         int size = 50;
         if (firstPointer.isDown())

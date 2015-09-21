@@ -1,5 +1,6 @@
 package com.westreicher.birdsim;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Vector3;
 import com.westreicher.birdsim.util.InputHelper;
@@ -9,9 +10,9 @@ import com.westreicher.birdsim.util.InputHelper;
  */
 public class GameLoop {
     private final ChunkManager chunkManager;
-    private final Entity player;
     private PerspectiveCamera cam;
     private Vector3 virtualcam;
+    private Vector3 playermids = new Vector3();
     private long skipTicks = 33333333;
     private float interpolation;
     private long nextTick;
@@ -23,11 +24,14 @@ public class GameLoop {
         this.virtualcam = virtualcam;
         this.cam = cam;
         this.chunkManager = chunkManager;
-        nextTick = System.nanoTime();
+        nextTick = System.nanoTime(); //System.currentTimeMillis() * 1000000L;//
         interpolation = 0;
         currenttick = 0;
         setFPS(50);
-        player = Entity.spawnPlayer();
+        Gdx.app.log("player", "" + InputHelper.players.size());
+        for (int i = 0; i < InputHelper.players.size(); i++) {
+            Entity.spawnPlayer(i);
+        }
     }
 
     public void setFPS(float fps) {
@@ -39,7 +43,7 @@ public class GameLoop {
         int loops = 0;
         long currentTime = System.nanoTime();
         //TODO GWT compat??
-        //long currentTime =  System.currentTimeMillis()*1000000L;
+        //long currentTime = System.currentTimeMillis() * 1000000L;
         while (currentTime > nextTick && loops < MAX_FRAME_SKIPS) {
             logic();
             nextTick += skipTicks;
@@ -47,6 +51,7 @@ public class GameLoop {
             currenttick++;
             //TODO GWT compat??
             currentTime = System.nanoTime();
+            //currentTime = System.currentTimeMillis() * 1000000L;
         }
         interpolation = (float) (currentTime + skipTicks - nextTick) / skipTicks;
     }
@@ -64,10 +69,17 @@ public class GameLoop {
         chunkManager.updateDirection(dx, dy);
         Entity.updateall(currenttick);
 
-        virtualcam.x += (player.pos.x - virtualcam.x) / 10.0f;
-        virtualcam.y += (player.pos.y - virtualcam.y) / 10.0f;
-        cam.far = InputHelper.thirdPointer.update() ? 180 : 250;
-        cam.position.z += (cam.far - cam.position.z) / 10.0f;
+        playermids.set(0, 0, 0);
+        for (int i = 0; i < Entity.players.size(); i++) {
+            Entity player = Entity.players.arr[i];
+            playermids.add(player.pos);
+        }
+        playermids.scl(1f / Entity.players.size());
+
+        virtualcam.x += (playermids.x - virtualcam.x) / 10.0f;
+        virtualcam.y += (playermids.y - virtualcam.y) / 10.0f;
+        cam.far = 350;
+        cam.position.z += (250 - cam.position.z) / 10.0f;
 
         //chunkManager.explode2(playerTransform.position, isDesktop ? 15 : 7);
 

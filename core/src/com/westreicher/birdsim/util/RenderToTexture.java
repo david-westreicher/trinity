@@ -22,7 +22,7 @@ public class RenderToTexture {
     private boolean hasDepth;
 
     private RenderToTexture(int width, int height, boolean hasDepth) {
-        Gdx.app.log("", width + "+" + height);
+        //Gdx.app.log("", width + "+" + height);
         this.hasDepth = hasDepth;
         m_fbo = new FrameBuffer(Pixmap.Format.RGB565, width, height, hasDepth);
         Texture colbuf = m_fbo.getColorBufferTexture();

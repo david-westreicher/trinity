@@ -8,37 +8,43 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.westreicher.birdsim.Config;
 
+import java.util.ArrayList;
+
 /**
  * Created by david on 9/21/15.
  */
 public abstract class InputHelper {
 
-    public static InputHelper firstPointer;
-    public static InputHelper secondPointer;
-    public static InputHelper thirdPointer;
+
+    public static class PlayerInput {
+        public InputHelper firstPointer;
+        public InputHelper secondPointer;
+        public InputHelper thirdPointer;
+
+        public PlayerInput(InputHelper... inputs) {
+            this.firstPointer = inputs[0];
+            this.secondPointer = inputs[1];
+            if (inputs.length <= 2)
+                this.thirdPointer = new DummyInput();
+            else
+                this.thirdPointer = inputs[2];
+        }
+    }
+
+    public static ArrayList<PlayerInput> players = new ArrayList<PlayerInput>();
 
     public static void init(boolean isDesktop, Viewport viewport) {
-        Controller ctrl = null;
-        for (Controller controller : Controllers.getControllers()) {
-            ctrl = controller;
-            break;
-        }
-
         if (isDesktop) {
-            if (ctrl != null) {
-                firstPointer = new CController(0, ctrl);
-                secondPointer = new CController(1, ctrl);
+            for (Controller ctrl : Controllers.getControllers()) {
+                players.add(new PlayerInput(new CController(0, ctrl), new CController(1, ctrl)));
                 Gdx.app.log("game", "Gamepad found: " + ctrl.getName());
-            } else {
-                firstPointer = new Keyboard(0);
-                secondPointer = new Keyboard(1);
+            }
+            if (players.size() == 0) {
+                players.add(new PlayerInput(new Keyboard(0), new Keyboard(1)));
             }
         } else {
-            firstPointer = new SaveMouse(0, viewport);
-            secondPointer = new SaveMouse(1, viewport);
+            players.add(new PlayerInput(new SaveMouse(0, viewport), new SaveMouse(1, viewport), new SaveMouse(2, viewport)));
         }
-
-        thirdPointer = new SaveMouse(2, viewport);
     }
 
     private boolean isDown;
@@ -69,6 +75,23 @@ public abstract class InputHelper {
 
     public int getStartY() {
         return startY;
+    }
+
+    public static class DummyInput extends InputHelper {
+        @Override
+        public boolean update() {
+            return false;
+        }
+
+        @Override
+        public int relx() {
+            return 0;
+        }
+
+        @Override
+        public int rely() {
+            return 0;
+        }
     }
 
 }

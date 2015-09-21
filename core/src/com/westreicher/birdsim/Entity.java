@@ -26,6 +26,7 @@ public class Entity {
 
 
     private int lives;
+    private int id;
 
     private enum Type {ENEMY, BULLET, ITEM, PLAYER}
 
@@ -61,7 +62,7 @@ public class Entity {
     private Entity parent;
     private float size = 1;
     private MaxArray.MaxArrayEntity collisions = new MaxArray.MaxArrayEntity(10);
-    private static MaxArray.MaxArrayEntity players = new MaxArray.MaxArrayEntity(4);
+    public static MaxArray.MaxArrayEntity players = new MaxArray.MaxArrayEntity(4);
     private static Pool<Entity> ents = new Pool<Entity>() {
         @Override
         protected Entity newObject() {
@@ -76,9 +77,10 @@ public class Entity {
         e.init(rand.nextDouble() > 0.2 ? Type.ITEM : Type.ENEMY, x, y, colors[(int) (Math.random() * (colors.length - 1)) + 1], 0, 0, null);
     }
 
-    public static Entity spawnPlayer() {
+    public static Entity spawnPlayer(int id) {
         Entity e = ents.obtain();
         e.init(Type.PLAYER, 0, 0, colors[0], 0, 0, null);
+        e.id = id;
         players.add(e);
         return e;
     }
@@ -157,10 +159,12 @@ public class Entity {
                 }
                 radiant = -(float) Math.atan2(speed.y, speed.x);
                 if (tick % 50 == 0) {
-                    TMP_VEC3.set(players.arr[0].pos).sub(pos);
-                    TMP_VEC3.nor();
-                    TMP_VEC3.scl(1f);
-                    shoot(pos.x, pos.y, TMP_VEC3.x, TMP_VEC3.y, col, this);
+                    for (int i = 0; i < players.size(); i++) {
+                        TMP_VEC3.set(players.arr[i].pos).sub(pos);
+                        TMP_VEC3.nor();
+                        TMP_VEC3.scl(1f);
+                        shoot(pos.x, pos.y, TMP_VEC3.x, TMP_VEC3.y, col, this);
+                    }
                 }
                 if (lives == 0)
                     dead = true;
@@ -174,8 +178,8 @@ public class Entity {
                 }
                 break;
             case PLAYER:
-                InputHelper firstPointer = InputHelper.firstPointer;
-                InputHelper secondPointer = InputHelper.secondPointer;
+                InputHelper firstPointer = InputHelper.players.get(id).firstPointer;
+                InputHelper secondPointer = InputHelper.players.get(id).secondPointer;
                 if (firstPointer.update()) {
                     float rad = firstPointer.getRadiant();
                     this.radiant = rad;

@@ -108,9 +108,9 @@ public class MyGdxGame extends ApplicationAdapter {
     }
 
     private void drawThumbs() {
-        InputHelper firstPointer = InputHelper.firstPointer;
-        InputHelper secondPointer = InputHelper.secondPointer;
-        InputHelper thirdPointer = InputHelper.thirdPointer;
+        InputHelper firstPointer = InputHelper.players.get(0).firstPointer;
+        InputHelper secondPointer = InputHelper.players.get(0).secondPointer;
+        InputHelper thirdPointer = InputHelper.players.get(0).thirdPointer;
         spritebatch.begin();
         int size = 50;
         if (firstPointer.isDown())

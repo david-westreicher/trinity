@@ -7,7 +7,8 @@ import com.westreicher.birdsim.MyGdxGame;
 public class DesktopLauncher {
     public static void main(String[] arg) {
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-//        config.samples = 4;
+        //TODO investigate: point sprites + MSAA fails @ macbook
+        // config.samples = 4;
         config.vSyncEnabled = false;
         config.foregroundFPS = 0;
         config.backgroundFPS = 0;

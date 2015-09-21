@@ -242,7 +242,29 @@ public class Entity {
                     }
                 }
                 break;
+            case ITEM:
+                for (int i = 0; i < collisions.size(); i++) {
+                    Entity other = collisions.arr[i];
+                    switch (other.type) {
+                        case PLAYER:
+                            collideItemPlayer(this, other);
+                    }
+                }
+                break;
+            case PLAYER:
+                for (int i = 0; i < collisions.size(); i++) {
+                    Entity other = collisions.arr[i];
+                    switch (other.type) {
+                        case ITEM:
+                            collideItemPlayer(other, this);
+                    }
+                }
+                break;
         }
+    }
+
+    private void collideItemPlayer(Entity item, Entity player) {
+        item.dead = true;
     }
 
     private static void collideBulletEnemy(Entity bullet, Entity enemy) {

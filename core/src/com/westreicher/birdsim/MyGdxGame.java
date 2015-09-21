@@ -3,6 +3,8 @@ package com.westreicher.birdsim;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.controllers.Controller;
+import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.FPSLogger;
 import com.badlogic.gdx.graphics.GL20;
@@ -16,6 +18,7 @@ import com.badlogic.gdx.graphics.g3d.loader.ObjLoader;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.westreicher.birdsim.util.CController;
 import com.westreicher.birdsim.util.InputHelper;
 import com.westreicher.birdsim.util.Keyboard;
 import com.westreicher.birdsim.util.ManagedRessources;
@@ -77,8 +80,27 @@ public class MyGdxGame extends ApplicationAdapter {
         player = new ModelInstance(new ObjLoader().loadModel(Gdx.files.internal("player.obj")));
         player.materials.get(0).set(ColorAttribute.createDiffuse(Color.RED));
         //player = new ModelInstance(new ModelBuilder().createBox(1f, 1f, 1f, new Material(ColorAttribute.createDiffuse(1, 0, 0, 0)), VertexAttributes.Usage.Position));
-        firstPointer = isDesktop ? new Keyboard(0) : new SaveMouse(0, viewport);
-        secondPointer = isDesktop ? new Keyboard(1) : new SaveMouse(1, viewport);
+
+        Controller ctrl = null;
+        for (Controller controller : Controllers.getControllers()) {
+            ctrl = controller;
+            break;
+        }
+
+        if (isDesktop) {
+            if (ctrl != null) {
+                firstPointer = new CController(0, ctrl);
+                secondPointer = new CController(1, ctrl);
+                Gdx.app.log("game", "Gamepad found: " + ctrl.getName());
+            } else {
+                firstPointer = new Keyboard(0);
+                secondPointer = new Keyboard(1);
+            }
+        } else {
+            firstPointer = new SaveMouse(0, viewport);
+            secondPointer = new SaveMouse(1, viewport);
+        }
+
         thirdPointer = new SaveMouse(2, viewport);
         playerTransform = new Transform();
         Entity.init();
@@ -163,8 +185,9 @@ public class MyGdxGame extends ApplicationAdapter {
         if (isDesktop) {
             downs.end();
             downs.draw(viewport.getScreenWidth(), viewport.getScreenHeight());
+        } else { // TODO isTouch?
+            drawThumbs();
         }
-        drawThumbs();
     }
 
     private void drawThumbs() {

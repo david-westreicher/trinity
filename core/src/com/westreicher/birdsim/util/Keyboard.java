@@ -19,7 +19,7 @@ public class Keyboard extends InputHelper {
     private static final int DELTAS[][] = new int[][]{
             new int[]{-1, 0},//LEFT
             new int[]{0, 1},//UP
-            new int[]{1, 0},//UP
+            new int[]{1, 0},//RIGHT
             new int[]{0, -1},//DOWN
     };
 

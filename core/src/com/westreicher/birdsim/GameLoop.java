@@ -11,7 +11,7 @@ import com.westreicher.birdsim.util.InputHelper;
  */
 public class GameLoop {
     private final ChunkManager chunkManager;
-    private final InputHelper.SaveMouse thirdPointer;
+    private final InputHelper thirdPointer;
     private final MyGdxGame.Transform playerTransform;
     private final InputHelper firstPointer;
     private final InputHelper secondPointer;
@@ -24,7 +24,7 @@ public class GameLoop {
     private long currenttick;
     private float fps;
 
-    public GameLoop(Vector3 virtualcam, PerspectiveCamera cam, ChunkManager chunkManager, MyGdxGame.Transform playerTransform, InputHelper firstPointer, InputHelper secondPointer, InputHelper.SaveMouse thirdPointer) {
+    public GameLoop(Vector3 virtualcam, PerspectiveCamera cam, ChunkManager chunkManager, MyGdxGame.Transform playerTransform, InputHelper firstPointer, InputHelper secondPointer, InputHelper thirdPointer) {
         this.virtualcam = virtualcam;
         this.cam = cam;
         this.chunkManager = chunkManager;

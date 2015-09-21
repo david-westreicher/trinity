@@ -3,22 +3,15 @@ package com.westreicher.birdsim;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.controllers.Controller;
-import com.badlogic.gdx.controllers.Controllers;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.FPSLogger;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.loader.ObjLoader;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.westreicher.birdsim.util.CController;
 import com.westreicher.birdsim.util.InputHelper;
 import com.westreicher.birdsim.util.ManagedRessources;
 import com.westreicher.birdsim.util.RenderToTexture.DownSampler;
@@ -29,13 +22,10 @@ public class MyGdxGame extends ApplicationAdapter {
     private PerspectiveCamera cam;
     ModelBatch mb;
     Viewport viewport;
-    private float rat = 1;
-    private ModelInstance player;
     public ChunkManager chunkManager;
     private FPSLogger fps = new FPSLogger();
     private SpriteBatch spritebatch;
     private Texture thumbTex;
-    public static Transform playerTransform;
     private DownSampler downs = null;
     public static MyGdxGame single = null;
     public Vector3 virtualcam = new Vector3();
@@ -46,7 +36,6 @@ public class MyGdxGame extends ApplicationAdapter {
 
     @Override
     public void resize(int width, int height) {
-        rat = 1.0f / Math.min(width, height);
         viewport.update(width, height);
         spritebatch.getProjectionMatrix().setToOrtho2D(0, 0, width, height);
         if (downs != null)
@@ -72,11 +61,6 @@ public class MyGdxGame extends ApplicationAdapter {
         thumbTex = new Texture(Gdx.files.internal("thumb.png"));
         mb = new ModelBatch();
         chunkManager = new ChunkManager();
-        player = new ModelInstance(new ObjLoader().loadModel(Gdx.files.internal("player.obj")));
-        player.materials.get(0).set(ColorAttribute.createDiffuse(Color.RED));
-        //player = new ModelInstance(new ModelBuilder().createBox(1f, 1f, 1f, new Material(ColorAttribute.createDiffuse(1, 0, 0, 0)), VertexAttributes.Usage.Position));
-
-        playerTransform = new Transform();
         Entity.init();
         soundplayer = new SoundPlayer();
         InputHelper.init(isDesktop, viewport);
@@ -88,14 +72,12 @@ public class MyGdxGame extends ApplicationAdapter {
     public void render() {
         fps.log();
         gameloop.tick();
-        playerTransform.transform(player);
 
         Gdx.gl.glClearColor(0, 0, 0, 1);
         //Gdx.gl.glClearColor(0.251f, 0.643f, 0.875f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
         if (isDesktop) downs.begin();
         mb.begin(cam);
-        mb.render(player);
         Entity.render(mb);
         mb.end();
         chunkManager.render(cam, virtualcam);
@@ -135,17 +117,5 @@ public class MyGdxGame extends ApplicationAdapter {
 
     public void playSound(SoundPlayer.Sounds s, Vector3 pos) {
         soundplayer.play(s, pos);
-    }
-
-    public static class Transform {
-        public Vector3 position = new Vector3();
-        public float scale = 1;
-        public float radiant;
-
-        public void transform(ModelInstance player) {
-            player.transform.setToTranslation(position);
-            player.transform.scl(scale);
-            player.transform.rotateRad(Config.UPAXIS, radiant);
-        }
     }
 }

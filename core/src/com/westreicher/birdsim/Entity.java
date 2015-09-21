@@ -42,6 +42,7 @@ public class Entity {
     ;
 
     private static final float EDGE = Config.TILES_PER_CHUNK * Config.CHUNKNUMS / 2;
+    private static final Vector3 TMP_VEC3 = new Vector3();
     private static Model playerModel;
     private static Model itemModel;
     private static Model bulletModel;
@@ -65,13 +66,11 @@ public class Entity {
         }
     };
 
-    public static void spawn(Vector3 pos, Random rand) {
-        if (!Config.SPAWN_STUFF)
-            return;
-        if (rand.nextDouble() > 0.1)
+    public static void spawn(float x, float y, Random rand) {
+        if (!Config.SPAWN_STUFF || rand.nextDouble() > 0.1)
             return;
         Entity e = ents.obtain();
-        e.init(rand.nextDouble() > 0.2 ? Type.ITEM : Type.ENEMY, pos.x, pos.y, ColorAttr.values()[(int) (Math.random() * (ColorAttr.values().length - 1)) + 1], 0, 0, null);
+        e.init(rand.nextDouble() > 0.2 ? Type.ITEM : Type.ENEMY, x, y, ColorAttr.values()[(int) (Math.random() * (ColorAttr.values().length - 1)) + 1], 0, 0, null);
     }
 
     public static void shoot(float x, float y, float xspeed, float yspeed, ColorAttr col, Entity parent) {
@@ -142,10 +141,10 @@ public class Entity {
                 }
                 radiant = -(float) Math.atan2(speed.y, speed.x);
                 if (Gdx.graphics.getFrameId() % 100 == 0) {
-                    Vector3 dir = MyGdxGame.playerTransform.position.cpy().sub(pos);
-                    dir.nor();
-                    dir.scl(1f);
-                    shoot(pos.x, pos.y, dir.x, dir.y, col, this);
+                    TMP_VEC3.set(MyGdxGame.playerTransform.position).sub(pos);
+                    TMP_VEC3.nor();
+                    TMP_VEC3.scl(1f);
+                    shoot(pos.x, pos.y, TMP_VEC3.x, TMP_VEC3.y, col, this);
                 }
                 if (lives == 0)
                     dead = true;
@@ -178,7 +177,7 @@ public class Entity {
             dead = true;
         this.modelInstance.transform.setToTranslation(pos);
         this.modelInstance.transform.scl(scale);
-        this.modelInstance.transform.rotateRad(MyGdxGame.UPAXIS, radiant);
+        this.modelInstance.transform.rotateRad(Config.UPAXIS, radiant);
     }
 
 

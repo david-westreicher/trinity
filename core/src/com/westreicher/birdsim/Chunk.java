@@ -37,7 +37,7 @@ public class Chunk {
 
     ;
 
-    private static final double NOISE_SCALE = 0.5;
+    private static final double NOISE_SCALE = 0.8;
     private static int NOISE_OCTAVES = 10;
     private static final int SIZE = Config.TILES_PER_CHUNK;
     private float[][] map = new float[SIZE][SIZE];
@@ -47,8 +47,8 @@ public class Chunk {
     private static final Vector3 tmp = new Vector3();
     public Random rand = new Random();
     public boolean shouldDraw;
-    private int absx;
-    private int absy;
+    private long absx;
+    private long absy;
     private float randdark;
 
     public Chunk() {
@@ -57,13 +57,13 @@ public class Chunk {
                 new VertexAttribute(VertexAttributes.Usage.ColorPacked, 3, ShaderProgram.COLOR_ATTRIBUTE));
     }
 
-    public float getNoise(float x, float y, float octave) {
+    public float getNoise(double x, double y, int octave) {
         double mul = Math.pow(octave, 2);
         float noise = (float) (mul * SimplexNoise.noise(x * NOISE_SCALE / mul, y * NOISE_SCALE / mul));
         return noise;
     }
 
-    public float getNoise(float x, float y) {
+    public float getNoise(double x, double y) {
         float noise = 0;
         for (int i = 10; i > 10 - NOISE_OCTAVES; i -= 2)
             noise += getNoise(x, y, i);
@@ -92,7 +92,7 @@ public class Chunk {
     }
 
 
-    public void setPos(int absx, int absy) {
+    public void setPos(long absx, long absy) {
         rand.setSeed(getSeed(absx, absy));
         randdark = (float) rand.nextDouble();
         randdark = (float) rand.nextDouble();
@@ -149,21 +149,20 @@ public class Chunk {
                 tmp.set(getCol(scale));
                 if (scale > 0) {
                     float dark = 0;//randdark;
-                    for (int x1 = x - 2; x1 <= x; x1++) {
-                        for (int y1 = y - 2; y1 <= y; y1++) {
-                            float diff = -scale;
+                    for (int x1 = x - 3; x1 <= x; x1++) {
+                        for (int y1 = y - 3; y1 <= y; y1++) {
+                            float other = 0;
                             if (x1 < 0 || y1 < 0) {
-                                //TODO fetch from neighbouring chunk
                                 float neighborval = chunkman.getValAbs(x1, SIZE - y1 - 1, absx, absy);
                                 if (neighborval == ChunkManager.OUTSIDE)
-                                    diff += getNoise((x1 + absx * SIZE), (-y1 + absy * SIZE));
+                                    other = getNoise((x1 + absx * SIZE), (-y1 + absy * SIZE));
                                 else
-                                    diff += neighborval;
-                                //MyGdxGame.single.chunkManager.setValRel(absx * SIZE - SIZE / 2, absy * SIZE - SIZE / 2, 2);
+                                    other = neighborval;
                             } else
-                                diff += map[x1][y1];
+                                other = map[x1][y1];
+                            float diff = other - scale;
                             if (diff > 0)
-                                dark += diff * 0.6f;
+                                dark += diff * 0.3f;
                         }
                     }
                     tmp.scl(Math.max(0, 1 - dark));

@@ -20,7 +20,7 @@ public class ChunkManager {
     public static final float OUTSIDE = -10.0f;
     private static final int CHUNKNUMS = Config.CHUNKNUMS;
     private Chunk chunks[][] = new Chunk[CHUNKNUMS][CHUNKNUMS];
-    private int[] pos = new int[]{0, 0};
+    private long[] pos = new long[]{0, 0};
     private Spiral s = new Spiral();
     private BatchShaderProgram shader;
     private float[] tmpfloat = new float[3];
@@ -30,8 +30,8 @@ public class ChunkManager {
     public ChunkManager() {
         for (int x = 0; x < CHUNKNUMS; x++) {
             for (int y = 0; y < CHUNKNUMS; y++) {
-                int realX = (x - (CHUNKNUMS / 2)) + pos[0];
-                int realY = (y - (CHUNKNUMS / 2)) + pos[1];
+                long realX = (x - (CHUNKNUMS / 2)) + pos[0];
+                long realY = (y - (CHUNKNUMS / 2)) + pos[1];
                 chunks[x][y] = new Chunk();
                 chunks[x][y].setPos(realX, realY);
             }
@@ -52,8 +52,7 @@ public class ChunkManager {
                 if (chunks[x][y].genMesh()) {
                     maxupdates -= 1;
                     if (x == 0 || y == 0 || x == CHUNKNUMS - 1 || y == CHUNKNUMS - 1)
-                        //TODO don't alloc new vec ...
-                        Entity.spawn(new Vector3(spos.x * Config.TILES_PER_CHUNK, spos.y * Config.TILES_PER_CHUNK, 0), mi.rand);
+                        Entity.spawn(spos.x * Config.TILES_PER_CHUNK, spos.y * Config.TILES_PER_CHUNK, mi.rand);
                 }
                 if (maxupdates <= 0)
                     break;
@@ -113,8 +112,8 @@ public class ChunkManager {
                     swap(x, y, x + plus, y);
             for (int y = 0; y < CHUNKNUMS; y++) {
                 Chunk c = chunks[endx][y];
-                int realX = (endx - (CHUNKNUMS / 2)) + pos[0];
-                int realY = (y - (CHUNKNUMS / 2)) + pos[1];
+                long realX = (endx - (CHUNKNUMS / 2)) + pos[0];
+                long realY = (y - (CHUNKNUMS / 2)) + pos[1];
                 c.setPos(realX, realY);
             }
         }
@@ -128,8 +127,8 @@ public class ChunkManager {
                     swap(x, y, x, y + plus);
             for (int x = 0; x < CHUNKNUMS; x++) {
                 Chunk c = chunks[x][endy];
-                int realX = (x - (CHUNKNUMS / 2)) + pos[0];
-                int realY = (endy - (CHUNKNUMS / 2)) + pos[1];
+                long realX = (x - (CHUNKNUMS / 2)) + pos[0];
+                long realY = (endy - (CHUNKNUMS / 2)) + pos[1];
                 c.setPos(realX, realY);
             }
         }
@@ -170,7 +169,7 @@ public class ChunkManager {
         return tr.c == null ? OUTSIDE : tr.c.getVal(tr.innerx, tr.innery);
     }
 
-    public float getValAbs(int x, int y, float absx, float absy) {
+    public float getValAbs(int x, int y, long absx, long absy) {
         TileResult tr = setTileResult(x + (absx - pos[0]) * Config.TILES_PER_CHUNK - Config.TILES_PER_CHUNK / 2, y + (absy - pos[1]) * Config.TILES_PER_CHUNK - Config.TILES_PER_CHUNK / 2);
         return tr.c == null ? OUTSIDE : tr.c.getVal(tr.innerx, tr.innery);
     }
@@ -208,7 +207,7 @@ public class ChunkManager {
     }
 
     public void resize(int width, int height) {
-        this.pointsize = (Math.max(width, height) / 200f);
+        this.pointsize = (Math.max(width, height) / 150f);
     }
 
     private static class TileResult {

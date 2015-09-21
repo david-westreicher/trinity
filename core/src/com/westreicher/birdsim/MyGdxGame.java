@@ -35,13 +35,13 @@ public class MyGdxGame extends ApplicationAdapter {
     private SpriteBatch spritebatch;
     private Texture thumbTex;
     public static Transform playerTransform;
-    private float delta;
     private InputHelper.SaveMouse thirdPointer;
     private DownSampler downs = null;
     public static MyGdxGame single = null;
     public Vector3 virtualcam = new Vector3();
 
     private SoundPlayer soundplayer;
+    private GameLoop gameloop;
 
 
     @Override
@@ -57,7 +57,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
     @Override
     public void create() {
-        isDesktop = Gdx.app.getType() == Application.ApplicationType.Desktop;
+        isDesktop = Gdx.app.getType() == Application.ApplicationType.Desktop || Gdx.app.getType() == Application.ApplicationType.WebGL;
         single = this;
         ManagedRessources.init();
         Gdx.app.log("game", "create");
@@ -81,73 +81,15 @@ public class MyGdxGame extends ApplicationAdapter {
         playerTransform = new Transform();
         Entity.init();
         soundplayer = new SoundPlayer();
+        gameloop = new GameLoop(virtualcam, cam, chunkManager, playerTransform, firstPointer, secondPointer, thirdPointer);
     }
 
-
-    public void movePlayer(float x, float y) {
-        playerTransform.position.x += x;
-        playerTransform.position.y -= y;
-        if (chunkManager.getVal(playerTransform.position) <= 0)
-            return;
-        playerTransform.position.y += y;
-        if (chunkManager.getVal(playerTransform.position) <= 0)
-            return;
-        playerTransform.position.x -= x;
-        playerTransform.position.y -= y;
-        if (chunkManager.getVal(playerTransform.position) <= 0)
-            return;
-        playerTransform.position.y += y;
-    }
 
     @Override
     public void render() {
-        this.delta = Gdx.graphics.getDeltaTime();
         fps.log();
-        int dx = 0;
-        int dy = 0;
-        if (Math.abs(virtualcam.x) > Config.TILES_PER_CHUNK / 2.0)
-            dx = (int) Math.signum(virtualcam.x);
-        if (Math.abs(virtualcam.y) > Config.TILES_PER_CHUNK / 2.0)
-            dy = (int) Math.signum(virtualcam.y);
-        virtualcam.x -= dx * Config.TILES_PER_CHUNK;
-        virtualcam.y -= dy * Config.TILES_PER_CHUNK;
-        playerTransform.position.add(-dx * Config.TILES_PER_CHUNK, -dy * Config.TILES_PER_CHUNK, 0);
-        Entity.translateAll(-dx * Config.TILES_PER_CHUNK, -dy * Config.TILES_PER_CHUNK);
-        chunkManager.updateDirection(dx, dy);
-        Entity.updateall(delta);
-
-        if (firstPointer.update()) {
-            int mousex = firstPointer.relx();
-            int mousey = firstPointer.rely();
-            float rad = firstPointer.getRadiant();
-            playerTransform.radiant = rad;
-            //movePlayer(mousex * delta * Config.MOVE_SPEED, mousey * delta * Config.MOVE_SPEED);
-            movePlayer((float) Math.cos(rad) * delta * Config.MOVE_SPEED, -(float) Math.sin(rad) * delta * Config.MOVE_SPEED);
-        }
-        //Gdx.app.log("game", "" +"");
-        float xspeed = 0;
-        float yspeed = 0;
-        if (secondPointer.update()) {
-            float radiant = secondPointer.getRadiant();
-            xspeed = (float) Math.cos(radiant);
-            yspeed = (float) Math.sin(radiant);
-            if (Gdx.graphics.getFrameId() % 10 == 0) {
-                Entity.shoot(playerTransform.position.x, playerTransform.position.y, xspeed, yspeed, Entity.ColorAttr.RED, null);
-            }
-        }
-        virtualcam.x += (playerTransform.position.x + xspeed * 0 - virtualcam.x) / 10.0f;
-        virtualcam.y += (playerTransform.position.y + yspeed * 0 - virtualcam.y) / 10.0f;
-        cam.far = thirdPointer.update() ? 180 : 250;
-        cam.position.z += (cam.far - cam.position.z) / 10.0f;
-
-        //chunkManager.explode2(playerTransform.position, isDesktop ? 15 : 7);
-        playerTransform.position.z = chunkManager.getVal(playerTransform.position.x, playerTransform.position.y) * Config.TERRAIN_HEIGHT + 145;
+        gameloop.tick();
         playerTransform.transform(player);
-
-        //cam.position.set(virtualcam.x, virtualcam.y - 50, cam.position.z);
-        //cam.lookAt(cam.position.x, cam.position.y + 200, 0);
-        cam.position.set(virtualcam.x, virtualcam.y, cam.position.z);
-        cam.update();
 
         Gdx.gl.glClearColor(0, 0, 0, 1);
         //Gdx.gl.glClearColor(0.251f, 0.643f, 0.875f, 1);
@@ -191,7 +133,6 @@ public class MyGdxGame extends ApplicationAdapter {
     public void playSound(SoundPlayer.Sounds s, Vector3 pos) {
         soundplayer.play(s, pos);
     }
-
 
     public static class Transform {
         public Vector3 position = new Vector3();

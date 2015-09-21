@@ -128,10 +128,10 @@ public class Entity {
         this.modelInstance = new ModelInstance(m);
         modelInstance.materials.get(0).set(col.attr);
         aliveents.add(this);
-        update(0);
+        update(0, 0);
     }
 
-    private void update(float delta) {
+    private void update(float delta, long tick) {
         ChunkManager chunkManager = MyGdxGame.single.chunkManager;
         switch (type) {
             case ENEMY:
@@ -140,7 +140,7 @@ public class Entity {
                     speed.y = (float) (Math.random() - 0.5f);
                 }
                 radiant = -(float) Math.atan2(speed.y, speed.x);
-                if (Gdx.graphics.getFrameId() % 100 == 0) {
+                if (tick % 50 == 0) {
                     TMP_VEC3.set(MyGdxGame.playerTransform.position).sub(pos);
                     TMP_VEC3.nor();
                     TMP_VEC3.scl(1f);
@@ -247,10 +247,10 @@ public class Entity {
         }
     }
 
-    public static void updateall(float delta) {
+    public static void updateall(float delta, long tick) {
         for (int i = 0; i < aliveents.size(); i++) {
             Entity ent = aliveents.get(i);
-            ent.update(delta);
+            ent.update(delta, tick);
             ent.collisions.reset();
         }
         for (int i = 0; i < aliveents.size() - 1; i++) {

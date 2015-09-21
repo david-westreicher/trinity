@@ -10,4 +10,5 @@ public class Config {
     public static final int CHUNKNUMS = (MyGdxGame.isDesktop ? 5 : 4) * 2 + 1;
     public static final float MOVE_SPEED = 75f;
     public static final float TERRAIN_HEIGHT = 15f;
+    public static final boolean SPAWN_STUFF = true;
 }

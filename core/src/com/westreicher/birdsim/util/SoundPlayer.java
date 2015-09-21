@@ -35,9 +35,9 @@ public class SoundPlayer {
     }
 
     public void dispose() {
-        for (Sounds s : Sounds.values()) {
-            map.get(s).dispose();
-        }
+        //for (Sounds s : Sounds.values()) {
+        //    map.get(s).dispose();
+        //}
         map.clear();
     }
 }

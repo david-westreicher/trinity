@@ -153,7 +153,7 @@ public class MyGdxGame extends ApplicationAdapter {
         cam.position.z += ((thirdPointer.update() ? 200 : 250) - cam.position.z) / 10.0f;
 
         //chunkManager.explode2(playerTransform.position, isDesktop ? 15 : 7);
-        playerTransform.position.z = chunkManager.getVal(playerTransform.position.x, playerTransform.position.y) + 145;
+        playerTransform.position.z = chunkManager.getVal(playerTransform.position.x, playerTransform.position.y) * Config.TERRAIN_HEIGHT + 145;
         playerTransform.transform(player);
 
         //cam.position.set(virtualcam.x, virtualcam.y - 50, cam.position.z);

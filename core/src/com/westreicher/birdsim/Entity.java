@@ -66,6 +66,8 @@ public class Entity {
     };
 
     public static void spawn(Vector3 pos, Random rand) {
+        if (!Config.SPAWN_STUFF)
+            return;
         if (rand.nextDouble() > 0.1)
             return;
         Entity e = ents.obtain();
@@ -159,7 +161,7 @@ public class Entity {
         }
 
 
-        float orig = chunkManager.getVal(pos);
+        float orig = chunkManager.getVal(pos) * Config.TERRAIN_HEIGHT;
         if (Config.POST_PROCESSING) {
             //TODO optimize Z projection
             float dstx = pos.x - MyGdxGame.single.virtualcam.x;

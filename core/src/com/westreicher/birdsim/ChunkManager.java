@@ -30,8 +30,8 @@ public class ChunkManager {
     public ChunkManager() {
         for (int x = 0; x < CHUNKNUMS; x++) {
             for (int y = 0; y < CHUNKNUMS; y++) {
-                int realX = (x - (CHUNKNUMS / 2));
-                int realY = (y - (CHUNKNUMS / 2));
+                int realX = (x - (CHUNKNUMS / 2)) + pos[0];
+                int realY = (y - (CHUNKNUMS / 2)) + pos[1];
                 chunks[x][y] = new Chunk();
                 chunks[x][y].setPos(realX, realY);
             }
@@ -52,6 +52,7 @@ public class ChunkManager {
                 if (chunks[x][y].genMesh()) {
                     maxupdates -= 1;
                     if (x == 0 || y == 0 || x == CHUNKNUMS - 1 || y == CHUNKNUMS - 1)
+                        //TODO don't alloc new vec ...
                         Entity.spawn(new Vector3(spos.x * Config.TILES_PER_CHUNK, spos.y * Config.TILES_PER_CHUNK, 0), mi.rand);
                 }
                 if (maxupdates <= 0)
@@ -170,7 +171,7 @@ public class ChunkManager {
     }
 
     public float getValAbs(int x, int y, float absx, float absy) {
-        TileResult tr = setTileResult(x + (absx - pos[0]) * Config.TILES_PER_CHUNK - CHUNKNUMS / 2, y + (absy - pos[1]) * Config.TILES_PER_CHUNK - CHUNKNUMS / 2);
+        TileResult tr = setTileResult(x + (absx - pos[0]) * Config.TILES_PER_CHUNK - Config.TILES_PER_CHUNK / 2, y + (absy - pos[1]) * Config.TILES_PER_CHUNK - Config.TILES_PER_CHUNK / 2);
         return tr.c == null ? OUTSIDE : tr.c.getVal(tr.innerx, tr.innery);
     }
 

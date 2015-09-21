@@ -78,7 +78,7 @@ public class Chunk {
     }
 
     public float getVal(int x, int y) {
-        return Math.max(0, map[x][y] * Config.TERRAIN_HEIGHT);
+        return Math.max(0, map[x][y]);
     }
 
     public void mulVal(int x, int y, float percent) {
@@ -154,11 +154,11 @@ public class Chunk {
                             float diff = -scale;
                             if (x1 < 0 || y1 < 0) {
                                 //TODO fetch from neighbouring chunk
-                                //float neighborval = 0;//chunkman.getValAbs(x1, y1, absx, absy);
-                                //if (neighborval == ChunkManager.OUTSIDE)
-                                diff += getNoise((x1 + absx * SIZE), (-y1 + absy * SIZE));
-                                //else
-                                //    diff += neighborval;
+                                float neighborval = chunkman.getValAbs(x1, SIZE - y1 - 1, absx, absy);
+                                if (neighborval == ChunkManager.OUTSIDE)
+                                    diff += getNoise((x1 + absx * SIZE), (-y1 + absy * SIZE));
+                                else
+                                    diff += neighborval;
                                 //MyGdxGame.single.chunkManager.setValRel(absx * SIZE - SIZE / 2, absy * SIZE - SIZE / 2, 2);
                             } else
                                 diff += map[x1][y1];

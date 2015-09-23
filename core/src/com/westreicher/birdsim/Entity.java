@@ -46,11 +46,13 @@ public class Entity {
     private static final float EDGE = Config.TILES_PER_CHUNK * Config.CHUNKNUMS / 2;
     private static final ColorAttr[] colors = ColorAttr.values();
     private static final Vector3 TMP_VEC3 = new Vector3();
+    private static final Vector3 TMP_VEC2 = new Vector3();
     private static Model playerModel;
     private static Model itemModel;
     private static Model bulletModel;
     private Vector3 speed = new Vector3();
     public Vector3 pos = new Vector3();
+    public Vector3 oldpos = new Vector3();
     private float scale = 1f;
     private boolean visible;
     private ModelInstance modelInstance;
@@ -109,6 +111,7 @@ public class Entity {
         this.dead = false;
         this.type = type;
         this.pos.set(posx, posy, 0);
+        this.oldpos.set(pos);
         this.col = col;
         this.parent = parent;
         this.lives = 3;
@@ -146,10 +149,11 @@ public class Entity {
         this.modelInstance = new ModelInstance(m);
         modelInstance.materials.get(0).set(col.attr);
         aliveents.add(this);
-        update(0);
+        update(0, Config.UPAXIS);
     }
 
-    private void update(long tick) {
+    private void update(long tick, Vector3 cam) {
+        oldpos.set(pos);
         ChunkManager chunkManager = MyGdxGame.single.chunkManager;
         switch (type) {
             case ENEMY:
@@ -166,8 +170,6 @@ public class Entity {
                         shoot(pos.x, pos.y, TMP_VEC3.x, TMP_VEC3.y, col, this);
                     }
                 }
-                if (lives == 0)
-                    dead = true;
                 break;
             case BULLET:
                 pos.mulAdd(speed, 3);
@@ -192,7 +194,7 @@ public class Entity {
                     float xspeed = (float) Math.cos(radiant);
                     float yspeed = (float) Math.sin(radiant);
                     if (tick % 10 == 0) {
-                        Entity.shoot(pos.x, pos.y, xspeed, yspeed, Entity.ColorAttr.RED, null);
+                        Entity.shoot(pos.x, pos.y, xspeed, yspeed, Entity.ColorAttr.RED, this);
                     }
                 }
                 break;
@@ -202,8 +204,8 @@ public class Entity {
         float orig = chunkManager.getVal(pos) * Config.TERRAIN_HEIGHT;
         if (Config.POST_PROCESSING) {
             //TODO optimize Z projection
-            float dstx = pos.x - MyGdxGame.single.virtualcam.x;
-            float dsty = pos.y - MyGdxGame.single.virtualcam.y;
+            float dstx = pos.x - cam.x;
+            float dsty = pos.y - cam.y;
             float dstsq = dstx * dstx + dsty * dsty;
             float dstfrac = (dstsq / (140f * 140f));
             visible = dstfrac <= 1;
@@ -214,9 +216,6 @@ public class Entity {
         }
         if (Math.abs(pos.x) > EDGE || Math.abs(pos.y) > EDGE)
             dead = true;
-        this.modelInstance.transform.setToTranslation(pos);
-        this.modelInstance.transform.scl(scale);
-        this.modelInstance.transform.rotateRad(Config.UPAXIS, radiant);
     }
 
 
@@ -238,6 +237,7 @@ public class Entity {
                 for (int i = 0; i < collisions.size(); i++) {
                     Entity other = collisions.arr[i];
                     switch (other.type) {
+                        case PLAYER:
                         case ENEMY:
                             collideBulletEnemy(this, other);
                             break;
@@ -252,6 +252,7 @@ public class Entity {
                     switch (other.type) {
                         case PLAYER:
                             collideItemPlayer(this, other);
+                            break;
                     }
                 }
                 break;
@@ -261,6 +262,10 @@ public class Entity {
                     switch (other.type) {
                         case ITEM:
                             collideItemPlayer(other, this);
+                            break;
+                        case BULLET:
+                            collideBulletEnemy(other, this);
+                            break;
                     }
                 }
                 break;
@@ -274,6 +279,10 @@ public class Entity {
     private static void collideBulletEnemy(Entity bullet, Entity enemy) {
         if (bullet.parent != enemy) {
             enemy.lives--;
+            if (enemy.lives <= 0) {
+                enemy.dead = true;
+                if (enemy.type == Type.PLAYER) players.remove(enemy);
+            }
             bullet.dead = true;
         }
     }
@@ -299,19 +308,33 @@ public class Entity {
         return false;
     }
 
-    public static void render(ModelBatch mb) {
+    public static void render(ModelBatch mb, float interp) {
         //TODO Use custom rendering instead of modelinstances?
         for (int i = 0; i < aliveents.size(); i++) {
             Entity ent = aliveents.get(i);
+            ent.setModelInstance(interp);
             if (ent.visible)
                 mb.render(ent.modelInstance);
         }
     }
 
-    public static void updateall(long tick) {
+    private void setModelInstance(float interp) {
+        modelInstance.transform.setToTranslation(interpolate(oldpos, pos, interp));
+        modelInstance.transform.scl(scale);
+        modelInstance.transform.rotateRad(Config.UPAXIS, radiant);
+    }
+
+    private Vector3 interpolate(Vector3 oldpos, Vector3 pos, float interp) {
+        TMP_VEC3.set(oldpos);
+        TMP_VEC2.set(pos).sub(oldpos).scl(interp);
+        TMP_VEC3.add(TMP_VEC2);
+        return TMP_VEC3;
+    }
+
+    public static void updateall(long tick, Vector3 cam) {
         for (int i = 0; i < aliveents.size(); i++) {
             Entity ent = aliveents.get(i);
-            ent.update(tick);
+            ent.update(tick, cam);
             ent.collisions.reset();
         }
         for (int i = 0; i < aliveents.size() - 1; i++) {

@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.westreicher.birdsim.util.InputHelper;
+import com.westreicher.birdsim.util.InterpVec3;
 import com.westreicher.birdsim.util.ManagedRessources;
 import com.westreicher.birdsim.util.RenderToTexture.DownSampler;
 import com.westreicher.birdsim.util.SoundPlayer;
@@ -28,7 +29,6 @@ public class MyGdxGame extends ApplicationAdapter {
     private Texture thumbTex;
     private DownSampler downs = null;
     public static MyGdxGame single = null;
-    public Vector3 virtualcam = new Vector3();
 
     private SoundPlayer soundplayer;
     private GameLoop gameloop;
@@ -64,7 +64,7 @@ public class MyGdxGame extends ApplicationAdapter {
         Entity.init();
         soundplayer = new SoundPlayer();
         InputHelper.init(isDesktop, viewport);
-        gameloop = new GameLoop(virtualcam, cam, chunkManager);
+        gameloop = new GameLoop(cam, chunkManager);
     }
 
 
@@ -73,14 +73,15 @@ public class MyGdxGame extends ApplicationAdapter {
         fps.log();
         gameloop.tick();
 
+        float interp = gameloop.getInterp();
         Gdx.gl.glClearColor(0, 0, 0, 1);
         //Gdx.gl.glClearColor(0.251f, 0.643f, 0.875f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
         if (isDesktop) downs.begin();
         mb.begin(cam);
-        Entity.render(mb);
+        Entity.render(mb, interp);
         mb.end();
-        chunkManager.render(cam, virtualcam);
+        chunkManager.render(cam);
         if (isDesktop) {
             downs.end();
             downs.draw(viewport.getScreenWidth(), viewport.getScreenHeight());

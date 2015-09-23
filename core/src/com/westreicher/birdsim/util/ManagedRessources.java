@@ -64,7 +64,7 @@ public class ManagedRessources {
                 + "uniform mat4 u_projTrans;\n" //
                 + "uniform vec3 trans;\n" //
                 + (Config.POST_PROCESSING ? ""//
-                + "  uniform vec3 virtualcam;\n"//
+                + "  uniform vec2 virtualcam;\n"//
                 //+ "  varying float dstfrac;"
                 : "")//
                 + "uniform float pointsize;\n" //
@@ -77,7 +77,7 @@ public class ManagedRessources {
                 + "  vec3 pos = " + ShaderProgram.POSITION_ATTRIBUTE + "*chunksize + trans;\n" //
                 + "  pos.z *= heightscale;\n" //
                 + (Config.POST_PROCESSING ? ""//
-                + "    float dst = length(pos.xy-virtualcam.xy);\n" //
+                + "    float dst = length(pos.xy-virtualcam);\n" //
                 + "    float dstfrac = (dst*dst*maxdstsqinv);\n" //
                 + "    pos.z+=(1.0-dstfrac)*140.0;\n" : "")//
                 + "  gl_Position =  u_projTrans * vec4(pos,1.0);\n" //

@@ -1,9 +1,11 @@
 package com.westreicher.birdsim;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Vector3;
 import com.westreicher.birdsim.util.InputHelper;
+import com.westreicher.birdsim.util.InterpVec3;
 
 /**
  * Created by david on 9/21/15.
@@ -11,7 +13,6 @@ import com.westreicher.birdsim.util.InputHelper;
 public class GameLoop {
     private final ChunkManager chunkManager;
     private PerspectiveCamera cam;
-    private Vector3 virtualcam;
     private Vector3 playermids = new Vector3();
     private long skipTicks = 33333333;
     private float interpolation;
@@ -19,9 +20,9 @@ public class GameLoop {
     private int MAX_FRAME_SKIPS = 5;
     private long currenttick;
     private float fps;
+    public InterpVec3 virtualcam = new InterpVec3();
 
-    public GameLoop(Vector3 virtualcam, PerspectiveCamera cam, ChunkManager chunkManager) {
-        this.virtualcam = virtualcam;
+    public GameLoop(PerspectiveCamera cam, ChunkManager chunkManager) {
         this.cam = cam;
         this.chunkManager = chunkManager;
         nextTick = System.nanoTime(); //System.currentTimeMillis() * 1000000L;//
@@ -54,42 +55,52 @@ public class GameLoop {
             //currentTime = System.currentTimeMillis() * 1000000L;
         }
         interpolation = (float) (currentTime + skipTicks - nextTick) / skipTicks;
+        Vector3 interpvirtual = virtualcam.getInterppos(interpolation);
+        cam.position.set(interpvirtual.x, interpvirtual.y, cam.position.z);
+        cam.update();
     }
 
     private void logic() {
         int dx = 0;
         int dy = 0;
-        if (Math.abs(virtualcam.x) > Config.TILES_PER_CHUNK / 2.0)
-            dx = (int) Math.signum(virtualcam.x);
-        if (Math.abs(virtualcam.y) > Config.TILES_PER_CHUNK / 2.0)
-            dy = (int) Math.signum(virtualcam.y);
-        virtualcam.x -= dx * Config.TILES_PER_CHUNK;
-        virtualcam.y -= dy * Config.TILES_PER_CHUNK;
+        if (Math.abs(virtualcam.pos.x) > Config.TILES_PER_CHUNK / 2.0)
+            dx = (int) Math.signum(virtualcam.pos.x);
+        if (Math.abs(virtualcam.pos.y) > Config.TILES_PER_CHUNK / 2.0)
+            dy = (int) Math.signum(virtualcam.pos.y);
+        virtualcam.pos.x -= dx * Config.TILES_PER_CHUNK;
+        virtualcam.pos.y -= dy * Config.TILES_PER_CHUNK;
         Entity.translateAll(-dx * Config.TILES_PER_CHUNK, -dy * Config.TILES_PER_CHUNK);
         chunkManager.updateDirection(dx, dy);
-        Entity.updateall(currenttick);
+        Entity.updateall(currenttick, virtualcam.pos);
 
         playermids.set(0, 0, 0);
         for (int i = 0; i < Entity.players.size(); i++) {
             Entity player = Entity.players.arr[i];
             playermids.add(player.pos);
         }
-        playermids.scl(1f / Entity.players.size());
+        if (Entity.players.size() > 0)
+            playermids.scl(1f / Entity.players.size());
+        else if (Gdx.input.isKeyPressed(Input.Keys.R)) {
+            Entity.spawnPlayer(0);
+        }
 
-        virtualcam.x += (playermids.x - virtualcam.x) / 10.0f;
-        virtualcam.y += (playermids.y - virtualcam.y) / 10.0f;
-        cam.far = 350;
-        cam.position.z += (250 - cam.position.z) / 10.0f;
+        virtualcam.resetOldPos();
+        virtualcam.pos.x += (playermids.x - virtualcam.pos.x) / 10.0f;
+        virtualcam.pos.y += (playermids.y - virtualcam.pos.y) / 10.0f;
+        cam.far = 250;
+        cam.position.z += (cam.far - 1 - cam.position.z) / 10.0f;
 
         //chunkManager.explode2(playerTransform.position, isDesktop ? 15 : 7);
 
         //cam.position.set(virtualcam.x, virtualcam.y - 50, cam.position.z);
         //cam.lookAt(cam.position.x, cam.position.y + 200, 0);
-        cam.position.set(virtualcam.x, virtualcam.y, cam.position.z);
-        cam.update();
     }
 
     private float getInterpolation() {
+        return interpolation;
+    }
+
+    public float getInterp() {
         return interpolation;
     }
 }

@@ -38,7 +38,7 @@ public class ChunkManager {
         }
     }
 
-    public void render(Camera cam, Vector3 virtualcam) {
+    public void render(Camera cam) {
         s.reset();
         int maxupdates = 1;
         while (true) {
@@ -64,7 +64,7 @@ public class ChunkManager {
         shader.begin();
         shader.setUniformMatrix("u_projTrans", cam.combined);
         if (Config.POST_PROCESSING) {
-            shader.setUniformf("virtualcam", virtualcam);
+            shader.setUniformf("virtualcam", cam.position.x, cam.position.y);
             shader.setUniformf("maxdstsqinv", 1f / (140f * 140f));
         }
         shader.setUniformf("pointsize", pointsize);

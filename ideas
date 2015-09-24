@@ -1,0 +1,38 @@
+clouds
+biomes
+particle effects
+respawn in death order
+differentiate players and enemies
+Items:
+    multiple shoot (general or ...) +1
+    slowmo
+    shotgun (small distance, many shells)
+    machinegun recoil
+    bazooka slower, lesser
+    grenades
+    mines
+    phazer
+    poison 
+    teleport
+enemies:
+    items
+
++-----+-----+-----+
+|  H  |  S  |  G  |
++-----+-----|-----|
+            | GM  |
+            +-----+
+
+H... Health
+S... Speciality (Faster, Invisible, ...) with timer
+G... Gun (Rocket, Machine, Shotgun, Phazer, ...)
+GM.. Gun specialty multiplier
+
+random respawn
+no start on land
+random item drop
+enemy/player dies -> drops
+
+
+// respawn special case => ACTIONS
+#friendly fire off

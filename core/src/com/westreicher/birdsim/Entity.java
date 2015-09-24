@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.loader.ObjLoader;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Pool;
 import com.westreicher.birdsim.util.InputHelper;
 import com.westreicher.birdsim.util.MaxArray;
@@ -87,7 +88,7 @@ public class Entity {
     private static final GunType[] guntypes = GunType.values();
 
     private enum GunType {
-        ROCKETGUN(5, 10, 1, 25, 2.5f, 100), MACHINEGUN(1, 0, 2, 5, 1, 0);
+        ROCKETGUN(5, 10, 1, 25, 4, 100), MACHINEGUN(1, 0, 2, 5, 2, 0);
 
         private final int damage;
         private final float speed;
@@ -142,7 +143,6 @@ public class Entity {
     private float radiant;
     private static ArrayList<Entity> aliveents = new ArrayList<Entity>();
     private Entity parent;
-    private float size = 1;
     private MaxArray.MaxArrayEntity collisions = new MaxArray.MaxArrayEntity(100);
     public static MaxArray.MaxArrayEntity tmpplayersarr = new MaxArray.MaxArrayEntity(4);
     public static MaxArray.MaxArrayEntity aliveplayers = new MaxArray.MaxArrayEntity(4);
@@ -178,7 +178,7 @@ public class Entity {
     public static void init() {
         playerModel = new ObjLoader().loadModel(Gdx.files.internal("player.obj"));
         itemModel = new ModelBuilder().createBox(1, 1, 1, new Material(ColorAttribute.createDiffuse(1, 1, 1, 0)), VertexAttributes.Usage.Position);
-        bulletModel = new ModelBuilder().createBox(1, 1, 1, new Material(ColorAttribute.createDiffuse(1, 1, 1, 0)), VertexAttributes.Usage.Position);
+        bulletModel = new ObjLoader().loadModel(Gdx.files.internal("rocket.obj"));
     }
 
     public static void dispose() {
@@ -208,8 +208,7 @@ public class Entity {
             case ENEMY:
                 this.speed.set((float) Math.random() - 0.5f, (float) Math.random() - 0.5f, 0);
                 m = playerModel;
-                size = 8;
-                scale = 1f;
+                scale = 4f;
                 gunSlot.type = guntypes[(int) (Math.random() * guntypes.length)];
                 break;
             case BULLET:
@@ -217,21 +216,18 @@ public class Entity {
                 gunSpecialitySlot.set(parent.gunSpecialitySlot);
                 this.speed.set(xspeed, yspeed, 0);
                 scale = gunSlot.type.scale * gunSpecialitySlot.getMultiplier(GunSpecialty.DAMAGE);
-                size = Math.max(1, (int) scale);
                 m = bulletModel;
                 MyGdxGame.single.playSound(SoundPlayer.Sounds.SHOT1, pos);
-                //radiant = -(float) Math.atan2(speed.y, speed.x);
+                radiant = -(float) Math.atan2(-speed.y, speed.x);
                 break;
             case ITEM:
                 this.speed.set(0, 0, 0);
                 scale = 1f;
-                size = 3;
                 m = itemModel;
                 break;
             case PLAYER:
                 this.speed.set(0, 0, 0);
-                scale = 1f;
-                size = 8;
+                scale = 6f;
                 m = playerModel;
                 gunSlot.type = GunType.MACHINEGUN;
                 gunSlot.multiplier = 1;
@@ -454,7 +450,7 @@ public class Entity {
 
     private void respawn(Vector3 pos) {
         aliveplayers.add(this);
-        init(Type.PLAYER, pos.x, pos.y, colors[(int) (Math.random() * colors.length)], 0, 0, null);
+        init(Type.PLAYER, pos.x, pos.y, col, 0, 0, null);
     }
 
     private static void collideBulletEnemy(Entity bullet, Entity victim) {
@@ -533,8 +529,8 @@ public class Entity {
             Entity ent = aliveents.get(i);
             boolean belongsToSlowMoPlayer = slowmoplayers.contains(ent) || (ent.type == Type.BULLET && slowmoplayers.contains(ent.parent));
             if (slowmoplayers.size() > 0 && !belongsToSlowMoPlayer) {
-                if (tick % 2 == 0)
-                    ent.updateLogic(tick / 2);
+                if (tick % 5 == 0)
+                    ent.updateLogic(tick / 5);
             } else ent.updateLogic(tick);
 
             ent.updateZ(cam);
@@ -547,7 +543,7 @@ public class Entity {
                 double xdist = one.pos.x - two.pos.x;
                 double ydist = one.pos.y - two.pos.y;
                 double dist = Math.sqrt(xdist * xdist + ydist * ydist);
-                if (dist < (one.size + two.size) / 2.0)
+                if (dist < (one.scale + two.scale) / 2.0)
                     one.collisions.add(two);
             }
         }

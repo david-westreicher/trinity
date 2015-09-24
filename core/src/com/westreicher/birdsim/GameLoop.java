@@ -2,6 +2,7 @@ package com.westreicher.birdsim;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Vector3;
 import com.westreicher.birdsim.util.InputHelper;
@@ -12,7 +13,7 @@ import com.westreicher.birdsim.util.InterpVec3;
  */
 public class GameLoop {
     private final ChunkManager chunkManager;
-    private PerspectiveCamera cam;
+    private Camera cam;
     private Vector3 playermids = new Vector3();
     private long skipTicks = 33333333;
     private float interpolation;
@@ -22,7 +23,7 @@ public class GameLoop {
     private float fps;
     public InterpVec3 virtualcam = new InterpVec3();
 
-    public GameLoop(PerspectiveCamera cam, ChunkManager chunkManager) {
+    public GameLoop(Camera cam, ChunkManager chunkManager) {
         this.cam = cam;
         this.chunkManager = chunkManager;
         nextTick = System.nanoTime(); //System.currentTimeMillis() * 1000000L;//

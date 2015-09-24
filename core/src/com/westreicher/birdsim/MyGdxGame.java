@@ -3,12 +3,15 @@ package com.westreicher.birdsim;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.FPSLogger;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -19,7 +22,7 @@ import com.westreicher.birdsim.util.SoundPlayer;
 
 public class MyGdxGame extends ApplicationAdapter {
     public static boolean isDesktop;
-    private PerspectiveCamera cam;
+    private Camera cam;
     ModelBatch mb;
     Viewport viewport;
     public ChunkManager chunkManager;
@@ -50,7 +53,6 @@ public class MyGdxGame extends ApplicationAdapter {
         ManagedRessources.init();
         Gdx.app.log("game", "create");
         Gdx.app.log("game", "GL ES 3.0 supported: " + (Gdx.gl30 != null));
-        //DefaultShader.defaultCullFace = 0;
         cam = new PerspectiveCamera();
         cam.position.set(0, 0, 25 * (Config.DEBUG ? 10 : 1.25f));
         cam.near = 10f;

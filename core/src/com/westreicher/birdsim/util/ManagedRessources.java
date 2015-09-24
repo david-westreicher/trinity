@@ -24,7 +24,7 @@ public class ManagedRessources {
         return singl.getShaderProgram(chunk);
     }
 
-    public enum Shaders {CHUNK}
+    public enum Shaders {CHUNK, ENTITY}
 
     ;
 
@@ -36,6 +36,11 @@ public class ManagedRessources {
                 case CHUNK:
                     vert = getChunkVert();
                     frag = getChunkFrag();
+                    //logShader(vert, frag);
+                    break;
+                case ENTITY:
+                    vert = getEntityVert();
+                    frag = getEntityFrag();
                     //logShader(vert, frag);
                     break;
             }
@@ -100,6 +105,42 @@ public class ManagedRessources {
                 + "{\n" //
                 //+ "  if(dstfrac>1.0)discard;\n" //
                 + "  gl_FragColor = vec4(col,1);\n" //
+                + "}";
+    }
+
+
+    private String getEntityVert() {
+        return ""//
+                + "attribute vec3 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
+                + "uniform mat4 u_projTrans;\n" //
+                + "uniform vec3 trans;\n" //
+                + (Config.POST_PROCESSING ? ""//
+                + "  uniform vec2 virtualcam;\n"//
+                : "")//
+                + "uniform float maxdstsqinv;\n" //
+                + "\n" //
+                + "void main()\n" //
+                + "{\n" //
+                + "  vec3 pos = " + ShaderProgram.POSITION_ATTRIBUTE + " + trans;\n" //
+                + (Config.POST_PROCESSING ? ""//
+                + "    float dst = length(pos.xy-virtualcam);\n" //
+                + "    float dstfrac = (dst*dst*maxdstsqinv);\n" //
+                + "    pos.z+=(1.0-dstfrac)*140.0;\n" : "")//
+                + "  gl_Position =  u_projTrans * vec4(pos,1.0);\n" //
+                + "}\n";
+    }
+
+    private String getEntityFrag() {
+        return ""//
+                + "#ifdef GL_ES\n" //
+                + "#define LOWP lowp\n" //
+                + "precision mediump float;\n" //
+                + "#else\n" //
+                + "#define LOWP \n" //
+                + "#endif\n" //
+                + "void main()\n"//
+                + "{\n" //
+                + "  gl_FragColor = vec4(1.0,1.0,1.0,1.0);\n" //
                 + "}";
     }
 

@@ -103,5 +103,11 @@ public class MaxArray {
             }
             arr[--pointer] = null;
         }
+
+        public boolean contains(Entity ent) {
+            for (int i = 0; i < pointer; i++)
+                if (arr[i] == ent) return true;
+            return false;
+        }
     }
 }

@@ -28,7 +28,7 @@ public class GameLoop {
         nextTick = System.nanoTime(); //System.currentTimeMillis() * 1000000L;//
         interpolation = 0;
         currenttick = 0;
-        setFPS(50);
+        setFPS(Config.LOGIC_FPS);
         Gdx.app.log("player", "" + InputHelper.players.size());
         for (int i = 0; i < InputHelper.players.size(); i++) {
             Entity.spawnPlayer(i);
@@ -74,15 +74,12 @@ public class GameLoop {
         Entity.updateall(currenttick, virtualcam.pos);
 
         playermids.set(0, 0, 0);
-        for (int i = 0; i < Entity.players.size(); i++) {
-            Entity player = Entity.players.arr[i];
+        for (int i = 0; i < Entity.aliveplayers.size(); i++) {
+            Entity player = Entity.aliveplayers.arr[i];
             playermids.add(player.pos);
         }
-        if (Entity.players.size() > 0)
-            playermids.scl(1f / Entity.players.size());
-        else if (Gdx.input.isKeyPressed(Input.Keys.R)) {
-            Entity.spawnPlayer(0);
-        }
+        if (Entity.aliveplayers.size() > 0)
+            playermids.scl(1f / Entity.aliveplayers.size());
 
         virtualcam.resetOldPos();
         virtualcam.pos.x += (playermids.x - virtualcam.pos.x) / 10.0f;

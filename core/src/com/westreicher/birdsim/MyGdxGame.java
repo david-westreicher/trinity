@@ -13,7 +13,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.westreicher.birdsim.util.InputHelper;
-import com.westreicher.birdsim.util.InterpVec3;
 import com.westreicher.birdsim.util.ManagedRessources;
 import com.westreicher.birdsim.util.RenderToTexture.DownSampler;
 import com.westreicher.birdsim.util.SoundPlayer;
@@ -70,7 +69,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
     @Override
     public void render() {
-        fps.log();
+        //fps.log();
         gameloop.tick();
 
         float interp = gameloop.getInterp();
@@ -88,6 +87,19 @@ public class MyGdxGame extends ApplicationAdapter {
         } else { // TODO isTouch?
             drawThumbs();
         }
+        drawLives();
+    }
+
+    private void drawLives() {
+        spritebatch.begin();
+        int size = 50;
+        for (int i = 0; i < Entity.aliveplayers.size(); i++) {
+            Entity ent = Entity.aliveplayers.arr[i];
+            for (int j = 0; j < ent.lives; j++) {
+                spritebatch.draw(thumbTex, size * j, size * i, size * 2, size * 2);
+            }
+        }
+        spritebatch.end();
     }
 
     private void drawThumbs() {

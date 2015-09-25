@@ -6,12 +6,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.FPSLogger;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -34,6 +32,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
     private SoundPlayer soundplayer;
     private GameLoop gameloop;
+    public EntityManager entitymanager;
 
 
     @Override
@@ -62,7 +61,7 @@ public class MyGdxGame extends ApplicationAdapter {
         thumbTex = new Texture(Gdx.files.internal("thumb.png"));
         mb = new ModelBatch();
         chunkManager = new ChunkManager();
-        Entity.init();
+        entitymanager = new EntityManager();
         soundplayer = new SoundPlayer();
         InputHelper.init(isDesktop, viewport);
         gameloop = new GameLoop(cam, chunkManager);
@@ -80,7 +79,7 @@ public class MyGdxGame extends ApplicationAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
         if (isDesktop) downs.begin();
         mb.begin(cam);
-        Entity.render(mb, interp);
+        entitymanager.render(mb, interp);
         mb.end();
         chunkManager.render(cam);
         if (isDesktop) {
@@ -95,8 +94,8 @@ public class MyGdxGame extends ApplicationAdapter {
     private void drawLives() {
         spritebatch.begin();
         int size = 50;
-        for (int i = 0; i < Entity.aliveplayers.size(); i++) {
-            Entity ent = Entity.aliveplayers.arr[i];
+        for (int i = 0; i < entitymanager.aliveplayers.size(); i++) {
+            Entity ent = entitymanager.aliveplayers.arr[i];
             for (int j = 0; j < ent.lives; j++) {
                 spritebatch.draw(thumbTex, size * j, size * i, size * 2, size * 2);
             }
@@ -123,7 +122,7 @@ public class MyGdxGame extends ApplicationAdapter {
     @Override
     public void dispose() {
         ManagedRessources.dispose();
-        Entity.dispose();
+        entitymanager.dispose();
         mb.dispose();
         Gdx.app.log("game", "dispose");
         chunkManager.dispose();

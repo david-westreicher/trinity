@@ -1,118 +1,46 @@
 package com.westreicher.birdsim;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.VertexAttributes;
-import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.loader.ObjLoader;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Pool;
 import com.westreicher.birdsim.util.InputHelper;
 import com.westreicher.birdsim.util.MaxArray;
 import com.westreicher.birdsim.util.SoundPlayer;
-
-import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * Created by david on 9/4/15.
  */
 public class Entity {
-
-
-    int lives;
-    private int id;
-
-    private enum Type {ENEMY, BULLET, ITEM, PLAYER}
-
-    private enum ColorAttr {
-        RED(new Color(1, 0, 0, 1)), VIOLET(new Color(1, 0, 1, 1)), YELLOW(new Color(0.9f, 1, 0, 1)), TEAL(new Color(1, 0.2f, 0.2f, 1)), GOLD(new Color(1, 0.5f, 0.5f, 1)), BLUE(new Color(0, 0, 1, 1));
-        private final ColorAttribute attr;
-
-        ColorAttr(Color col) {
-            this.attr = new ColorAttribute(ColorAttribute.Diffuse, col);
-        }
-    }
-
-
     private static final float EDGE = Config.TILES_PER_CHUNK * Config.CHUNKNUMS / 2;
-    private static final ColorAttr[] colors = ColorAttr.values();
     private static final Vector3 TMP_VEC3 = new Vector3();
     private static final Vector3 TMP_VEC2 = new Vector3();
     private static final float ENEMY_VISIBILITY = 150;
-    private static Model playerModel;
-    private static Model itemModel;
-    private static Model bulletModel;
+    public static EntityManager manager;
+
+
+    public int lives;
+    public int id;
+
+
     private Vector3 speed = new Vector3();
     public Vector3 pos = new Vector3();
     public Vector3 oldpos = new Vector3();
-    private float scale = 1f;
-    private boolean visible;
-    private ModelInstance modelInstance;
-    private boolean dead = false;
-    private Type type;
-    private ColorAttr col;
+    public float scale = 1f;
+    public boolean visible;
+    public ModelInstance modelInstance;
+    public boolean dead = false;
+    public EntityManager.Type type;
+    public EntityManager.ColorAttr col;
     private float radiant;
-    private static ArrayList<Entity> aliveents = new ArrayList<Entity>();
-    private Entity parent;
+    public Entity parent;
+    public final MaxArray.MaxArrayEntity collisions = new MaxArray.MaxArrayEntity(100);
     public final SlotSystem.Slot<SlotSystem.Specialty> specialitySlot = new SlotSystem.Slot<SlotSystem.Specialty>();
-    public final SlotSystem.Slot<SlotSystem.GunType> gunSlot = new SlotSystem.Slot<SlotSystem.GunType>();
-    public final SlotSystem.Slot<SlotSystem.GunSpecialty> gunSpecialitySlot = new SlotSystem.Slot<SlotSystem.GunSpecialty>();
-    private MaxArray.MaxArrayEntity collisions = new MaxArray.MaxArrayEntity(100);
-    public static MaxArray.MaxArrayEntity tmpplayersarr = new MaxArray.MaxArrayEntity(4);
-    public static MaxArray.MaxArrayEntity aliveplayers = new MaxArray.MaxArrayEntity(4);
-    public static MaxArray.MaxArrayEntity players = new MaxArray.MaxArrayEntity(4);
-    private static Pool<Entity> ents = new Pool<Entity>() {
-        @Override
-        protected Entity newObject() {
-            return new Entity();
-        }
-    };
+    private final SlotSystem.Slot<SlotSystem.GunType> gunSlot = new SlotSystem.Slot<SlotSystem.GunType>();
+    private final SlotSystem.Slot<SlotSystem.GunSpecialty> gunSpecialitySlot = new SlotSystem.Slot<SlotSystem.GunSpecialty>();
 
-    public static void spawn(float x, float y, Random rand) {
-        if (!Config.SPAWN_STUFF || rand.nextDouble() > 0.3)
-            return;
-        Entity e = ents.obtain();
-        e.init(rand.nextDouble() > 0.5 ? Type.ITEM : Type.ENEMY, x, y, ColorAttr.YELLOW, 0, 0, null);
-    }
 
-    public static Entity spawnPlayer(int id) {
-        Entity e = ents.obtain();
-        e.init(Type.PLAYER, 0, 0, colors[id], 0, 0, null);
-        e.id = id;
-        aliveplayers.add(e);
-        players.add(e);
-        return e;
-    }
-
-    public static void shoot(float x, float y, float xspeed, float yspeed, ColorAttr col, Entity parent) {
-        Entity e = Entity.ents.obtain();
-        e.init(Entity.Type.BULLET, x, y, col, xspeed, yspeed, parent);
-    }
-
-    public static void init() {
-        playerModel = new ObjLoader().loadModel(Gdx.files.internal("player.obj"));
-        itemModel = new ModelBuilder().createBox(1, 1, 1, new Material(ColorAttribute.createDiffuse(1, 1, 1, 0)), VertexAttributes.Usage.Position);
-        bulletModel = new ObjLoader().loadModel(Gdx.files.internal("rocket.obj"));
-    }
-
-    public static void dispose() {
-        aliveents.clear();
-        ents.clear();
-        playerModel.dispose();
-        itemModel.dispose();
-        bulletModel.dispose();
-        aliveplayers.reset();
-        tmpplayersarr.reset();
-    }
-
-    public void init(Type type, float posx, float posy, ColorAttr col, float xspeed, float yspeed, Entity parent) {
+    public void init(EntityManager.Type type, float posx, float posy, EntityManager.ColorAttr col, float xspeed, float yspeed, Model m, Entity parent) {
         specialitySlot.reset();
         gunSpecialitySlot.reset();
         gunSlot.reset();
@@ -123,12 +51,10 @@ public class Entity {
         this.col = col;
         this.parent = parent;
         this.lives = 10;
-        Model m = null;
         //if (ChunkManager.isStuck(pos, 1)) type = Type.ITEM;
         switch (type) {
             case ENEMY:
                 this.speed.set((float) Math.random() - 0.5f, (float) Math.random() - 0.5f, 0);
-                m = playerModel;
                 scale = 4f;
                 gunSlot.type = SlotSystem.randomGun();
                 break;
@@ -137,19 +63,16 @@ public class Entity {
                 gunSpecialitySlot.set(parent.gunSpecialitySlot);
                 this.speed.set(xspeed, yspeed, 0);
                 scale = gunSlot.type.scale * gunSpecialitySlot.getMultiplier(SlotSystem.GunSpecialty.DAMAGE);
-                m = bulletModel;
                 MyGdxGame.single.playSound(SoundPlayer.Sounds.SHOT1, pos);
                 radiant = -(float) Math.atan2(-speed.y, speed.x);
                 break;
             case ITEM:
                 this.speed.set(0, 0, 0);
                 scale = 1f;
-                m = itemModel;
                 break;
             case PLAYER:
                 this.speed.set(0, 0, 0);
                 scale = 6f;
-                m = playerModel;
                 gunSlot.type = SlotSystem.GunType.MACHINEGUN;
                 gunSlot.multiplier = 1;
                 // specialitySlot.type = Specialty.SLOWMO;
@@ -159,11 +82,10 @@ public class Entity {
         //TODO don't allocate new modelinstances
         this.modelInstance = new ModelInstance(m);
         modelInstance.materials.get(0).set(col.attr);
-        aliveents.add(this);
         updateLogic(0);
     }
 
-    private void updateLogic(long tick) {
+    public void updateLogic(long tick) {
         oldpos.set(pos);
         ChunkManager chunkManager = MyGdxGame.single.chunkManager;
         int freq = gunSpecialitySlot.getMultiplier(SlotSystem.GunSpecialty.FREQUENCY);
@@ -177,8 +99,8 @@ public class Entity {
                 if (tick % ((gunSlot.type.frequency * 4) / freq) == 0) {
                     float shortestDist = ENEMY_VISIBILITY;
                     Entity closestplayer = null;
-                    for (int i = 0; i < aliveplayers.size(); i++) {
-                        Entity player = aliveplayers.arr[i];
+                    for (int i = 0; i < manager.aliveplayers.size(); i++) {
+                        Entity player = manager.aliveplayers.arr[i];
                         float dist = player.pos.dst(pos);
                         if (player.specialitySlot.type == SlotSystem.Specialty.INVISIBLLE)
                             continue;
@@ -191,7 +113,7 @@ public class Entity {
                         TMP_VEC3.set(closestplayer.pos).sub(pos);
                         TMP_VEC3.nor();
                         TMP_VEC3.scl(gunSpecialitySlot.getMultiplier(SlotSystem.GunSpecialty.SPEED));
-                        shoot(pos.x, pos.y, TMP_VEC3.x, TMP_VEC3.y, col, this);
+                        manager.shoot(pos.x, pos.y, TMP_VEC3.x, TMP_VEC3.y, col, this);
                     }
                 }
                 break;
@@ -222,7 +144,7 @@ public class Entity {
                             float speed = gunSpecialitySlot.getMultiplier(SlotSystem.GunSpecialty.SPEED);
                             float xspeed = (float) Math.cos(tmpradiant) * speed;
                             float yspeed = (float) Math.sin(tmpradiant) * speed;
-                            Entity.shoot(pos.x, pos.y, xspeed, yspeed, Entity.ColorAttr.RED, this);
+                            manager.shoot(pos.x, pos.y, xspeed, yspeed, EntityManager.ColorAttr.RED, this);
                             tmpradiant += Math.PI * 2 / gunSlot.multiplier;
                         }
                     }
@@ -239,7 +161,7 @@ public class Entity {
             dead = true;
     }
 
-    private void updateZ(Vector3 cam) {
+    public void updateZ(Vector3 cam) {
         ChunkManager chunkManager = MyGdxGame.single.chunkManager;
         float orig = chunkManager.getVal(pos) * Config.TERRAIN_HEIGHT;
         if (Config.POST_PROCESSING) {
@@ -257,7 +179,7 @@ public class Entity {
     }
 
 
-    private void resolveCollisions() {
+    public void resolveCollisions() {
         switch (type) {
             case ENEMY:
                 for (int i = 0; i < collisions.size(); i++) {
@@ -318,7 +240,7 @@ public class Entity {
             Gdx.app.log("item", "lives");
         } else if (poss == 3) {
             Gdx.app.log("item", "respawn");
-            if (!respawnOnePlayer(pos)) {
+            if (!manager.respawnOnePlayer(pos)) {
                 //TODO hacky stuff
                 collideItemPlayer(item, player);
                 return;
@@ -354,35 +276,15 @@ public class Entity {
         Gdx.app.log("item", lives + "," + player.gunSlot + "," + player.gunSpecialitySlot + "," + player.specialitySlot);
     }
 
-    private static boolean respawnOnePlayer(Vector3 pos) {
-        tmpplayersarr.reset();
-        for (int i = 0; i < players.size(); i++) {
-            if (players.arr[i].dead) {
-                tmpplayersarr.add(players.arr[i]);
-                break;
-            }
-        }
-        if (tmpplayersarr.size() > 0) {
-            tmpplayersarr.arr[(int) (Math.random() * tmpplayersarr.size())].respawn(pos);
-            return true;
-        }
-        return false;
-    }
-
-    private void respawn(Vector3 pos) {
-        aliveplayers.add(this);
-        init(Type.PLAYER, pos.x, pos.y, col, 0, 0, null);
-    }
 
     private static void collideBulletEnemy(Entity bullet, Entity victim) {
-        boolean bothplayers = bullet.parent.type == Type.PLAYER && victim.type == Type.PLAYER;
+        boolean bothplayers = bullet.parent.type == EntityManager.Type.PLAYER && victim.type == EntityManager.Type.PLAYER;
         if (bullet.parent != victim && !bothplayers) {
             float damagemul = bullet.gunSpecialitySlot.getMultiplier(SlotSystem.GunSpecialty.DAMAGE);
             int damage = (int) (bullet.gunSlot.type.damage * damagemul);
             victim.lives -= damage;
             if (victim.lives <= 0) {
                 victim.dead = true;
-                if (victim.type == Type.PLAYER) aliveplayers.remove(victim);
             }
             bullet.dead = true;
         }
@@ -409,17 +311,7 @@ public class Entity {
         return false;
     }
 
-    public static void render(ModelBatch mb, float interp) {
-        //TODO Use custom rendering instead of modelinstances?
-        for (int i = 0; i < aliveents.size(); i++) {
-            Entity ent = aliveents.get(i);
-            ent.setModelInstance(interp);
-            if (ent.visible)
-                mb.render(ent.modelInstance);
-        }
-    }
-
-    private void setModelInstance(float interp) {
+    public void setModelInstance(float interp) {
         modelInstance.transform.setToTranslation(interpolate(oldpos, pos, interp));
         modelInstance.transform.scl(scale);
         modelInstance.transform.rotateRad(Config.UPAXIS, radiant);
@@ -432,63 +324,7 @@ public class Entity {
         return TMP_VEC3;
     }
 
-    public static void updateall(long tick, Vector3 cam) {
-
-        //DEBUG RESPAWN
-        if (Gdx.input.isKeyPressed(Input.Keys.R) || InputHelper.players.get(0).thirdPointer.update()) {
-            respawnOnePlayer(cam);
-        }
-
-        MaxArray.MaxArrayEntity slowmoplayers = tmpplayersarr;
-        slowmoplayers.reset();
-        for (int i = 0; i < aliveplayers.size(); i++) {
-            Entity player = aliveplayers.arr[i];
-            if (player.specialitySlot.type == SlotSystem.Specialty.SLOWMO)
-                slowmoplayers.add(player);
-        }
-        for (int i = 0; i < aliveents.size(); i++) {
-            Entity ent = aliveents.get(i);
-            boolean belongsToSlowMoPlayer = slowmoplayers.contains(ent) || (ent.type == Type.BULLET && slowmoplayers.contains(ent.parent));
-            if (slowmoplayers.size() > 0 && !belongsToSlowMoPlayer) {
-                if (tick % 5 == 0)
-                    ent.updateLogic(tick / 5);
-            } else ent.updateLogic(tick);
-
-            ent.updateZ(cam);
-            ent.collisions.reset();
-        }
-        for (int i = 0; i < aliveents.size() - 1; i++) {
-            Entity one = aliveents.get(i);
-            for (int j = i + 1; j < aliveents.size(); j++) {
-                Entity two = aliveents.get(j);
-                double xdist = one.pos.x - two.pos.x;
-                double ydist = one.pos.y - two.pos.y;
-                double dist = Math.sqrt(xdist * xdist + ydist * ydist);
-                if (dist < (one.scale + two.scale) / 2.0)
-                    one.collisions.add(two);
-            }
-        }
-        for (int i = 0; i < aliveents.size(); i++) {
-            aliveents.get(i).resolveCollisions();
-        }
-        for (int i = 0; i < aliveents.size(); i++) {
-            Entity e = aliveents.get(i);
-            if (e.dead) {
-                aliveents.remove(i);
-                if (e.type != Type.PLAYER)
-                    ents.free(e);
-            }
-        }
-    }
-
-
-    public static void translateAll(float x, float y) {
-        for (int i = 0; i < aliveents.size(); i++) {
-            aliveents.get(i).translate(x, y);
-        }
-    }
-
-    private void translate(float x, float y) {
+    public void translate(float x, float y) {
         this.pos.add(x, y, 0);
         this.oldpos.add(x, y, 0);
     }

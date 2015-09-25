@@ -52,7 +52,7 @@ public class ChunkManager {
                 if (chunks[x][y].genMesh()) {
                     maxupdates -= 1;
                     if (x == 0 || y == 0 || x == CHUNKNUMS - 1 || y == CHUNKNUMS - 1)
-                        Entity.spawn(spos.x * Config.TILES_PER_CHUNK, spos.y * Config.TILES_PER_CHUNK, mi.rand);
+                        MyGdxGame.single.entitymanager.spawn(spos.x * Config.TILES_PER_CHUNK, spos.y * Config.TILES_PER_CHUNK, mi.rand);
                 }
                 if (maxupdates <= 0)
                     break;

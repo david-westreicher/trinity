@@ -13,6 +13,7 @@ import com.westreicher.birdsim.util.InterpVec3;
  */
 public class GameLoop {
     private final ChunkManager chunkManager;
+    private final EntityManager manager;
     private Camera cam;
     private Vector3 playermids = new Vector3();
     private long skipTicks = 33333333;
@@ -31,8 +32,9 @@ public class GameLoop {
         currenttick = 0;
         setFPS(Config.LOGIC_FPS);
         Gdx.app.log("player", "" + InputHelper.players.size());
+        manager = MyGdxGame.single.entitymanager;
         for (int i = 0; i < InputHelper.players.size(); i++) {
-            Entity.spawnPlayer(i);
+            manager.spawnPlayer(i);
         }
     }
 
@@ -70,17 +72,17 @@ public class GameLoop {
             dy = (int) Math.signum(virtualcam.pos.y);
         virtualcam.pos.x -= dx * Config.TILES_PER_CHUNK;
         virtualcam.pos.y -= dy * Config.TILES_PER_CHUNK;
-        Entity.translateAll(-dx * Config.TILES_PER_CHUNK, -dy * Config.TILES_PER_CHUNK);
+        manager.translateAll(-dx * Config.TILES_PER_CHUNK, -dy * Config.TILES_PER_CHUNK);
         chunkManager.updateDirection(dx, dy);
-        Entity.updateall(currenttick, virtualcam.pos);
+        manager.updateall(currenttick, virtualcam.pos);
 
         playermids.set(0, 0, 0);
-        for (int i = 0; i < Entity.aliveplayers.size(); i++) {
-            Entity player = Entity.aliveplayers.arr[i];
+        for (int i = 0; i < manager.aliveplayers.size(); i++) {
+            Entity player = manager.aliveplayers.arr[i];
             playermids.add(player.pos);
         }
-        if (Entity.aliveplayers.size() > 0)
-            playermids.scl(1f / Entity.aliveplayers.size());
+        if (manager.aliveplayers.size() > 0)
+            playermids.scl(1f / manager.aliveplayers.size());
 
         virtualcam.resetOldPos();
         virtualcam.pos.x += (playermids.x - virtualcam.pos.x) / 10.0f;

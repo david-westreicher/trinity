@@ -102,7 +102,7 @@ public class MyGdxGame extends ApplicationAdapter {
             downs.end();
             downs.draw(viewport.getScreenWidth(), viewport.getScreenHeight());
         } else { // TODO isTouch?
-            drawThumbs();
+            drawThumbs(viewport.getScreenWidth(), viewport.getScreenHeight());
         }
 
         if (!InputHelper.players.get(0).firstPointer.update() && !InputHelper.players.get(0).secondPointer.update()) {
@@ -130,21 +130,18 @@ public class MyGdxGame extends ApplicationAdapter {
         this.state = s;
     }
 
-    private void drawThumbs() {
+    private void drawThumbs(int w, int h) {
         InputHelper firstPointer = InputHelper.players.get(0).firstPointer;
         InputHelper secondPointer = InputHelper.players.get(0).secondPointer;
         InputHelper thirdPointer = InputHelper.players.get(0).thirdPointer;
-        spritebatch.begin();
+
         int size = 50;
-        if (firstPointer.isDown())
-            spritebatch.draw(thumbTex,
-                    firstPointer.getStartX() - size,
-                    viewport.getScreenHeight() - firstPointer.getStartY() - size
-                    , size * 2, size * 2, 0, 0, 1, 1);
-        if (secondPointer.isDown())
-            spritebatch.draw(thumbTex, secondPointer.getStartX() - size, viewport.getScreenHeight() - secondPointer.getStartY() - size, size * 2, size * 2, 0, 0, 1, 1);
+
+        spritebatch.begin();
+        spritebatch.draw(thumbTex, firstPointer.getStartX(w) - size, h - firstPointer.getStartY(h) - size, size * 2, size * 2, 0, 0, 1, 1);
+        spritebatch.draw(thumbTex, secondPointer.getStartX(w) - size, h - secondPointer.getStartY(h) - size, size * 2, size * 2, 0, 0, 1, 1);
         if (thirdPointer.isDown()) {
-            spritebatch.draw(thumbTex, thirdPointer.getStartX() - size, viewport.getScreenHeight() - thirdPointer.getStartY() - size, size * 2, size * 2, 0, 0, 1, 1);
+            spritebatch.draw(thumbTex, thirdPointer.getStartX(w) - size, h - thirdPointer.getStartY(h) - size, size * 2, size * 2, 0, 0, 1, 1);
         }
         spritebatch.end();
     }

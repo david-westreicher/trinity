@@ -92,12 +92,14 @@ public class MaxArray {
         }
 
         public void remove(Entity e) {
-            int start = pointer + 1;
+            int start = -1;
             for (int i = 0; i < pointer; i++)
                 if (arr[i] == e) {
                     start = i;
                     break;
                 }
+            if (start == -1)
+                return;
             for (int i = start; i < pointer; i++) {
                 arr[i] = arr[i + 1];
             }

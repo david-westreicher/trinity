@@ -12,7 +12,6 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.loader.ObjLoader;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Pool;
 import com.westreicher.birdsim.util.InputHelper;
 import com.westreicher.birdsim.util.MaxArray;
@@ -32,87 +31,7 @@ public class Entity {
 
     private enum Type {ENEMY, BULLET, ITEM, PLAYER}
 
-    ;
-
-    private static final Specialty[] specialties = Specialty.values();
-
-    private enum Specialty {
-        FASTER, SLOWMO, INVISIBLLE;
-    }
-
-    ;
-
-    private static final GunSpecialty[] gunspecialties = GunSpecialty.values();
-
-    private enum GunSpecialty {
-        DAMAGE, SPEED, FREQUENCY;
-    }
-
-    ;
-
-    public static class Slot<T> {
-        private T type;
-        private int multiplier = 1;
-
-        public Slot(T type) {
-            this.type = type;
-        }
-
-        public Slot() {
-            type = null;
-        }
-
-        public int getMultiplier(T t) {
-            if (type == t)
-                return multiplier + 1;
-            else
-                return 1;
-        }
-
-        public void set(Slot<T> otherslot) {
-            type = otherslot.type;
-            multiplier = otherslot.multiplier;
-        }
-
-        public String toString() {
-            StringBuilder sb = new StringBuilder();
-            if (type == null)
-                sb.append("empty");
-            else
-                sb.append(type.getClass().getSimpleName() + ":" + type.toString() + ": " + multiplier);
-            return sb.toString();
-        }
-    }
-
-
-    private static final GunType[] guntypes = GunType.values();
-
-    private enum GunType {
-        ROCKETGUN(5, 10, 1, 25, 4, 100), MACHINEGUN(1, 0, 2, 5, 2, 0);
-
-        private final int damage;
-        private final float speed;
-        private final float scale;
-        private final int worlddamage;
-        private final int frequency;
-        private final float maxdistance;
-
-        GunType(int damage, int worlddamage, float speed, int frequency, float scale, float maxdistance) {
-            this.damage = damage;
-            this.worlddamage = worlddamage;
-            this.speed = speed;
-            this.frequency = frequency;
-            this.scale = scale;
-            this.maxdistance = maxdistance;
-        }
-    }
-
-    ;
-    private Slot<Specialty> specialitySlot = new Slot<Specialty>();
-    private Slot<GunType> gunSlot = new Slot<GunType>(GunType.MACHINEGUN);
-    private Slot<GunSpecialty> gunSpecialitySlot = new Slot<GunSpecialty>();
-
-    public enum ColorAttr {
+    private enum ColorAttr {
         RED(new Color(1, 0, 0, 1)), VIOLET(new Color(1, 0, 1, 1)), YELLOW(new Color(0.9f, 1, 0, 1)), TEAL(new Color(1, 0.2f, 0.2f, 1)), GOLD(new Color(1, 0.5f, 0.5f, 1)), BLUE(new Color(0, 0, 1, 1));
         private final ColorAttribute attr;
 
@@ -121,7 +40,6 @@ public class Entity {
         }
     }
 
-    ;
 
     private static final float EDGE = Config.TILES_PER_CHUNK * Config.CHUNKNUMS / 2;
     private static final ColorAttr[] colors = ColorAttr.values();
@@ -143,6 +61,9 @@ public class Entity {
     private float radiant;
     private static ArrayList<Entity> aliveents = new ArrayList<Entity>();
     private Entity parent;
+    public final SlotSystem.Slot<SlotSystem.Specialty> specialitySlot = new SlotSystem.Slot<SlotSystem.Specialty>();
+    public final SlotSystem.Slot<SlotSystem.GunType> gunSlot = new SlotSystem.Slot<SlotSystem.GunType>();
+    public final SlotSystem.Slot<SlotSystem.GunSpecialty> gunSpecialitySlot = new SlotSystem.Slot<SlotSystem.GunSpecialty>();
     private MaxArray.MaxArrayEntity collisions = new MaxArray.MaxArrayEntity(100);
     public static MaxArray.MaxArrayEntity tmpplayersarr = new MaxArray.MaxArrayEntity(4);
     public static MaxArray.MaxArrayEntity aliveplayers = new MaxArray.MaxArrayEntity(4);
@@ -192,9 +113,9 @@ public class Entity {
     }
 
     public void init(Type type, float posx, float posy, ColorAttr col, float xspeed, float yspeed, Entity parent) {
-        specialitySlot.type = null;
-        gunSlot.type = null;
-        gunSpecialitySlot.type = null;
+        specialitySlot.reset();
+        gunSpecialitySlot.reset();
+        gunSlot.reset();
         this.dead = false;
         this.type = type;
         this.pos.set(posx, posy, 0);
@@ -209,13 +130,13 @@ public class Entity {
                 this.speed.set((float) Math.random() - 0.5f, (float) Math.random() - 0.5f, 0);
                 m = playerModel;
                 scale = 4f;
-                gunSlot.type = guntypes[(int) (Math.random() * guntypes.length)];
+                gunSlot.type = SlotSystem.randomGun();
                 break;
             case BULLET:
                 gunSlot.type = parent.gunSlot.type;
                 gunSpecialitySlot.set(parent.gunSpecialitySlot);
                 this.speed.set(xspeed, yspeed, 0);
-                scale = gunSlot.type.scale * gunSpecialitySlot.getMultiplier(GunSpecialty.DAMAGE);
+                scale = gunSlot.type.scale * gunSpecialitySlot.getMultiplier(SlotSystem.GunSpecialty.DAMAGE);
                 m = bulletModel;
                 MyGdxGame.single.playSound(SoundPlayer.Sounds.SHOT1, pos);
                 radiant = -(float) Math.atan2(-speed.y, speed.x);
@@ -229,7 +150,7 @@ public class Entity {
                 this.speed.set(0, 0, 0);
                 scale = 6f;
                 m = playerModel;
-                gunSlot.type = GunType.MACHINEGUN;
+                gunSlot.type = SlotSystem.GunType.MACHINEGUN;
                 gunSlot.multiplier = 1;
                 // specialitySlot.type = Specialty.SLOWMO;
                 // specialitySlot.multiplier = 1000;
@@ -245,7 +166,7 @@ public class Entity {
     private void updateLogic(long tick) {
         oldpos.set(pos);
         ChunkManager chunkManager = MyGdxGame.single.chunkManager;
-        int freq = gunSpecialitySlot.getMultiplier(GunSpecialty.FREQUENCY);
+        int freq = gunSpecialitySlot.getMultiplier(SlotSystem.GunSpecialty.FREQUENCY);
         switch (type) {
             case ENEMY:
                 if (!tryToMove(speed.x, speed.y, true)) {
@@ -259,7 +180,7 @@ public class Entity {
                     for (int i = 0; i < aliveplayers.size(); i++) {
                         Entity player = aliveplayers.arr[i];
                         float dist = player.pos.dst(pos);
-                        if (player.specialitySlot.type == Specialty.INVISIBLLE)
+                        if (player.specialitySlot.type == SlotSystem.Specialty.INVISIBLLE)
                             continue;
                         if (dist < shortestDist) {
                             shortestDist = dist;
@@ -269,7 +190,7 @@ public class Entity {
                     if (closestplayer != null) {
                         TMP_VEC3.set(closestplayer.pos).sub(pos);
                         TMP_VEC3.nor();
-                        TMP_VEC3.scl(gunSpecialitySlot.getMultiplier(GunSpecialty.SPEED));
+                        TMP_VEC3.scl(gunSpecialitySlot.getMultiplier(SlotSystem.GunSpecialty.SPEED));
                         shoot(pos.x, pos.y, TMP_VEC3.x, TMP_VEC3.y, col, this);
                     }
                 }
@@ -280,7 +201,7 @@ public class Entity {
                     dead = true;
                     MyGdxGame.single.playSound(SoundPlayer.Sounds.SHOT2, pos);
                     if (gunSlot.type.worlddamage > 0)
-                        chunkManager.explode2(pos, gunSlot.type.worlddamage * gunSpecialitySlot.getMultiplier(GunSpecialty.DAMAGE));
+                        chunkManager.explode2(pos, gunSlot.type.worlddamage * gunSpecialitySlot.getMultiplier(SlotSystem.GunSpecialty.DAMAGE));
                 }
                 break;
             case PLAYER:
@@ -289,7 +210,7 @@ public class Entity {
                 if (firstPointer.update()) {
                     float rad = firstPointer.getRadiant();
                     this.radiant = rad;
-                    float faster = specialitySlot.type == Specialty.FASTER ? 1.5f : 1;
+                    float faster = specialitySlot.type == SlotSystem.Specialty.FASTER ? 1.5f : 1;
                     tryToMove((float) Math.cos(rad) * Config.MOVE_SPEED * faster, -(float) Math.sin(rad) * Config.MOVE_SPEED * faster, false);
                 }
                 //Gdx.app.log("game", "" +"");
@@ -298,7 +219,7 @@ public class Entity {
                         float radiant = secondPointer.getRadiant();
                         float tmpradiant = radiant;
                         for (int i = 0; i < gunSlot.multiplier; i++) {
-                            float speed = gunSpecialitySlot.getMultiplier(GunSpecialty.SPEED);
+                            float speed = gunSpecialitySlot.getMultiplier(SlotSystem.GunSpecialty.SPEED);
                             float xspeed = (float) Math.cos(tmpradiant) * speed;
                             float yspeed = (float) Math.sin(tmpradiant) * speed;
                             Entity.shoot(pos.x, pos.y, xspeed, yspeed, Entity.ColorAttr.RED, this);
@@ -403,7 +324,7 @@ public class Entity {
                 return;
             }
         } else if (poss == 2) {
-            Specialty randomSpecialty = specialties[(int) (Math.random() * specialties.length)];
+            SlotSystem.Specialty randomSpecialty = SlotSystem.randomSpecialty();
             Gdx.app.log("item", randomSpecialty.toString());
             if (player.specialitySlot.type == randomSpecialty) {
                 player.specialitySlot.multiplier += 1000;
@@ -412,7 +333,7 @@ public class Entity {
                 player.specialitySlot.multiplier = 1000;
             }
         } else if (poss == 1) {
-            GunSpecialty randomSpecialty = gunspecialties[(int) (Math.random() * gunspecialties.length)];
+            SlotSystem.GunSpecialty randomSpecialty = SlotSystem.randomGunSpecialty();
             Gdx.app.log("item", randomSpecialty.toString());
             if (player.gunSpecialitySlot.type == randomSpecialty) {
                 player.gunSpecialitySlot.multiplier++;
@@ -421,7 +342,7 @@ public class Entity {
                 player.gunSpecialitySlot.multiplier = 1;
             }
         } else {
-            GunType randomgun = guntypes[(int) (Math.random() * guntypes.length)];
+            SlotSystem.GunType randomgun = SlotSystem.randomGun();
             Gdx.app.log("item", randomgun.toString());
             if (player.gunSlot.type == randomgun) {
                 player.gunSlot.multiplier++;
@@ -456,7 +377,7 @@ public class Entity {
     private static void collideBulletEnemy(Entity bullet, Entity victim) {
         boolean bothplayers = bullet.parent.type == Type.PLAYER && victim.type == Type.PLAYER;
         if (bullet.parent != victim && !bothplayers) {
-            float damagemul = bullet.gunSpecialitySlot.getMultiplier(GunSpecialty.DAMAGE);
+            float damagemul = bullet.gunSpecialitySlot.getMultiplier(SlotSystem.GunSpecialty.DAMAGE);
             int damage = (int) (bullet.gunSlot.type.damage * damagemul);
             victim.lives -= damage;
             if (victim.lives <= 0) {
@@ -522,7 +443,7 @@ public class Entity {
         slowmoplayers.reset();
         for (int i = 0; i < aliveplayers.size(); i++) {
             Entity player = aliveplayers.arr[i];
-            if (player.specialitySlot.type == Specialty.SLOWMO)
+            if (player.specialitySlot.type == SlotSystem.Specialty.SLOWMO)
                 slowmoplayers.add(player);
         }
         for (int i = 0; i < aliveents.size(); i++) {

@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Vector3;
  * Created by david on 9/17/15.
  */
 public class Config {
-    public static final int LOGIC_FPS = 60;
+    public static final int LOGIC_FPS = 50;
     public static final boolean POST_PROCESSING = true;
     public static final boolean DEBUG = true;
     public static final int TILES_PER_CHUNK = 40;

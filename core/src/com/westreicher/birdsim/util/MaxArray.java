@@ -1,9 +1,6 @@
 package com.westreicher.birdsim.util;
 
-import com.westreicher.birdsim.Entity;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.westreicher.birdsim.entities.Entity;
 
 /**
  * Created by david on 9/14/15.

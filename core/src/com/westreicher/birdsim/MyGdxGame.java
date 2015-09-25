@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.westreicher.birdsim.entities.EntityManager;
 import com.westreicher.birdsim.util.InputHelper;
 import com.westreicher.birdsim.util.ManagedRessources;
 import com.westreicher.birdsim.util.RenderToTexture.DownSampler;
@@ -32,7 +33,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
     private SoundPlayer soundplayer;
     private GameLoop gameloop;
-    public EntityManager entitymanager;
+    public com.westreicher.birdsim.entities.EntityManager entitymanager;
 
 
     @Override
@@ -95,7 +96,7 @@ public class MyGdxGame extends ApplicationAdapter {
         spritebatch.begin();
         int size = 50;
         for (int i = 0; i < entitymanager.aliveplayers.size(); i++) {
-            Entity ent = entitymanager.aliveplayers.arr[i];
+            com.westreicher.birdsim.entities.Entity ent = entitymanager.aliveplayers.arr[i];
             for (int j = 0; j < ent.lives; j++) {
                 spritebatch.draw(thumbTex, size * j, size * i, size * 2, size * 2);
             }

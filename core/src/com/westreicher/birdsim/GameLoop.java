@@ -1,10 +1,9 @@
 package com.westreicher.birdsim;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Vector3;
+import com.westreicher.birdsim.entities.EntityManager;
 import com.westreicher.birdsim.util.InputHelper;
 import com.westreicher.birdsim.util.InterpVec3;
 
@@ -78,7 +77,7 @@ public class GameLoop {
 
         playermids.set(0, 0, 0);
         for (int i = 0; i < manager.aliveplayers.size(); i++) {
-            Entity player = manager.aliveplayers.arr[i];
+            com.westreicher.birdsim.entities.Entity player = manager.aliveplayers.arr[i];
             playermids.add(player.pos);
         }
         if (manager.aliveplayers.size() > 0)

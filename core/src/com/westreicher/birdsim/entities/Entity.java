@@ -1,9 +1,13 @@
-package com.westreicher.birdsim;
+package com.westreicher.birdsim.entities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
+import com.westreicher.birdsim.ChunkManager;
+import com.westreicher.birdsim.Config;
+import com.westreicher.birdsim.MyGdxGame;
+import com.westreicher.birdsim.SlotSystem;
 import com.westreicher.birdsim.util.InputHelper;
 import com.westreicher.birdsim.util.MaxArray;
 import com.westreicher.birdsim.util.SoundPlayer;

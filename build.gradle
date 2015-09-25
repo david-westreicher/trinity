@@ -7,7 +7,7 @@ buildscript {
     dependencies {
         classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
         classpath 'com.android.tools.build:gradle:1.2.3'
-        classpath 'net.onedaybeard.artemis:artemis-odb-gradle-plugin:0.11.4'
+        classpath 'net.onedaybeard.artemis:artemis-odb-gradle-plugin:0.13.1'
     }
 }
 
@@ -23,8 +23,7 @@ allprojects {
         box2DLightsVersion = '1.4'
         ashleyVersion = '1.6.0'
         aiVersion = '1.5.0'
-        artemisVersion = '0.11.4'
-        artemisContribVersion = '0.11.4'
+        artemisVersion = '0.13.1'
     }
 
     repositories {
@@ -86,7 +85,7 @@ project(":core") {
     }
 
     sourceSets {
-        main  {compileClasspath += [configurations.provided] }
+        main { compileClasspath += [configurations.provided] }
     }
 
     dependencies {
@@ -98,11 +97,6 @@ project(":core") {
         compile "net.onedaybeard.artemis:artemis-odb:$artemisVersion"
         // Artemis-odb annotation processor (see https://github.com/junkdog/artemis-odb/wiki/EntityFactory)
         provided "net.onedaybeard.artemis:artemis-odb-processor:$artemisVersion"
-
-        // Artemis-odb bonus functionality (systems, events, components).
-        compile "net.mostlyoriginal.artemis-odb:contrib-core:$artemisContribVersion"
-        compile "net.mostlyoriginal.artemis-odb:contrib-jam:$artemisContribVersion"
-        compile "net.mostlyoriginal.artemis-odb:contrib-eventbus:$artemisContribVersion"
     }
 }
 

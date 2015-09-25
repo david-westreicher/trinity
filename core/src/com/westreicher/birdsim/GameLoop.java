@@ -100,4 +100,8 @@ public class GameLoop {
     public float getInterp() {
         return interpolation;
     }
+
+    public void resetInterp() {
+        nextTick = System.nanoTime();
+    }
 }

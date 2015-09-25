@@ -37,6 +37,12 @@ public class MyGdxGame extends ApplicationAdapter {
     private GameLoop gameloop;
     public com.westreicher.birdsim.entities.EntityManager entitymanager;
 
+    private enum State {
+        PAUSE,
+        RUN
+    }
+
+    private State state = State.RUN;
 
     @Override
     public void resize(int width, int height) {
@@ -75,12 +81,23 @@ public class MyGdxGame extends ApplicationAdapter {
     @Override
     public void render() {
         //fps.log();
-        gameloop.tick();
+
+        switch (state) {
+            case RUN:
+                gameloop.tick();
+                break;
+            case PAUSE:
+                gameloop.resetInterp();
+                break;
+            default:
+                break;
+        }
 
         float interp = gameloop.getInterp();
         Gdx.gl.glClearColor(0, 0, 0, 1);
         //Gdx.gl.glClearColor(0.251f, 0.643f, 0.875f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+
         if (isDesktop) downs.begin();
         mb.begin(cam);
         entitymanager.render(mb, interp);
@@ -90,8 +107,15 @@ public class MyGdxGame extends ApplicationAdapter {
             downs.end();
             downs.draw(viewport.getScreenWidth(), viewport.getScreenHeight());
         } else { // TODO isTouch?
-            drawThumbs();
+            drawThumbs(viewport.getScreenWidth(), viewport.getScreenHeight());
         }
+
+        if (!InputHelper.players.get(0).firstPointer.update() && !InputHelper.players.get(0).secondPointer.update()) {
+            setGameState(State.PAUSE);
+        } else if (state != State.RUN) {
+            setGameState(State.RUN);
+        }
+
         drawLives();
         artemis.tick();
     }
@@ -108,18 +132,22 @@ public class MyGdxGame extends ApplicationAdapter {
         spritebatch.end();
     }
 
-    private void drawThumbs() {
+    public void setGameState(State s) {
+        this.state = s;
+    }
+
+    private void drawThumbs(int w, int h) {
         InputHelper firstPointer = InputHelper.players.get(0).firstPointer;
         InputHelper secondPointer = InputHelper.players.get(0).secondPointer;
         InputHelper thirdPointer = InputHelper.players.get(0).thirdPointer;
-        spritebatch.begin();
+
         int size = 50;
-        if (firstPointer.isDown())
-            spritebatch.draw(thumbTex, firstPointer.getStartX() - size, viewport.getScreenHeight() - firstPointer.getStartY() - size, size * 2, size * 2, 0, 0, 1, 1);
-        if (secondPointer.isDown())
-            spritebatch.draw(thumbTex, secondPointer.getStartX() - size, viewport.getScreenHeight() - secondPointer.getStartY() - size, size * 2, size * 2, 0, 0, 1, 1);
+
+        spritebatch.begin();
+        spritebatch.draw(thumbTex, firstPointer.getStartX(w) - size, h - firstPointer.getStartY(h) - size, size * 2, size * 2, 0, 0, 1, 1);
+        spritebatch.draw(thumbTex, secondPointer.getStartX(w) - size, h - secondPointer.getStartY(h) - size, size * 2, size * 2, 0, 0, 1, 1);
         if (thirdPointer.isDown()) {
-            spritebatch.draw(thumbTex, thirdPointer.getStartX() - size, viewport.getScreenHeight() - thirdPointer.getStartY() - size, size * 2, size * 2, 0, 0, 1, 1);
+            spritebatch.draw(thumbTex, thirdPointer.getStartX(w) - size, h - thirdPointer.getStartY(h) - size, size * 2, size * 2, 0, 0, 1, 1);
         }
         spritebatch.end();
     }

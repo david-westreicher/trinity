@@ -10,9 +10,15 @@ public class SaveMouse extends InputHelper {
     private final int index;
     private final Viewport v;
 
-    public SaveMouse(int index, Viewport v) {
+    private final boolean isFix;
+
+    public SaveMouse(int index, Viewport v, int x, int y) {
         this.index = index;
         this.v = v;
+        this.isFix = (x != 0 && y != 0);
+
+        startX = x;
+        startY = y;
     }
 
     public boolean update() {
@@ -20,12 +26,14 @@ public class SaveMouse extends InputHelper {
         int height = v.getScreenHeight();
         if (Gdx.input.isTouched(index)) {
             if (!super.isDown()) {
-                int currentx = Gdx.input.getX(index);
-                int currenty = Gdx.input.getY(index);
-                if (Math.abs(currentx - width / 2) < width / 2 - 100
+                if (!isFix){
+                    int currentx = Gdx.input.getX(index);
+                    int currenty = Gdx.input.getY(index);
+                    if (Math.abs(currentx - width / 2) < width / 2 - 100
                         && Math.abs(currenty - height / 2) < height / 2 - 100) {
-                    startX = currentx;
-                    startY = currenty;
+                        startX = currentx;
+                        startY = currenty;
+                    }
                 }
             }
             super.setDown(true);
@@ -36,11 +44,11 @@ public class SaveMouse extends InputHelper {
     }
 
     public int relx() {
-        return (Gdx.input.getX(index) - startX);
+        return (Gdx.input.getX(index) - getStartX(v.getScreenWidth()));
     }
 
     public int rely() {
-        return (Gdx.input.getY(index) - startY);
+        return (Gdx.input.getY(index) - getStartY(v.getScreenHeight()));
     }
 
 }

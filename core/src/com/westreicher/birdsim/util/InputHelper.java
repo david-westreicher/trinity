@@ -15,6 +15,11 @@ import java.util.ArrayList;
  */
 public abstract class InputHelper {
 
+    // giving as %
+    private static final int center1X = 15;
+    private static final int center2X = 85;
+
+    private static final int centerY = 70;
 
     public static class PlayerInput {
         public InputHelper firstPointer;
@@ -43,7 +48,7 @@ public abstract class InputHelper {
                 players.add(new PlayerInput(new Keyboard(0), new Keyboard(1)));
             }
         } else {
-            players.add(new PlayerInput(new SaveMouse(0, viewport), new SaveMouse(1, viewport), new SaveMouse(2, viewport)));
+            players.add(new PlayerInput(new SaveMouse(0, viewport, center1X, centerY), new SaveMouse(1, viewport, center2X, centerY), new SaveMouse(2, viewport, 0, 0)));
         }
     }
 
@@ -69,12 +74,12 @@ public abstract class InputHelper {
         return (float) Math.atan2(-rely(), relx());
     }
 
-    public int getStartX() {
-        return startX;
+    public int getStartX(int w) {
+        return (w * startX) / 100;
     }
 
-    public int getStartY() {
-        return startY;
+    public int getStartY(int h) {
+        return (h * startY) / 100;
     }
 
     public static class DummyInput extends InputHelper {

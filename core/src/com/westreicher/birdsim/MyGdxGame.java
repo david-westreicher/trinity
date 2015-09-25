@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.entities.EntityManager;
 import com.westreicher.birdsim.util.InputHelper;
 import com.westreicher.birdsim.util.ManagedRessources;
@@ -30,6 +31,7 @@ public class MyGdxGame extends ApplicationAdapter {
     private Texture thumbTex;
     private DownSampler downs = null;
     public static MyGdxGame single = null;
+    private Artemis artemis;
 
     private SoundPlayer soundplayer;
     private GameLoop gameloop;
@@ -66,6 +68,7 @@ public class MyGdxGame extends ApplicationAdapter {
         soundplayer = new SoundPlayer();
         InputHelper.init(isDesktop, viewport);
         gameloop = new GameLoop(cam, chunkManager);
+        artemis = new Artemis();
     }
 
 
@@ -90,6 +93,7 @@ public class MyGdxGame extends ApplicationAdapter {
             drawThumbs();
         }
         drawLives();
+        artemis.tick();
     }
 
     private void drawLives() {
@@ -128,6 +132,7 @@ public class MyGdxGame extends ApplicationAdapter {
         Gdx.app.log("game", "dispose");
         chunkManager.dispose();
         soundplayer.dispose();
+        artemis.dispose();
     }
 
     public void playSound(SoundPlayer.Sounds s, Vector3 pos) {

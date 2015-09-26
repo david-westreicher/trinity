@@ -16,7 +16,7 @@ public class Accelerometer extends InputHelper {
     private int deltay;
     private int deltax;
     private static final Matrix4 MATRIX = new Matrix4();
-    private static final Vector3 DIRECTION = new Vector3();
+    private static final Vector3 DIRECTION = new Vector3(0, 0, -1).nor();
     private static final Vector3 TEMP_DIR = new Vector3();
 
     public Accelerometer(int index, Viewport v) {
@@ -33,46 +33,14 @@ public class Accelerometer extends InputHelper {
         Gdx.input.getRotationMatrix(MATRIX.val);
         TEMP_DIR.set(DIRECTION);
         TEMP_DIR.mul(MATRIX);
-
-        if (Gdx.graphics.getFrameId() % 100 == 0)
-            Gdx.app.log("game", "tmp dir: " + TEMP_DIR.toString());
-
-        if (Math.abs(accelX) > 0.3f && Math.abs(accelY) > 0.3f){
-            if (accelX < -1){
-                deltax = 0;
-                deltay = 1;
-            }
-
-            if (accelY < -1 ){
-                deltax = -1;
-                deltay = 0;
-            }
-
-            if (accelX > +1 ){
-                deltax = 0;
-                deltay = -1;
-            }
-
-            if (accelY > +1){
-                deltax = 1;
-                deltay = 0;
-            }
-//
-//            Gdx.app.log("game", "Xaxis: " + Float.toString(accelX));
-//            Gdx.app.log("game", "Yaxis: " + Float.toString(accelY));
-
-//        if(Gdx.input.isPeripheralAvailable(Input.Peripheral.Vibrator)){
-//            if(accelY > 7){
-//                Gdx.input.vibrate(100);
-//            }
-//        }
-        }
+        deltax = (int) (TEMP_DIR.y * 100);
+        deltay = (int) (TEMP_DIR.x * 100);
         return true;
     }
 
     @Override
     public int relx() {
-        return deltax;
+        return -deltax;
     }
 
     @Override

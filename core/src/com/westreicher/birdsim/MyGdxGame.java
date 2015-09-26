@@ -74,7 +74,7 @@ public class MyGdxGame extends ApplicationAdapter {
         soundplayer = new SoundPlayer();
         InputHelper.init(isDesktop, viewport);
         gameloop = new GameLoop(cam, chunkManager);
-        artemis = new Artemis();
+        artemis = Artemis.init();
     }
 
 
@@ -117,7 +117,7 @@ public class MyGdxGame extends ApplicationAdapter {
         }
 
         drawLives();
-        artemis.tick();
+        artemis.process();
     }
 
     private void drawLives() {

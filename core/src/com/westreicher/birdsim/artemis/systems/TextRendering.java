@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.westreicher.birdsim.artemis.components.Position2;
 import com.westreicher.birdsim.artemis.components.StaticText;
+import com.westreicher.birdsim.artemis.factories.TextEntity;
 
 /**
  * Created by david on 9/25/15.
@@ -17,7 +18,7 @@ import com.westreicher.birdsim.artemis.components.StaticText;
 @Wire
 public class TextRendering extends EntityProcessingSystem {
 
-    private com.westreicher.birdsim.artemis.factories.TextEntity te;
+    private TextEntity te;
     private SpriteBatch spritebatch;
     private BitmapFont font;
 

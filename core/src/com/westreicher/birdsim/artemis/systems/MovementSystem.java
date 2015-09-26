@@ -18,6 +18,7 @@ public class MovementSystem extends EntityProcessingSystem {
 
     ComponentMapper<Position2> positionMapper;
 
+
     @Override
     protected void process(Entity e) {
         Position2 pos = positionMapper.get(e);

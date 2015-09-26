@@ -3,6 +3,8 @@ biomes
 particle effects
 respawn in death order
 differentiate players and enemies
+vibrate on shot
+use accelerometer
 Items:
     multiple shoot (general or ...) +1
     slowmo

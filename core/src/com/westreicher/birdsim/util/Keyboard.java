@@ -23,7 +23,6 @@ public class Keyboard extends InputHelper {
             new int[]{0, -1},//DOWN
     };
 
-
     public Keyboard(int controls) {
         this.controls = controls;
         startX = -100;

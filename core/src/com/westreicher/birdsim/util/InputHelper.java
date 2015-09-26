@@ -1,6 +1,7 @@
 package com.westreicher.birdsim.util;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -48,7 +49,11 @@ public abstract class InputHelper {
                 players.add(new PlayerInput(new Keyboard(0), new Keyboard(1)));
             }
         } else {
-            players.add(new PlayerInput(new SaveMouse(0, viewport, center1X, centerY), new SaveMouse(1, viewport, center2X, centerY), new SaveMouse(2, viewport, 0, 0)));
+            if (Gdx.input.isPeripheralAvailable(Input.Peripheral.Accelerometer)){
+                players.add(new PlayerInput(new Accelerometer(0, viewport), new SaveMouse(1, viewport, center2X, centerY), new SaveMouse(2, viewport, 0, 0)));
+            } else {
+                players.add(new PlayerInput(new SaveMouse(0, viewport, center1X, centerY), new SaveMouse(1, viewport, center2X, centerY), new SaveMouse(2, viewport, 0, 0)));
+            }
         }
     }
 

@@ -12,6 +12,8 @@ public class AndroidLauncher extends AndroidApplication {
 		super.onCreate(savedInstanceState);
 		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
 		config.useImmersiveMode = true;
+		config.useAccelerometer = true;
+		config.useCompass = true;
 		initialize(new MyGdxGame(), config);
 	}
 }

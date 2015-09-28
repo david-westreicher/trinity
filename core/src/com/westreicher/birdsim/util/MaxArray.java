@@ -1,7 +1,5 @@
 package com.westreicher.birdsim.util;
 
-import com.westreicher.birdsim.entities.Entity;
-
 /**
  * Created by david on 9/14/15.
  */
@@ -74,39 +72,5 @@ public class MaxArray {
             arr[pointer++] = x3;
         }
 
-    }
-
-    public static class MaxArrayEntity extends MaxArray {
-        public final Entity[] arr;
-
-        public MaxArrayEntity(int maxsize) {
-            super(maxsize);
-            arr = new Entity[maxsize];
-        }
-
-        public void add(Entity x1) {
-            arr[pointer++] = x1;
-        }
-
-        public void remove(Entity e) {
-            int start = -1;
-            for (int i = 0; i < pointer; i++)
-                if (arr[i] == e) {
-                    start = i;
-                    break;
-                }
-            if (start == -1)
-                return;
-            for (int i = start; i < pointer; i++) {
-                arr[i] = arr[i + 1];
-            }
-            arr[--pointer] = null;
-        }
-
-        public boolean contains(Entity ent) {
-            for (int i = 0; i < pointer; i++)
-                if (arr[i] == ent) return true;
-            return false;
-        }
     }
 }

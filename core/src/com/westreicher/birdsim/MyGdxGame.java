@@ -16,7 +16,6 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.entities.EntityManager;
 import com.westreicher.birdsim.util.InputHelper;
-import com.westreicher.birdsim.util.ManagedRessources;
 import com.westreicher.birdsim.util.RenderToTexture.DownSampler;
 import com.westreicher.birdsim.util.SoundPlayer;
 
@@ -63,13 +62,11 @@ public class MyGdxGame extends ApplicationAdapter {
     @Override
     public void create() {
         artemis = Artemis.init();
-        ManagedRessources.init();
     }
 
     public void createOld() {
         isDesktop = Gdx.app.getType() == Application.ApplicationType.Desktop || Gdx.app.getType() == Application.ApplicationType.WebGL;
         single = this;
-        ManagedRessources.init();
         Gdx.app.log("game", "create");
         Gdx.app.log("game", "GL ES 3.0 supported: " + (Gdx.gl30 != null));
         cam = new PerspectiveCamera();
@@ -117,7 +114,7 @@ public class MyGdxGame extends ApplicationAdapter {
         mb.begin(cam);
         entitymanager.render(mb, interp);
         mb.end();
-        chunkManager.render(cam);
+        chunkManager.render(cam, null);
         if (isDesktop) {
             downs.end();
             downs.draw(viewport.getScreenWidth(), viewport.getScreenHeight());
@@ -168,7 +165,6 @@ public class MyGdxGame extends ApplicationAdapter {
 
     @Override
     public void dispose() {
-        ManagedRessources.dispose();
         if (entitymanager != null) entitymanager.dispose();
         if (mb != null) mb.dispose();
         Gdx.app.log("game", "dispose");

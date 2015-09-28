@@ -7,12 +7,16 @@ import com.artemis.utils.EntityBuilder;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
-import com.westreicher.birdsim.artemis.components.RenderPosition;
-import com.westreicher.birdsim.artemis.components.MapCoordinate;
-import com.westreicher.birdsim.artemis.components.Speed2;
 import com.westreicher.birdsim.artemis.factories.UberFactory;
 import com.westreicher.birdsim.artemis.managers.ModelManager;
-import com.westreicher.birdsim.artemis.systems.*;
+import com.westreicher.birdsim.artemis.managers.ShaderManager;
+import com.westreicher.birdsim.artemis.systems.AdjustHeight;
+import com.westreicher.birdsim.artemis.systems.Interpolate;
+import com.westreicher.birdsim.artemis.systems.MovementSystem;
+import com.westreicher.birdsim.artemis.systems.RenderChunks;
+import com.westreicher.birdsim.artemis.systems.RenderModels;
+import com.westreicher.birdsim.artemis.systems.StartRendering;
+import com.westreicher.birdsim.artemis.systems.TranslateMapCoordinates;
 import com.westreicher.birdsim.util.InputHelper;
 
 /**
@@ -32,6 +36,7 @@ public class Artemis extends World {
         WorldConfiguration config = new WorldConfiguration();
         config.setManager(TagManager.class);
         config.setManager(ModelManager.class);
+        config.setManager(ShaderManager.class);
 
         //LOGIC
         config.setSystem(MovementSystem.class);
@@ -63,16 +68,9 @@ public class Artemis extends World {
     }
 
     private static Viewport addCamAndViewport(Artemis a) {
-        CameraComponent camcomp = new CameraComponent();
+        CameraComponent camcomp = UberFactory.createCam(a);
         camcomp.cam.near = 1f;
         camcomp.cam.far = 500f;
-        new EntityBuilder(a)
-                .with(camcomp)
-                .with(new MapCoordinate())
-                .with(new Speed2())
-                .with(new RenderPosition())
-                .tag(VIRTUAL_CAM_TAG)
-                .build();
         return camcomp.viewport;
     }
 

@@ -3,6 +3,8 @@ package com.westreicher.birdsim.util;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 
 /**
+ * Optimizes the Drawing of many chunks.
+ * Because the number of vertex attributes doesn't change we shouldn't enable/disable after every chunk.
  * Created by david on 9/18/15.
  */
 public class BatchShaderProgram extends ShaderProgram {

@@ -5,7 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
-import com.westreicher.birdsim.artemis.components.RenderPosition;
+import com.westreicher.birdsim.artemis.components.RenderTransform;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
 import com.westreicher.birdsim.artemis.components.Speed2;
 
@@ -16,11 +16,11 @@ import com.westreicher.birdsim.artemis.components.Speed2;
 public class Interpolate extends EntityProcessingSystem {
     private ComponentMapper<MapCoordinate> coordMapper;
     private ComponentMapper<Speed2> speedMapper;
-    private ComponentMapper<RenderPosition> interpMapper;
+    private ComponentMapper<RenderTransform> transformMapper;
     private float delta;
 
     public Interpolate() {
-        super(Aspect.all(MapCoordinate.class, Speed2.class, RenderPosition.class));
+        super(Aspect.all(MapCoordinate.class, Speed2.class, RenderTransform.class));
     }
 
     @Override
@@ -32,8 +32,9 @@ public class Interpolate extends EntityProcessingSystem {
     protected void process(Entity e) {
         MapCoordinate pos = coordMapper.get(e);
         Speed2 speed = speedMapper.get(e);
-        RenderPosition interp = interpMapper.get(e);
-        interp.x = pos.x + speed.x * delta;
-        interp.y = pos.y + speed.y * delta;
+        RenderTransform transform = transformMapper.get(e);
+        transform.x = pos.x + speed.x * delta;
+        transform.y = pos.y + speed.y * delta;
+        transform.radiant = (float) -Math.atan2(-speed.y, speed.x);
     }
 }

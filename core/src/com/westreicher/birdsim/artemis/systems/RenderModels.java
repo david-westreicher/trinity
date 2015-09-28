@@ -13,7 +13,7 @@ import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
 import com.westreicher.birdsim.artemis.components.ModelComponent;
-import com.westreicher.birdsim.artemis.components.RenderPosition;
+import com.westreicher.birdsim.artemis.components.RenderTransform;
 import com.westreicher.birdsim.artemis.components.Speed2;
 
 /**
@@ -21,14 +21,14 @@ import com.westreicher.birdsim.artemis.components.Speed2;
  */
 @Wire
 public class RenderModels extends EntityProcessingSystem {
-    private ComponentMapper<RenderPosition> interpMapper;
+    private ComponentMapper<RenderTransform> interpMapper;
     private ComponentMapper<Speed2> speedMapper;
     private ComponentMapper<ModelComponent> modelMapper;
     private ModelBatch mb;
     private float delta;
 
     public RenderModels() {
-        super(Aspect.all(RenderPosition.class, Speed2.class, ModelComponent.class));
+        super(Aspect.all(RenderTransform.class, Speed2.class, ModelComponent.class));
     }
 
     @Override
@@ -53,11 +53,11 @@ public class RenderModels extends EntityProcessingSystem {
         ModelComponent model = modelMapper.get(e);
         if (!model.visible) return;
         ModelInstance mi = model.type.modelinst;
-        RenderPosition pos = interpMapper.get(e);
+        RenderTransform transform = interpMapper.get(e);
         Speed2 speed = speedMapper.get(e);
-        mi.transform.setToTranslation(pos.x, pos.y, pos.z);
+        mi.transform.setToTranslation(transform.x, transform.y, transform.z);
         mi.transform.scl(model.scale);
-        mi.transform.rotateRad(Config.UPAXIS, (float) -Math.atan2(-speed.y, speed.x));
+        mi.transform.rotateRad(Config.UPAXIS, transform.radiant);
         mb.render(mi);
     }
 

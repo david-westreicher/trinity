@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
-import com.westreicher.birdsim.artemis.components.RenderPosition;
+import com.westreicher.birdsim.artemis.components.RenderTransform;
 
 /**
  * Created by david on 9/28/15.
@@ -24,7 +24,7 @@ public class StartRendering extends BaseSystem {
 
     private void interpolateCam() {
         Entity camentity = world.getManager(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG);
-        RenderPosition pos = camentity.getComponent(RenderPosition.class);
+        RenderTransform pos = camentity.getComponent(RenderTransform.class);
         Camera cam = camentity.getComponent(CameraComponent.class).cam;
         cam.position.set(pos.x, pos.y, 250);
         cam.update();

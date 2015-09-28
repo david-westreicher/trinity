@@ -43,7 +43,8 @@ public class FixedTimestepStrategy extends InvocationStrategy {
         //long currentTime = System.currentTimeMillis() * 1000000L;
         while (currentTime > nextTick && loops < MAX_FRAME_SKIPS) {
             process(systems, true);
-            FPS_LOGGER.log();
+            if (Config.DEBUG)
+                FPS_LOGGER.log();
             nextTick += skipTicks;
             loops++;
             currenttick++;
@@ -51,7 +52,7 @@ public class FixedTimestepStrategy extends InvocationStrategy {
             currentTime = System.nanoTime();
             //currentTime = System.currentTimeMillis() * 1000000L;
         }
-        if (loops > 1)
+        if (loops > 1 && Config.DEBUG)
             Gdx.app.log("FRAMESKIP", "" + (loops - 1));
         interpolation = (float) (currentTime + skipTicks - nextTick) / skipTicks;
         world.setDelta(interpolation);

@@ -7,8 +7,4 @@ import com.artemis.Component;
  */
 public class InputComponent extends Component {
     public int id;
-
-    public InputComponent(int id) {
-        this.id = id;
-    }
 }

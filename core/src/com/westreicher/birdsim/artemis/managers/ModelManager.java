@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.loader.ObjLoader;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.westreicher.birdsim.artemis.components.ModelComponent;
 
 /**
  * Created by david on 9/28/15.
@@ -39,7 +38,7 @@ public class ModelManager extends Manager {
         }
     }
 
-    private final Models[] modelsarr = Models.values();
+    public static final Models[] modelsarr = Models.values();
 
     @Override
     protected void initialize() {

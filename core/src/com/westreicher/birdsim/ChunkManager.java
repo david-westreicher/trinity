@@ -1,16 +1,11 @@
 package com.westreicher.birdsim;
 
 import com.artemis.Component;
-import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.westreicher.birdsim.util.ManagedRessources;
 import com.westreicher.birdsim.util.Spiral;
 import com.westreicher.birdsim.util.BatchShaderProgram;
 
@@ -23,7 +18,6 @@ public class ChunkManager extends Component {
     private Chunk chunks[][] = new Chunk[CHUNKNUMS][CHUNKNUMS];
     private long[] pos = new long[]{0, 0};
     private Spiral s = new Spiral();
-    private BatchShaderProgram shader;
     private float[] tmpfloat = new float[3];
     private static final TileResult TILE_RESULT = new TileResult();
     private float pointsize;
@@ -61,11 +55,10 @@ public class ChunkManager extends Component {
         }
     }
 
-    public void render(Camera cam) {
+    public void render(Camera cam, BatchShaderProgram shader) {
         regenerateMeshes();
         Gdx.gl20.glEnable(GL20.GL_DEPTH_TEST);
         Gdx.gl20.glEnable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);
-        shader = ManagedRessources.getShader(ManagedRessources.Shaders.CHUNK);
         shader.begin();
         shader.setUniformMatrix("u_projTrans", cam.combined);
         if (Config.POST_PROCESSING) {

@@ -1,19 +1,16 @@
 package com.westreicher.birdsim.artemis.components;
 
 import com.artemis.Component;
+import com.artemis.PooledComponent;
 
 /**
  * Created by david on 9/28/15.
  */
-public class Speed2 extends Component {
+public class Speed2 extends PooledComponent {
     public float x;
     public float y;
 
-    public Speed2() {
-    }
-
-    public Speed2(float x, float y) {
-        this.x = x;
-        this.y = y;
+    @Override
+    protected void reset() {
     }
 }

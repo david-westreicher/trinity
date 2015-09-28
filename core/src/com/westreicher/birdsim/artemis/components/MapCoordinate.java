@@ -8,4 +8,12 @@ import com.artemis.Component;
 public class MapCoordinate extends Component {
     public float x;
     public float y;
+
+    public MapCoordinate() {
+    }
+
+    public MapCoordinate(float x, float y) {
+        this.x = x;
+        this.y = y;
+    }
 }

@@ -8,7 +8,6 @@ import com.artemis.managers.TagManager;
 import com.artemis.systems.EntityProcessingSystem;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
-import com.westreicher.birdsim.artemis.components.Position2;
 import com.westreicher.birdsim.artemis.components.Speed2;
 
 /**
@@ -17,16 +16,16 @@ import com.westreicher.birdsim.artemis.components.Speed2;
 @Wire
 public class MovementSystem extends EntityProcessingSystem {
     public MovementSystem() {
-        super(Aspect.all(Position2.class, Speed2.class));
+        super(Aspect.all(MapCoordinate.class, Speed2.class));
     }
 
-    ComponentMapper<Position2> positionMapper;
+    ComponentMapper<MapCoordinate> coordMapper;
     ComponentMapper<Speed2> speedMapper;
 
 
     @Override
     protected void process(Entity e) {
-        Position2 pos = positionMapper.get(e);
+        MapCoordinate pos = coordMapper.get(e);
         Speed2 speed = speedMapper.get(e);
         pos.x += speed.x;
         pos.y += speed.y;
@@ -36,9 +35,6 @@ public class MovementSystem extends EntityProcessingSystem {
     protected void end() {
         Entity camentity = world.getManager(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG);
         Speed2 speed = camentity.getComponent(Speed2.class);
-        MapCoordinate coord = camentity.getComponent(MapCoordinate.class);
-        speed.x = 1;
-        coord.x += speed.x;
-        coord.y += speed.y;
+        speed.x = 0.5f;
     }
 }

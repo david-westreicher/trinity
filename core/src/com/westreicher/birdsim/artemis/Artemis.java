@@ -7,9 +7,13 @@ import com.artemis.utils.EntityBuilder;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
+import com.westreicher.birdsim.artemis.components.RenderPosition;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
 import com.westreicher.birdsim.artemis.components.Speed2;
+import com.westreicher.birdsim.artemis.factories.UberFactory;
+import com.westreicher.birdsim.artemis.managers.ModelManager;
 import com.westreicher.birdsim.artemis.systems.*;
+import com.westreicher.birdsim.util.InputHelper;
 
 /**
  * Created by david on 9/25/15.
@@ -27,24 +31,38 @@ public class Artemis extends World {
     public static Artemis init() {
         WorldConfiguration config = new WorldConfiguration();
         config.setManager(TagManager.class);
+        config.setManager(ModelManager.class);
 
         //LOGIC
         config.setSystem(MovementSystem.class);
         config.setSystem(TranslateMapCoordinates.class);
 
         //RENDERING
+        config.setSystem(Interpolate.class);
+        config.setSystem(AdjustHeight.class);
         config.setSystem(StartRendering.class);
         config.setSystem(RenderChunks.class);
-        config.setSystem(TextRendering.class);
+        config.setSystem(RenderModels.class);
+        //config.setSystem(TextRendering.class);
 
         Artemis a = new Artemis(config);
         a.setInvocationStrategy(new FixedTimestepStrategy(a));
-        addCamAndViewport(a);
+        Viewport v = addCamAndViewport(a);
         addChunkManager(a);
+        addPlayers(v, a);
         return a;
     }
 
-    private static void addCamAndViewport(Artemis a) {
+    private static void addPlayers(Viewport v, World w) {
+        InputHelper.init(true, v);
+        int id = 0;
+        //for (InputHelper.PlayerInput pi : InputHelper.players) {
+        for (int i = 0; i < 10; i++) {
+            UberFactory.createPlayer(w, id++);
+        }
+    }
+
+    private static Viewport addCamAndViewport(Artemis a) {
         CameraComponent camcomp = new CameraComponent();
         camcomp.cam.near = 1f;
         camcomp.cam.far = 500f;
@@ -52,8 +70,10 @@ public class Artemis extends World {
                 .with(camcomp)
                 .with(new MapCoordinate())
                 .with(new Speed2())
+                .with(new RenderPosition())
                 .tag(VIRTUAL_CAM_TAG)
                 .build();
+        return camcomp.viewport;
     }
 
     private static void addChunkManager(Artemis a) {

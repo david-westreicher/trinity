@@ -1,7 +1,6 @@
 package com.westreicher.birdsim.artemis.systems;
 
 import com.artemis.Aspect;
-import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.annotations.Wire;
@@ -11,7 +10,6 @@ import com.badlogic.gdx.graphics.Camera;
 import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
-import com.westreicher.birdsim.artemis.components.Speed2;
 
 /**
  * Created by david on 9/28/15.

@@ -138,9 +138,8 @@ public class Chunk {
         return p;
     }
 
-    public boolean genMesh() {
+    public boolean genMesh(ChunkManager chunkman) {
         verts.reset();
-        ChunkManager chunkman = MyGdxGame.single.chunkManager;
         for (int x = 0; x < SIZE; x++) {
             for (int y = 0; y < SIZE; y++) {
                 float scale = map[x][y];

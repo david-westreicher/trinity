@@ -7,11 +7,4 @@ import com.artemis.Component;
  */
 public class StaticText extends Component {
     public String text;
-
-    public StaticText() {
-    }
-
-    public StaticText(String text) {
-        this.text = text;
-    }
 }

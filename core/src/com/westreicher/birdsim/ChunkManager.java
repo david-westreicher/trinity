@@ -1,5 +1,6 @@
 package com.westreicher.birdsim;
 
+import com.artemis.Component;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
@@ -16,7 +17,7 @@ import com.westreicher.birdsim.util.BatchShaderProgram;
 /**
  * Created by david on 9/4/15.
  */
-public class ChunkManager {
+public class ChunkManager extends Component {
     public static final float OUTSIDE = -10.0f;
     private static final int CHUNKNUMS = Config.CHUNKNUMS;
     private Chunk chunks[][] = new Chunk[CHUNKNUMS][CHUNKNUMS];
@@ -38,7 +39,7 @@ public class ChunkManager {
         }
     }
 
-    public void render(Camera cam) {
+    public void regenerateMeshes() {
         s.reset();
         int maxupdates = 1;
         while (true) {
@@ -49,15 +50,19 @@ public class ChunkManager {
                 break;
             Chunk mi = chunks[x][y];
             if (!mi.isReady) {
-                if (chunks[x][y].genMesh()) {
+                if (chunks[x][y].genMesh(this)) {
                     maxupdates -= 1;
-                    if (x == 0 || y == 0 || x == CHUNKNUMS - 1 || y == CHUNKNUMS - 1)
-                        MyGdxGame.single.entitymanager.spawn(spos.x * Config.TILES_PER_CHUNK, spos.y * Config.TILES_PER_CHUNK, mi.rand);
+                    //if (x == 0 || y == 0 || x == CHUNKNUMS - 1 || y == CHUNKNUMS - 1)
+                    //    MyGdxGame.single.entitymanager.spawn(spos.x * Config.TILES_PER_CHUNK, spos.y * Config.TILES_PER_CHUNK, mi.rand);
                 }
                 if (maxupdates <= 0)
                     break;
             }
         }
+    }
+
+    public void render(Camera cam) {
+        regenerateMeshes();
         Gdx.gl20.glEnable(GL20.GL_DEPTH_TEST);
         Gdx.gl20.glEnable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);
         shader = ManagedRessources.getShader(ManagedRessources.Shaders.CHUNK);

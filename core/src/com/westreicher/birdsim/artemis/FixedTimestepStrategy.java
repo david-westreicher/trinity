@@ -4,6 +4,8 @@ import com.artemis.BaseSystem;
 import com.artemis.InvocationStrategy;
 import com.artemis.World;
 import com.artemis.utils.Bag;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.FPSLogger;
 import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.util.Util;
 
@@ -11,17 +13,20 @@ import com.westreicher.birdsim.util.Util;
  * Created by david on 9/26/15.
  */
 public class FixedTimestepStrategy extends InvocationStrategy {
+    private static final FPSLogger FPS_LOGGER = new FPSLogger();
     private static final int MAX_FRAME_SKIPS = 5;
+    private World world;
     private long nextTick;
     private float interpolation;
     private long currenttick;
     private float fps;
     private long skipTicks;
 
-    public FixedTimestepStrategy() {
+    public FixedTimestepStrategy(World world) {
         nextTick = System.nanoTime(); //System.currentTimeMillis() * 1000000L;//
         interpolation = 0;
         currenttick = 0;
+        this.world = world;
         setFPS(Config.LOGIC_FPS);
     }
 
@@ -38,6 +43,7 @@ public class FixedTimestepStrategy extends InvocationStrategy {
         //long currentTime = System.currentTimeMillis() * 1000000L;
         while (currentTime > nextTick && loops < MAX_FRAME_SKIPS) {
             process(systems, true);
+            FPS_LOGGER.log();
             nextTick += skipTicks;
             loops++;
             currenttick++;
@@ -45,6 +51,8 @@ public class FixedTimestepStrategy extends InvocationStrategy {
             currentTime = System.nanoTime();
             //currentTime = System.currentTimeMillis() * 1000000L;
         }
+        if (loops > 1)
+            Gdx.app.log("FRAMESKIP", "" + (loops - 1));
         interpolation = (float) (currentTime + skipTicks - nextTick) / skipTicks;
         world.setDelta(interpolation);
         process(systems, false);

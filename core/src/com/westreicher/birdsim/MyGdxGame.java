@@ -46,6 +46,12 @@ public class MyGdxGame extends ApplicationAdapter {
 
     @Override
     public void resize(int width, int height) {
+        artemis.resize(width, height);
+    }
+
+
+    public void resizeOld(int width, int height) {
+        artemis.resize(width, height);
         viewport.update(width, height);
         spritebatch.getProjectionMatrix().setToOrtho2D(0, 0, width, height);
         if (downs != null)
@@ -56,6 +62,11 @@ public class MyGdxGame extends ApplicationAdapter {
 
     @Override
     public void create() {
+        artemis = Artemis.init();
+        ManagedRessources.init();
+    }
+
+    public void createOld() {
         isDesktop = Gdx.app.getType() == Application.ApplicationType.Desktop || Gdx.app.getType() == Application.ApplicationType.WebGL;
         single = this;
         ManagedRessources.init();
@@ -77,9 +88,13 @@ public class MyGdxGame extends ApplicationAdapter {
         artemis = Artemis.init();
     }
 
-
     @Override
     public void render() {
+        artemis.process();
+    }
+
+    public void renderOld() {
+
         //fps.log();
 
         switch (state) {
@@ -117,7 +132,6 @@ public class MyGdxGame extends ApplicationAdapter {
         }
 
         drawLives();
-        artemis.process();
     }
 
     private void drawLives() {
@@ -155,11 +169,11 @@ public class MyGdxGame extends ApplicationAdapter {
     @Override
     public void dispose() {
         ManagedRessources.dispose();
-        entitymanager.dispose();
-        mb.dispose();
+        if (entitymanager != null) entitymanager.dispose();
+        if (mb != null) mb.dispose();
         Gdx.app.log("game", "dispose");
-        chunkManager.dispose();
-        soundplayer.dispose();
+        if (chunkManager != null) chunkManager.dispose();
+        if (soundplayer != null) soundplayer.dispose();
         artemis.dispose();
     }
 

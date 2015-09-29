@@ -38,17 +38,13 @@ public class RenderGui extends BaseSystem {
     }
 
     private void drawThumbs(int w, int h) {
-        InputHelper firstPointer = InputHelper.players.get(0).firstPointer;
-        InputHelper secondPointer = InputHelper.players.get(0).secondPointer;
-        InputHelper thirdPointer = InputHelper.players.get(0).thirdPointer;
+        if (Config.IS_DESKTOP)
+            return;
         Texture thumbTex = world.getManager(TextureManager.class).get(TextureManager.Textures.THUMB);
-
         int size = 50;
-        spritebatch.draw(thumbTex, firstPointer.getStartX(w) - size, h - firstPointer.getStartY(h) - size, size * 2, size * 2, 0, 0, 1, 1);
-        spritebatch.draw(thumbTex, secondPointer.getStartX(w) - size, h - secondPointer.getStartY(h) - size, size * 2, size * 2, 0, 0, 1, 1);
-        if (thirdPointer.isDown()) {
-            spritebatch.draw(thumbTex, thirdPointer.getStartX(w) - size, h - thirdPointer.getStartY(h) - size, size * 2, size * 2, 0, 0, 1, 1);
-        }
+        float y = h * 0.3f;
+        spritebatch.draw(thumbTex, w * 0.15f - size, y - size, size * 2, size * 2, 0, 0, 1, 1);
+        spritebatch.draw(thumbTex, w * 0.85f - size, y - size, size * 2, size * 2, 0, 0, 1, 1);
     }
 
     private void drawLives() {

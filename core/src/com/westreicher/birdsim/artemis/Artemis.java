@@ -13,12 +13,14 @@ import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
 import com.westreicher.birdsim.artemis.factories.UberFactory;
+import com.westreicher.birdsim.artemis.managers.InputManager;
 import com.westreicher.birdsim.artemis.managers.ModelManager;
 import com.westreicher.birdsim.artemis.managers.ShaderManager;
 import com.westreicher.birdsim.artemis.managers.TextureManager;
 import com.westreicher.birdsim.artemis.systems.AdjustHeight;
 import com.westreicher.birdsim.artemis.systems.DeleteEntities;
 import com.westreicher.birdsim.artemis.systems.HandleGameInput;
+import com.westreicher.birdsim.artemis.systems.HandlePause;
 import com.westreicher.birdsim.artemis.systems.Interpolate;
 import com.westreicher.birdsim.artemis.systems.MovementSystem;
 import com.westreicher.birdsim.artemis.systems.RegenerateMeshesAndSpawn;
@@ -54,7 +56,10 @@ public class Artemis extends World {
         config.setManager(ModelManager.class);
         config.setManager(ShaderManager.class);
         config.setManager(TextureManager.class);
+        config.setManager(InputManager.class);
 
+
+        config.setSystem(HandlePause.class);
         //LOGIC
         addLogic(config, HandleGameInput.class);
         addLogic(config, MovementSystem.class);
@@ -73,9 +78,8 @@ public class Artemis extends World {
 
         Artemis a = new Artemis(config);
         a.setInvocationStrategy(new FixedTimestepStrategy(a));
-        Viewport v = addCamAndViewport(a);
+        addCamAndViewport(a);
         addChunkManager(a);
-        addPlayers(v, a);
         return a;
     }
 
@@ -84,21 +88,13 @@ public class Artemis extends World {
         config.setSystem(clss);
     }
 
-    private static void addPlayers(Viewport v, World w) {
-        InputHelper.init(v);
-        int id = 0;
-        for (InputHelper.PlayerInput pi : InputHelper.players) {
-            UberFactory.createPlayer(w, id++);
-        }
-    }
 
-    private static Viewport addCamAndViewport(Artemis a) {
+    private static void addCamAndViewport(Artemis a) {
         CameraComponent camcomp = UberFactory.createCam(a);
         camcomp.cam.near = 1f;
         camcomp.cam.far = 500f;
         camcomp.cam.position.set(0, 0, 250);
         camcomp.cam.update();
-        return camcomp.viewport;
     }
 
     private static void addChunkManager(Artemis a) {
@@ -120,5 +116,6 @@ public class Artemis extends World {
         cm.resize(width, height);
         Viewport viewport = this.getManager(TagManager.class).getEntity(VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).viewport;
         viewport.update(width, height);
+        this.getManager(InputManager.class).resize();
     }
 }

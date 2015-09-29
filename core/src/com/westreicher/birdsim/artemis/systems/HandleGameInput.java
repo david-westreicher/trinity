@@ -10,7 +10,10 @@ import com.westreicher.birdsim.artemis.components.InputComponent;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
 import com.westreicher.birdsim.artemis.components.Speed2;
 import com.westreicher.birdsim.artemis.factories.UberFactory;
+import com.westreicher.birdsim.artemis.managers.InputManager;
 import com.westreicher.birdsim.input.InputHelper;
+
+import java.util.ArrayList;
 
 /**
  * Created by david on 9/29/15.
@@ -21,6 +24,7 @@ public class HandleGameInput extends EntityProcessingSystem {
     private ComponentMapper<MapCoordinate> posMapper;
     private ComponentMapper<InputComponent> inputMapper;
     private long tick;
+    private ArrayList<InputHelper> players;
 
     public HandleGameInput() {
         super(Aspect.all(InputComponent.class, MapCoordinate.class, Speed2.class));
@@ -29,6 +33,7 @@ public class HandleGameInput extends EntityProcessingSystem {
     @Override
     protected void begin() {
         tick = ((FixedTimestepStrategy) world.getInvocationStrategy()).currenttick;
+        players = world.getManager(InputManager.class).players;
     }
 
     @Override
@@ -36,18 +41,19 @@ public class HandleGameInput extends EntityProcessingSystem {
         MapCoordinate pos = posMapper.get(e);
         Speed2 speed = speedMapper.get(e);
         InputComponent input = inputMapper.get(e);
-        InputHelper.PlayerInput playerinput = InputHelper.players.get(input.id);
-        if (playerinput.firstPointer.update()) {
-            float rad = playerinput.firstPointer.getRadiant();
+        InputHelper playerinput = players.get(input.id);
+        playerinput.update();
+        if (playerinput.isMoving()) {
+            float rad = playerinput.getMoveRadiant();
             speed.x = (float) Math.cos(rad);
             speed.y = (float) Math.sin(rad);
         } else {
             speed.x = 0;
             speed.y = 0;
         }
-        if (playerinput.secondPointer.update() && tick % 1 == 0) {
-            float rad = playerinput.secondPointer.getRadiant();
-            UberFactory.shoot(world, pos.x, pos.y, (float) Math.cos(rad), (float) Math.sin(rad));
+        if (playerinput.isShooting() && tick % 10 == 0) {
+            float rad = playerinput.getShootRadiant();
+            UberFactory.shoot(world, pos.x, pos.y, (float) Math.cos(rad) * 5, (float) Math.sin(rad) * 5);
         }
     }
 }

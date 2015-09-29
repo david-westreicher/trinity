@@ -21,6 +21,7 @@ public class FixedTimestepStrategy extends InvocationStrategy {
     public long currenttick;
     private float fps;
     private long skipTicks;
+    public boolean isPaused;
 
     public FixedTimestepStrategy(World world) {
         nextTick = System.nanoTime(); //System.currentTimeMillis() * 1000000L;//
@@ -37,6 +38,15 @@ public class FixedTimestepStrategy extends InvocationStrategy {
 
     @Override
     protected void process(Bag<BaseSystem> systems) {
+        if (!isPaused) {
+            updateLogicIfNecc(systems);
+            interpolation = (float) (System.nanoTime() + skipTicks - nextTick) / skipTicks;
+            world.setDelta(interpolation);
+        }
+        process(systems, false);
+    }
+
+    private void updateLogicIfNecc(Bag<BaseSystem> systems) {
         int loops = 0;
         long currentTime = System.nanoTime();
         //TODO GWT compat??
@@ -54,9 +64,7 @@ public class FixedTimestepStrategy extends InvocationStrategy {
         }
         if (loops > 1 && Config.DEBUG)
             Gdx.app.log("FRAMESKIP", "" + (loops - 1));
-        interpolation = (float) (currentTime + skipTicks - nextTick) / skipTicks;
-        world.setDelta(interpolation);
-        process(systems, false);
+
     }
 
     private void process(Bag<BaseSystem> systems, boolean logics) {
@@ -72,5 +80,14 @@ public class FixedTimestepStrategy extends InvocationStrategy {
                 } else if (!Artemis.LOGIC_SYSTEMS.contains(clss)) system.process();
             }
         }
+    }
+
+    public void pauseLogic() {
+        isPaused = true;
+    }
+
+    public void continueLogic() {
+        nextTick = System.nanoTime();
+        isPaused = false;
     }
 }

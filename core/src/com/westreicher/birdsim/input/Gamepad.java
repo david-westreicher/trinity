@@ -11,7 +11,7 @@ import com.badlogic.gdx.math.Vector3;
 /**
  * Created by david on 9/30/15.
  */
-public class Gamepad extends InputHelper {
+public class Gamepad extends AbstractInput {
 
     private final Controller ctrl;
 

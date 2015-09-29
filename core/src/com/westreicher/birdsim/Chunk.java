@@ -1,12 +1,10 @@
 package com.westreicher.birdsim;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.westreicher.birdsim.util.MaxArray;
 import com.westreicher.birdsim.util.SimplexNoise;
@@ -34,8 +32,6 @@ public class Chunk {
             this.col = new float[]{r, g, b};
         }
     }
-
-    ;
 
     private static final double NOISE_SCALE = 0.8;
     private static int NOISE_OCTAVES = 10;

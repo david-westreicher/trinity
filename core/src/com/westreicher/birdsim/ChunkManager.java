@@ -1,9 +1,7 @@
 package com.westreicher.birdsim;
 
 import com.artemis.Component;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector3;
-import com.westreicher.birdsim.util.BatchShaderProgram;
 
 /**
  * Created by david on 9/4/15.

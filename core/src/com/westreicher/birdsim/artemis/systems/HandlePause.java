@@ -7,7 +7,7 @@ import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.FixedTimestepStrategy;
 import com.westreicher.birdsim.artemis.components.InputComponent;
 import com.westreicher.birdsim.artemis.managers.InputManager;
-import com.westreicher.birdsim.input.InputHelper;
+import com.westreicher.birdsim.input.AbstractInput;
 
 import java.util.ArrayList;
 
@@ -19,10 +19,10 @@ public class HandlePause extends BaseSystem {
     @Override
     protected void processSystem() {
         boolean shouldpause = false;
-        ArrayList<InputHelper> players = world.getManager(InputManager.class).players;
+        ArrayList<AbstractInput> players = world.getManager(InputManager.class).players;
         for (Entity e : world.getManager(GroupManager.class).getEntities(Artemis.PLAYER_GROUP)) {
             InputComponent input = e.getComponent(InputComponent.class);
-            InputHelper control = players.get(input.id);
+            AbstractInput control = players.get(input.id);
             if (control.isPaused()) {
                 shouldpause = true;
                 break;

@@ -11,7 +11,7 @@ import com.westreicher.birdsim.artemis.components.MapCoordinate;
 import com.westreicher.birdsim.artemis.components.Speed2;
 import com.westreicher.birdsim.artemis.factories.UberFactory;
 import com.westreicher.birdsim.artemis.managers.InputManager;
-import com.westreicher.birdsim.input.InputHelper;
+import com.westreicher.birdsim.input.AbstractInput;
 
 import java.util.ArrayList;
 
@@ -24,7 +24,7 @@ public class HandleGameInput extends EntityProcessingSystem {
     private ComponentMapper<MapCoordinate> posMapper;
     private ComponentMapper<InputComponent> inputMapper;
     private long tick;
-    private ArrayList<InputHelper> players;
+    private ArrayList<AbstractInput> players;
 
     public HandleGameInput() {
         super(Aspect.all(InputComponent.class, MapCoordinate.class, Speed2.class));
@@ -41,7 +41,7 @@ public class HandleGameInput extends EntityProcessingSystem {
         MapCoordinate pos = posMapper.get(e);
         Speed2 speed = speedMapper.get(e);
         InputComponent input = inputMapper.get(e);
-        InputHelper playerinput = players.get(input.id);
+        AbstractInput playerinput = players.get(input.id);
         playerinput.update();
         if (playerinput.isMoving()) {
             float rad = playerinput.getMoveRadiant();

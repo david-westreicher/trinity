@@ -1,17 +1,11 @@
 package com.westreicher.birdsim.input;
 
 import com.artemis.World;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.controllers.Controllers;
-import com.badlogic.gdx.utils.viewport.Viewport;
-import com.westreicher.birdsim.Config;
-
-import java.util.ArrayList;
 
 /**
  * Created by david on 9/21/15.
  */
-public abstract class InputHelper {
+public abstract class AbstractInput {
 
     protected boolean isPaused;
     protected float movx;

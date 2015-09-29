@@ -7,7 +7,6 @@ import com.artemis.utils.Bag;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.FPSLogger;
 import com.westreicher.birdsim.Config;
-import com.westreicher.birdsim.util.Util;
 
 /**
  * Created by david on 9/26/15.

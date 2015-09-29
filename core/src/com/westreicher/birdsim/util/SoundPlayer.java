@@ -1,6 +1,5 @@
 package com.westreicher.birdsim.util;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.Vector3;
 

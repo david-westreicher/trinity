@@ -1,7 +1,6 @@
 package com.westreicher.birdsim.artemis.managers;
 
 import com.artemis.Manager;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.util.BatchShaderProgram;

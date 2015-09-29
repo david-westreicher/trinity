@@ -1,7 +1,6 @@
 package com.westreicher.birdsim.artemis.components;
 
 import com.artemis.PooledComponent;
-import com.badlogic.gdx.graphics.g3d.Material;
 import com.westreicher.birdsim.artemis.managers.ModelManager;
 import com.westreicher.birdsim.util.ColorAttr;
 

@@ -1,6 +1,5 @@
 package com.westreicher.birdsim.artemis.components;
 
-import com.artemis.Component;
 import com.artemis.PooledComponent;
 
 /**

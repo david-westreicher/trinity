@@ -5,7 +5,6 @@ import com.artemis.Entity;
 import com.artemis.managers.GroupManager;
 import com.artemis.managers.TagManager;
 import com.artemis.utils.ImmutableBag;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -14,7 +13,6 @@ import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
 import com.westreicher.birdsim.artemis.components.Health;
 import com.westreicher.birdsim.artemis.managers.TextureManager;
-import com.westreicher.birdsim.input.InputHelper;
 
 /**
  * Created by david on 9/29/15.

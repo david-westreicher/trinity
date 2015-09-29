@@ -7,7 +7,7 @@ import com.badlogic.gdx.Input;
 /**
  * Created by david on 9/29/15.
  */
-public class Keyboard extends InputHelper {
+public class Keyboard extends AbstractInput {
     private static final int KEYS[][] = new int[][]{
             new int[]{Input.Keys.A, Input.Keys.LEFT},//LEFT
             new int[]{Input.Keys.W, Input.Keys.UP},//UP

@@ -12,7 +12,7 @@ import com.westreicher.birdsim.artemis.components.CameraComponent;
 /**
  * Created by david on 9/29/15.
  */
-public class TouchInput extends InputHelper {
+public class TouchInput extends AbstractInput {
 
     private float startMovX;
     private float startMovY;

@@ -25,7 +25,7 @@ import com.westreicher.birdsim.artemis.systems.RenderChunks;
 import com.westreicher.birdsim.artemis.systems.RenderModels;
 import com.westreicher.birdsim.artemis.systems.StartRendering;
 import com.westreicher.birdsim.artemis.systems.TranslateMapCoordinates;
-import com.westreicher.birdsim.util.InputHelper;
+import com.westreicher.birdsim.input.InputHelper;
 
 import java.util.ArrayList;
 

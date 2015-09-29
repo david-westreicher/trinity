@@ -1,4 +1,4 @@
-package com.westreicher.birdsim.util;
+package com.westreicher.birdsim.input;
 
 import com.badlogic.gdx.Gdx;
 

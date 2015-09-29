@@ -7,7 +7,7 @@ import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
 import com.westreicher.birdsim.artemis.components.InputComponent;
 import com.westreicher.birdsim.artemis.components.Speed2;
-import com.westreicher.birdsim.util.InputHelper;
+import com.westreicher.birdsim.input.InputHelper;
 
 /**
  * Created by david on 9/29/15.

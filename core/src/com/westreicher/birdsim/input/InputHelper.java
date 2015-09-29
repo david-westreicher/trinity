@@ -1,10 +1,8 @@
-package com.westreicher.birdsim.util;
+package com.westreicher.birdsim.input;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.westreicher.birdsim.Config;
 

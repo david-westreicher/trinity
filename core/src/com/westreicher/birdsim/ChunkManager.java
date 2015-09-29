@@ -1,12 +1,8 @@
 package com.westreicher.birdsim;
 
 import com.artemis.Component;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.westreicher.birdsim.util.Spiral;
 import com.westreicher.birdsim.util.BatchShaderProgram;
 
 /**
@@ -15,12 +11,10 @@ import com.westreicher.birdsim.util.BatchShaderProgram;
 public class ChunkManager extends Component {
     public static final float OUTSIDE = -10.0f;
     private static final int CHUNKNUMS = Config.CHUNKNUMS;
-    private Chunk chunks[][] = new Chunk[CHUNKNUMS][CHUNKNUMS];
-    private long[] pos = new long[]{0, 0};
-    private Spiral s = new Spiral();
-    private float[] tmpfloat = new float[3];
+    public Chunk chunks[][] = new Chunk[CHUNKNUMS][CHUNKNUMS];
+    public long[] pos = new long[]{0, 0};
     private static final TileResult TILE_RESULT = new TileResult();
-    private float pointsize;
+    public float pointsize;
 
     public ChunkManager() {
         for (int x = 0; x < CHUNKNUMS; x++) {
@@ -31,59 +25,6 @@ public class ChunkManager extends Component {
                 chunks[x][y].setPos(realX, realY);
             }
         }
-    }
-
-    public void regenerateMeshes() {
-        s.reset();
-        int maxupdates = 1;
-        while (true) {
-            Vector2 spos = s.next();
-            int x = ((int) spos.x) + CHUNKNUMS / 2;
-            int y = ((int) spos.y) + CHUNKNUMS / 2;
-            if (x < 0 || y < 0 || x >= CHUNKNUMS || y >= CHUNKNUMS)
-                break;
-            Chunk mi = chunks[x][y];
-            if (!mi.isReady) {
-                if (chunks[x][y].genMesh(this)) {
-                    maxupdates -= 1;
-                    //if (x == 0 || y == 0 || x == CHUNKNUMS - 1 || y == CHUNKNUMS - 1)
-                    //    MyGdxGame.single.entitymanager.spawn(spos.x * Config.TILES_PER_CHUNK, spos.y * Config.TILES_PER_CHUNK, mi.rand);
-                }
-                if (maxupdates <= 0)
-                    break;
-            }
-        }
-    }
-
-    public void render(Camera cam, BatchShaderProgram shader) {
-        regenerateMeshes();
-        Gdx.gl20.glEnable(GL20.GL_DEPTH_TEST);
-        Gdx.gl20.glEnable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);
-        shader.begin();
-        shader.setUniformMatrix("u_projTrans", cam.combined);
-        if (Config.POST_PROCESSING) {
-            shader.setUniformf("virtualcam", cam.position.x, cam.position.y);
-            shader.setUniformf("maxdstsqinv", 1f / (140f * 140f));
-        }
-        shader.setUniformf("pointsize", pointsize);
-        shader.setUniformf("chunksize", Config.TILES_PER_CHUNK);
-        shader.setUniformf("heightscale", 2.5f * Config.TERRAIN_HEIGHT / Config.TILES_PER_CHUNK);
-        shader.bind();
-        for (int x = 0; x < CHUNKNUMS; x++) {
-            for (int y = 0; y < CHUNKNUMS; y++) {
-                Chunk mi = chunks[x][y];
-                if (mi.shouldDraw) {
-                    tmpfloat[0] = (x - (CHUNKNUMS / 2)) * Config.TILES_PER_CHUNK - Config.TILES_PER_CHUNK / 2;
-                    tmpfloat[1] = (y - (CHUNKNUMS / 2)) * Config.TILES_PER_CHUNK - Config.TILES_PER_CHUNK / 2;
-                    shader.setUniform3fv("trans", tmpfloat, 0, 3);
-                    mi.m.render(shader, GL20.GL_POINTS);
-                }
-            }
-        }
-        shader.unbind();
-        shader.end();
-        Gdx.gl20.glDisable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);
-        Gdx.gl20.glDisable(GL20.GL_DEPTH_TEST);
     }
 
     public void dispose() {
@@ -99,40 +40,7 @@ public class ChunkManager extends Component {
         pos[1] = 0;
     }
 
-    public void updateDirection(int dx, int dy) {
-        this.pos[0] += dx;
-        if (dx != 0) {
-            int stax = dx > 0 ? 0 : CHUNKNUMS - 1;
-            int endx = dx > 0 ? CHUNKNUMS - 1 : 0;
-            int plus = dx > 0 ? 1 : -1;
-            for (int x = stax; dx > 0 ? x < endx : x > endx; x += plus)
-                for (int y = 0; y < CHUNKNUMS; y++)
-                    swap(x, y, x + plus, y);
-            for (int y = 0; y < CHUNKNUMS; y++) {
-                Chunk c = chunks[endx][y];
-                long realX = (endx - (CHUNKNUMS / 2)) + pos[0];
-                long realY = (y - (CHUNKNUMS / 2)) + pos[1];
-                c.setPos(realX, realY);
-            }
-        }
-        this.pos[1] += dy;
-        if (dy != 0) {
-            int stay = dy > 0 ? 0 : CHUNKNUMS - 1;
-            int endy = dy > 0 ? CHUNKNUMS - 1 : 0;
-            int plus = dy > 0 ? 1 : -1;
-            for (int x = 0; x < CHUNKNUMS; x++)
-                for (int y = stay; dy > 0 ? y < endy : y > endy; y += plus)
-                    swap(x, y, x, y + plus);
-            for (int x = 0; x < CHUNKNUMS; x++) {
-                Chunk c = chunks[x][endy];
-                long realX = (x - (CHUNKNUMS / 2)) + pos[0];
-                long realY = (endy - (CHUNKNUMS / 2)) + pos[1];
-                c.setPos(realX, realY);
-            }
-        }
-    }
-
-    private void swap(int x1, int y1, int x2, int y2) {
+    public void swap(int x1, int y1, int x2, int y2) {
         Chunk tmp = chunks[x1][y1];
         chunks[x1][y1] = chunks[x2][y2];
         chunks[x2][y2] = tmp;

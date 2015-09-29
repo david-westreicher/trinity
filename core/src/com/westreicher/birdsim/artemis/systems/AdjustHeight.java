@@ -41,19 +41,15 @@ public class AdjustHeight extends EntityProcessingSystem {
         RenderTransform transform = transformMapper.get(e);
         ModelComponent model = modelMapper.get(e);
         float orig = cm.getVal(transform.x, transform.y) * Config.TERRAIN_HEIGHT;
-        float toZ = 0;
-        if (Config.POST_PROCESSING) {
+        float dstx = transform.x - cam.x;
+        float dsty = transform.y - cam.y;
+        float dstsq = dstx * dstx + dsty * dsty;
+        float dstfrac = (dstsq / (140f * 140f));
+        model.visible = Config.POST_PROCESSING ? dstfrac <= 1 : true;
+        if (Config.POST_PROCESSING)
             //TODO optimize Z projection
-            float dstx = transform.x - cam.x;
-            float dsty = transform.y - cam.y;
-            float dstsq = dstx * dstx + dsty * dsty;
-            float dstfrac = (dstsq / (140f * 140f));
-            model.visible = dstfrac <= 1;
-            toZ = (orig + (1.0f - dstfrac) * 140.0f + 5);
-        } else {
-            model.visible = true;
-            toZ = (orig + 5);
-        }
-        transform.z = toZ;
+            transform.z = (orig + (1.0f - dstfrac) * 140.0f + 5);
+        else
+            transform.z = (orig + 5);
     }
 }

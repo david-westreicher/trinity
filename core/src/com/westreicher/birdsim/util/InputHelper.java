@@ -38,8 +38,8 @@ public abstract class InputHelper {
 
     public static ArrayList<PlayerInput> players = new ArrayList<PlayerInput>();
 
-    public static void init(boolean isDesktop, Viewport viewport) {
-        if (isDesktop) {
+    public static void init(Viewport viewport) {
+        if (Config.IS_DESKTOP) {
             for (Controller ctrl : Controllers.getControllers()) {
                 players.add(new PlayerInput(new CController(0, ctrl), new CController(1, ctrl)));
                 Gdx.app.log("game", "Gamepad found: " + ctrl.getName());

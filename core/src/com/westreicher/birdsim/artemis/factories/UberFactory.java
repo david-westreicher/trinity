@@ -9,6 +9,7 @@ import com.artemis.managers.TagManager;
 import com.artemis.utils.EntityBuilder;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
+import com.westreicher.birdsim.artemis.components.Health;
 import com.westreicher.birdsim.artemis.components.InputComponent;
 import com.westreicher.birdsim.artemis.components.RenderTransform;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
@@ -46,5 +47,22 @@ public class UberFactory extends Manager {
         edit.create(RenderTransform.class);
         w.getManager(TagManager.class).register(Artemis.VIRTUAL_CAM_TAG, e);
         return cc;
+    }
+
+    public static Entity createEnemy(World w, float x, float y) {
+        Entity e = w.createEntity();
+        EntityEdit edit = e.edit();
+        MapCoordinate coord = edit.create(MapCoordinate.class);
+        coord.x = x;
+        coord.y = y;
+        Speed2 speed = edit.create(Speed2.class);
+        speed.x = (float) (Math.random() - 0.5);
+        speed.y = (float) (Math.random() - 0.5);
+        RenderTransform transform = edit.create(RenderTransform.class);
+        ModelComponent model = edit.create(ModelComponent.class);
+        model.type = ModelManager.modelsarr[(int) (Math.random() * ModelManager.modelsarr.length)];
+        Health health = edit.create(Health.class);
+        health.health = 10;
+        return e;
     }
 }

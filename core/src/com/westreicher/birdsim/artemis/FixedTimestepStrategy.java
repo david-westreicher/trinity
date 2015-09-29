@@ -68,8 +68,8 @@ public class FixedTimestepStrategy extends InvocationStrategy {
             if (!system.isPassive()) {
                 Class clss = system.getClass();
                 if (logics) {
-                    if (Util.contains(Artemis.LOGIC_SYSTEMS, clss)) system.process();
-                } else if (!Util.contains(Artemis.LOGIC_SYSTEMS, clss)) system.process();
+                    if (Artemis.LOGIC_SYSTEMS.contains(clss)) system.process();
+                } else if (!Artemis.LOGIC_SYSTEMS.contains(clss)) system.process();
             }
         }
     }

@@ -16,13 +16,13 @@ import com.westreicher.birdsim.input.InputHelper;
  * Created by david on 9/29/15.
  */
 @Wire
-public class HandleInput extends EntityProcessingSystem {
+public class HandleGameInput extends EntityProcessingSystem {
     private ComponentMapper<Speed2> speedMapper;
     private ComponentMapper<MapCoordinate> posMapper;
     private ComponentMapper<InputComponent> inputMapper;
     private long tick;
 
-    public HandleInput() {
+    public HandleGameInput() {
         super(Aspect.all(InputComponent.class, MapCoordinate.class, Speed2.class));
     }
 

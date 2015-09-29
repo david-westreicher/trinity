@@ -61,8 +61,8 @@ public class Artemis extends World {
 
         //RENDERING
         config.setSystem(Interpolate.class);
-        config.setSystem(AdjustHeight.class);
         config.setSystem(StartRendering.class);
+        config.setSystem(AdjustHeight.class);
         config.setSystem(RenderChunks.class);
         config.setSystem(RenderModels.class);
         //config.setSystem(TextRendering.class);
@@ -92,6 +92,8 @@ public class Artemis extends World {
         CameraComponent camcomp = UberFactory.createCam(a);
         camcomp.cam.near = 1f;
         camcomp.cam.far = 500f;
+        camcomp.cam.position.set(0, 0, 250);
+        camcomp.cam.update();
         return camcomp.viewport;
     }
 

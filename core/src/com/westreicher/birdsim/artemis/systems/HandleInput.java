@@ -5,8 +5,11 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
+import com.westreicher.birdsim.artemis.FixedTimestepStrategy;
 import com.westreicher.birdsim.artemis.components.InputComponent;
+import com.westreicher.birdsim.artemis.components.MapCoordinate;
 import com.westreicher.birdsim.artemis.components.Speed2;
+import com.westreicher.birdsim.artemis.factories.UberFactory;
 import com.westreicher.birdsim.input.InputHelper;
 
 /**
@@ -15,14 +18,22 @@ import com.westreicher.birdsim.input.InputHelper;
 @Wire
 public class HandleInput extends EntityProcessingSystem {
     private ComponentMapper<Speed2> speedMapper;
+    private ComponentMapper<MapCoordinate> posMapper;
     private ComponentMapper<InputComponent> inputMapper;
+    private long tick;
 
     public HandleInput() {
-        super(Aspect.all(InputComponent.class, Speed2.class));
+        super(Aspect.all(InputComponent.class, MapCoordinate.class, Speed2.class));
+    }
+
+    @Override
+    protected void begin() {
+        tick = ((FixedTimestepStrategy) world.getInvocationStrategy()).currenttick;
     }
 
     @Override
     protected void process(Entity e) {
+        MapCoordinate pos = posMapper.get(e);
         Speed2 speed = speedMapper.get(e);
         InputComponent input = inputMapper.get(e);
         InputHelper.PlayerInput playerinput = InputHelper.players.get(input.id);
@@ -33,6 +44,10 @@ public class HandleInput extends EntityProcessingSystem {
         } else {
             speed.x = 0;
             speed.y = 0;
+        }
+        if (playerinput.secondPointer.update() && tick % 1 == 0) {
+            float rad = playerinput.secondPointer.getRadiant();
+            UberFactory.shoot(world, pos.x, pos.y, (float) Math.cos(rad) * 20, (float) Math.sin(rad) * 20);
         }
     }
 }

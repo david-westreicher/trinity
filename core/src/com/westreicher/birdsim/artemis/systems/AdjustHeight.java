@@ -40,7 +40,12 @@ public class AdjustHeight extends EntityProcessingSystem {
     protected void process(Entity e) {
         RenderTransform transform = transformMapper.get(e);
         ModelComponent model = modelMapper.get(e);
-        float orig = cm.getVal(transform.x, transform.y) * Config.TERRAIN_HEIGHT;
+        float val = cm.getVal(transform.x, transform.y);
+        if (val == ChunkManager.OUTSIDE) {
+            model.visible = false;
+            return;
+        }
+        float orig = val * Config.TERRAIN_HEIGHT;
         float dstx = transform.x - cam.x;
         float dsty = transform.y - cam.y;
         float dstsq = dstx * dstx + dsty * dsty;

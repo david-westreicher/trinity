@@ -8,6 +8,7 @@ import com.artemis.managers.GroupManager;
 import com.artemis.managers.TagManager;
 import com.artemis.utils.EntityBuilder;
 import com.westreicher.birdsim.artemis.Artemis;
+import com.westreicher.birdsim.artemis.components.AIComponent;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
 import com.westreicher.birdsim.artemis.components.Health;
 import com.westreicher.birdsim.artemis.components.InputComponent;
@@ -58,9 +59,29 @@ public class UberFactory extends Manager {
         Speed2 speed = edit.create(Speed2.class);
         speed.x = (float) (Math.random() - 0.5);
         speed.y = (float) (Math.random() - 0.5);
+        coord.x += speed.x;
+        coord.y += speed.y;
         RenderTransform transform = edit.create(RenderTransform.class);
         ModelComponent model = edit.create(ModelComponent.class);
+        AIComponent ai = edit.create(AIComponent.class);
         model.type = ModelManager.modelsarr[(int) (Math.random() * ModelManager.modelsarr.length)];
+        Health health = edit.create(Health.class);
+        health.health = 10;
+        return e;
+    }
+
+    public static Entity shoot(World w, float x, float y, float xspeed, float yspeed) {
+        Entity e = w.createEntity();
+        EntityEdit edit = e.edit();
+        MapCoordinate coord = edit.create(MapCoordinate.class);
+        coord.x = x;
+        coord.y = y;
+        Speed2 speed = edit.create(Speed2.class);
+        speed.x = xspeed;
+        speed.y = yspeed;
+        RenderTransform transform = edit.create(RenderTransform.class);
+        ModelComponent model = edit.create(ModelComponent.class);
+        model.type = ModelManager.Models.BULLET;
         Health health = edit.create(Health.class);
         health.health = 10;
         return e;

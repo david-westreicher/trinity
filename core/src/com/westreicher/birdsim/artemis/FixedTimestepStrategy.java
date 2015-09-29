@@ -18,7 +18,7 @@ public class FixedTimestepStrategy extends InvocationStrategy {
     private World world;
     private long nextTick;
     private float interpolation;
-    private long currenttick;
+    public long currenttick;
     private float fps;
     private long skipTicks;
 

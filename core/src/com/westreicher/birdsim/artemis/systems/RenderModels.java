@@ -22,13 +22,11 @@ import com.westreicher.birdsim.artemis.components.Speed2;
 @Wire
 public class RenderModels extends EntityProcessingSystem {
     private ComponentMapper<RenderTransform> interpMapper;
-    private ComponentMapper<Speed2> speedMapper;
     private ComponentMapper<ModelComponent> modelMapper;
     private ModelBatch mb;
-    private float delta;
 
     public RenderModels() {
-        super(Aspect.all(RenderTransform.class, Speed2.class, ModelComponent.class));
+        super(Aspect.all(RenderTransform.class, ModelComponent.class));
     }
 
     @Override
@@ -40,7 +38,6 @@ public class RenderModels extends EntityProcessingSystem {
     protected void begin() {
         Camera cam = world.getManager(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).cam;
         mb.begin(cam);
-        delta = world.getDelta();
     }
 
     @Override
@@ -54,7 +51,6 @@ public class RenderModels extends EntityProcessingSystem {
         if (!model.visible) return;
         ModelInstance mi = model.type.modelinst;
         RenderTransform transform = interpMapper.get(e);
-        Speed2 speed = speedMapper.get(e);
         mi.transform.setToTranslation(transform.x, transform.y, transform.z);
         mi.transform.scl(model.scale);
         mi.transform.rotateRad(Config.UPAXIS, transform.radiant);

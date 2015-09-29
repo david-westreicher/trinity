@@ -5,7 +5,7 @@ import com.artemis.PooledComponent;
 /**
  * Created by david on 9/25/15.
  */
-public class gStaticText extends PooledComponent {
+public class StaticText extends PooledComponent {
     public String text;
 
     @Override

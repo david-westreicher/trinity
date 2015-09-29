@@ -20,9 +20,9 @@ public class CController extends InputHelper {
 
     @Override
     public boolean update() {
-        x = (int) (ctrl.getAxis(axe * 2) * 10);
-        y = (int) (ctrl.getAxis(axe * 2 + 1) * 10);
-        return (Math.abs(x) > 1 || Math.abs(y) > 1);
+        x = (int) (ctrl.getAxis(axe * 2) * 100);
+        y = (int) (ctrl.getAxis(axe * 2 + 1) * 100);
+        return (Math.abs(x) > 10 || Math.abs(y) > 10);
     }
 
     @Override

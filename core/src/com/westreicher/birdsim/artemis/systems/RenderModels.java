@@ -51,6 +51,7 @@ public class RenderModels extends EntityProcessingSystem {
         if (!model.visible) return;
         ModelInstance mi = model.type.modelinst;
         RenderTransform transform = interpMapper.get(e);
+        mi.materials.get(0).set(model.col.attr);
         mi.transform.setToTranslation(transform.x, transform.y, transform.z);
         mi.transform.scl(model.scale);
         mi.transform.rotateRad(Config.UPAXIS, transform.radiant);

@@ -21,16 +21,17 @@ public class SaveMouse extends InputHelper {
         startY = y;
     }
 
+    //TODO choose closest finger
     public boolean update() {
         int width = v.getScreenWidth();
         int height = v.getScreenHeight();
         if (Gdx.input.isTouched(index)) {
             if (!super.isDown()) {
-                if (!isFix){
+                if (!isFix) {
                     int currentx = Gdx.input.getX(index);
                     int currenty = Gdx.input.getY(index);
                     if (Math.abs(currentx - width / 2) < width / 2 - 100
-                        && Math.abs(currenty - height / 2) < height / 2 - 100) {
+                            && Math.abs(currenty - height / 2) < height / 2 - 100) {
                         startX = currentx;
                         startY = currenty;
                     }

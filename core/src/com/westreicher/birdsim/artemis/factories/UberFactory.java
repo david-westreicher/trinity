@@ -17,6 +17,7 @@ import com.westreicher.birdsim.artemis.components.MapCoordinate;
 import com.westreicher.birdsim.artemis.components.ModelComponent;
 import com.westreicher.birdsim.artemis.components.Speed2;
 import com.westreicher.birdsim.artemis.managers.ModelManager;
+import com.westreicher.birdsim.util.ColorAttr;
 
 /**
  * Created by david on 9/28/15.
@@ -35,7 +36,10 @@ public class UberFactory extends Manager {
         input.id = id;
         ModelComponent model = edit.create(ModelComponent.class);
         model.type = ModelManager.modelsarr[(int) (Math.random() * ModelManager.modelsarr.length)];
+        model.col = ColorAttr.random();
         w.getManager(GroupManager.class).add(e, Artemis.PLAYER_GROUP);
+        Health health = edit.create(Health.class);
+        health.health = 10;
         return e;
     }
 
@@ -65,6 +69,7 @@ public class UberFactory extends Manager {
         ModelComponent model = edit.create(ModelComponent.class);
         AIComponent ai = edit.create(AIComponent.class);
         model.type = ModelManager.modelsarr[(int) (Math.random() * ModelManager.modelsarr.length)];
+        model.col = ColorAttr.random();
         Health health = edit.create(Health.class);
         health.health = 10;
         return e;
@@ -82,6 +87,7 @@ public class UberFactory extends Manager {
         RenderTransform transform = edit.create(RenderTransform.class);
         ModelComponent model = edit.create(ModelComponent.class);
         model.type = ModelManager.Models.BULLET;
+        model.col = ColorAttr.random();
         Health health = edit.create(Health.class);
         health.health = 10;
         return e;

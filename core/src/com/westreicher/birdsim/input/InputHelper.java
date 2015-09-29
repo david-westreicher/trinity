@@ -34,9 +34,10 @@ public abstract class InputHelper {
         }
     }
 
-    public static ArrayList<PlayerInput> players = new ArrayList<PlayerInput>();
+    public static ArrayList<PlayerInput> players;
 
     public static void init(Viewport viewport) {
+        players = new ArrayList<PlayerInput>();
         if (Config.IS_DESKTOP) {
             for (Controller ctrl : Controllers.getControllers()) {
                 players.add(new PlayerInput(new CController(0, ctrl), new CController(1, ctrl)));

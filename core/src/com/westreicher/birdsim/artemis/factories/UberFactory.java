@@ -4,6 +4,7 @@ import com.artemis.Entity;
 import com.artemis.EntityEdit;
 import com.artemis.Manager;
 import com.artemis.World;
+import com.artemis.managers.GroupManager;
 import com.artemis.managers.TagManager;
 import com.artemis.utils.EntityBuilder;
 import com.westreicher.birdsim.artemis.Artemis;
@@ -27,13 +28,12 @@ public class UberFactory extends Manager {
         coord.x = (float) Math.random() * 100 - 50;
         coord.y = (float) Math.random() * 100 - 50;
         Speed2 speed = edit.create(Speed2.class);
-        speed.x = (float) Math.random() - 0.5f;
-        speed.y = (float) Math.random() - 0.5f;
         RenderTransform transform = edit.create(RenderTransform.class);
         InputComponent input = edit.create(InputComponent.class);
         input.id = id;
         ModelComponent model = edit.create(ModelComponent.class);
         model.type = ModelManager.modelsarr[(int) (Math.random() * ModelManager.modelsarr.length)];
+        w.getManager(GroupManager.class).add(e, Artemis.PLAYER_GROUP);
         return e;
     }
 

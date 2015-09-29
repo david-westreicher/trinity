@@ -5,6 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
+import com.badlogic.gdx.Gdx;
 import com.westreicher.birdsim.artemis.components.RenderTransform;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
 import com.westreicher.birdsim.artemis.components.Speed2;
@@ -25,7 +26,7 @@ public class Interpolate extends EntityProcessingSystem {
 
     @Override
     protected void begin() {
-        this.delta = world.getDelta();
+        this.delta = world.getDelta() - 1;
     }
 
     @Override
@@ -35,6 +36,7 @@ public class Interpolate extends EntityProcessingSystem {
         RenderTransform transform = transformMapper.get(e);
         transform.x = pos.x + speed.x * delta;
         transform.y = pos.y + speed.y * delta;
-        transform.radiant = (float) -Math.atan2(-speed.y, speed.x);
+        if (speed.x != 0 || speed.y != 0)
+            transform.radiant = (float) -Math.atan2(-speed.y, speed.x);
     }
 }

@@ -2,6 +2,7 @@ package com.westreicher.birdsim.artemis;
 
 import com.artemis.World;
 import com.artemis.WorldConfiguration;
+import com.artemis.managers.GroupManager;
 import com.artemis.managers.TagManager;
 import com.artemis.utils.EntityBuilder;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -11,6 +12,7 @@ import com.westreicher.birdsim.artemis.factories.UberFactory;
 import com.westreicher.birdsim.artemis.managers.ModelManager;
 import com.westreicher.birdsim.artemis.managers.ShaderManager;
 import com.westreicher.birdsim.artemis.systems.AdjustHeight;
+import com.westreicher.birdsim.artemis.systems.HandleInput;
 import com.westreicher.birdsim.artemis.systems.Interpolate;
 import com.westreicher.birdsim.artemis.systems.MovementSystem;
 import com.westreicher.birdsim.artemis.systems.RenderChunks;
@@ -24,9 +26,10 @@ import com.westreicher.birdsim.util.InputHelper;
  */
 public class Artemis extends World {
 
-    public static final Class[] LOGIC_SYSTEMS = new Class[]{MovementSystem.class, TranslateMapCoordinates.class};
+    public static final Class[] LOGIC_SYSTEMS = new Class[]{HandleInput.class, MovementSystem.class, TranslateMapCoordinates.class};
     public static final String VIRTUAL_CAM_TAG = "virtualcam";
     public static final String CHUNKMANAGER_TAG = "chunkmanager";
+    public static final String PLAYER_GROUP = "players";
 
     private Artemis(WorldConfiguration config) {
         super(config);
@@ -35,10 +38,12 @@ public class Artemis extends World {
     public static Artemis init() {
         WorldConfiguration config = new WorldConfiguration();
         config.setManager(TagManager.class);
+        config.setManager(GroupManager.class);
         config.setManager(ModelManager.class);
         config.setManager(ShaderManager.class);
 
         //LOGIC
+        config.setSystem(HandleInput.class);
         config.setSystem(MovementSystem.class);
         config.setSystem(TranslateMapCoordinates.class);
 
@@ -61,8 +66,7 @@ public class Artemis extends World {
     private static void addPlayers(Viewport v, World w) {
         InputHelper.init(true, v);
         int id = 0;
-        //for (InputHelper.PlayerInput pi : InputHelper.players) {
-        for (int i = 0; i < 10; i++) {
+        for (InputHelper.PlayerInput pi : InputHelper.players) {
             UberFactory.createPlayer(w, id++);
         }
     }

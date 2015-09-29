@@ -50,7 +50,7 @@ public class Keyboard extends InputHelper {
 
     @Override
     public int rely() {
-        return -deltay;
+        return deltay;
     }
 
 }

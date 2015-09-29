@@ -64,8 +64,8 @@ public class Artemis extends World {
 
         //RENDERING
         config.setSystem(Interpolate.class);
-        config.setSystem(StartRendering.class);
         config.setSystem(AdjustHeight.class);
+        config.setSystem(StartRendering.class);
         config.setSystem(RenderChunks.class);
         config.setSystem(RenderModels.class);
         config.setSystem(RenderGui.class);

@@ -19,7 +19,7 @@ public class ModelManager extends Manager {
 
         private final String file;
         public ModelInstance modelinst;
-        private Model m;
+        public Model m;
 
         Models() {
             this(null);

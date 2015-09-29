@@ -47,7 +47,7 @@ public class HandleInput extends EntityProcessingSystem {
         }
         if (playerinput.secondPointer.update() && tick % 1 == 0) {
             float rad = playerinput.secondPointer.getRadiant();
-            UberFactory.shoot(world, pos.x, pos.y, (float) Math.cos(rad) * 20, (float) Math.sin(rad) * 20);
+            UberFactory.shoot(world, pos.x, pos.y, (float) Math.cos(rad), (float) Math.sin(rad));
         }
     }
 }

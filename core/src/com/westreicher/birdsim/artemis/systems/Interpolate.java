@@ -4,10 +4,13 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.annotations.Wire;
+import com.artemis.managers.TagManager;
 import com.artemis.systems.EntityProcessingSystem;
-import com.badlogic.gdx.Gdx;
-import com.westreicher.birdsim.artemis.components.RenderTransform;
+import com.badlogic.gdx.graphics.Camera;
+import com.westreicher.birdsim.artemis.Artemis;
+import com.westreicher.birdsim.artemis.components.CameraComponent;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
+import com.westreicher.birdsim.artemis.components.RenderTransform;
 import com.westreicher.birdsim.artemis.components.Speed2;
 
 /**
@@ -38,5 +41,18 @@ public class Interpolate extends EntityProcessingSystem {
         transform.y = pos.y + speed.y * delta;
         if (speed.x != 0 || speed.y != 0)
             transform.radiant = (float) -Math.atan2(-speed.y, speed.x);
+    }
+
+    @Override
+    protected void end() {
+        interpolateCam();
+    }
+
+    private void interpolateCam() {
+        Entity camentity = world.getManager(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG);
+        RenderTransform pos = camentity.getComponent(RenderTransform.class);
+        Camera cam = camentity.getComponent(CameraComponent.class).cam;
+        cam.position.set(pos.x, pos.y, 250);
+        cam.update();
     }
 }

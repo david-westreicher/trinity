@@ -16,17 +16,9 @@ import com.westreicher.birdsim.artemis.components.RenderTransform;
 public class StartRendering extends BaseSystem {
     @Override
     protected void processSystem() {
-        interpolateCam();
         Gdx.gl.glClearColor(0, 0, 0, 1);
         //Gdx.gl.glClearColor(0.251f, 0.643f, 0.875f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
     }
 
-    private void interpolateCam() {
-        Entity camentity = world.getManager(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG);
-        RenderTransform pos = camentity.getComponent(RenderTransform.class);
-        Camera cam = camentity.getComponent(CameraComponent.class).cam;
-        cam.position.set(pos.x, pos.y, 250);
-        cam.update();
-    }
 }

@@ -35,7 +35,7 @@ public class UberFactory extends Manager {
         InputComponent input = edit.create(InputComponent.class);
         input.id = id;
         ModelComponent model = edit.create(ModelComponent.class);
-        model.type = ModelManager.modelsarr[(int) (Math.random() * ModelManager.modelsarr.length)];
+        model.type = ModelManager.Models.PLAYER;
         model.col = ColorAttr.random();
         w.getManager(GroupManager.class).add(e, Artemis.PLAYER_GROUP);
         Health health = edit.create(Health.class);

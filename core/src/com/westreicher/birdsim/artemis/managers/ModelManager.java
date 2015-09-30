@@ -33,7 +33,7 @@ public class ModelManager extends Manager {
             if (file != null)
                 m = new ObjLoader().loadModel(Gdx.files.internal(file));
             else
-                m = new ModelBuilder().createBox(1, 1, 1, new Material(ColorAttribute.createDiffuse(1, 1, 1, 0)), VertexAttributes.Usage.Position);
+                m = new ModelBuilder().createBox(1, 1, 1, new Material(ColorAttribute.createDiffuse(1, 1, 1, 0)), VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
             modelinst = new ModelInstance(m);
         }
     }

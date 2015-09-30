@@ -7,9 +7,14 @@ import com.artemis.annotations.Wire;
 import com.artemis.managers.TagManager;
 import com.artemis.systems.EntityProcessingSystem;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.utils.Pool;
@@ -30,6 +35,7 @@ public class RenderModels extends EntityProcessingSystem {
     //TODO hacky, maybe use nicer pool
     private Material[] materialpool = new Material[1000];
     private int entindex;
+    private Environment env;
 
     public RenderModels() {
         super(Aspect.all(RenderTransform.class, ModelComponent.class));
@@ -37,6 +43,8 @@ public class RenderModels extends EntityProcessingSystem {
 
     @Override
     protected void initialize() {
+        env = new Environment();
+        env.add(new DirectionalLight().set(Color.WHITE, 1, -1, -1));
         mb = new ModelBatch();
         for (int i = 0; i < materialpool.length; i++)
             materialpool[i] = new Material();
@@ -65,7 +73,7 @@ public class RenderModels extends EntityProcessingSystem {
         mi.transform.setToTranslation(transform.x, transform.y, transform.z);
         mi.transform.scl(model.scale);
         mi.transform.rotateRad(Config.UPAXIS, transform.radiant);
-        mb.render(mi);
+        mb.render(mi, env);
     }
 
     @Override

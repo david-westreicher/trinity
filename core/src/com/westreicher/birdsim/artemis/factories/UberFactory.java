@@ -15,6 +15,7 @@ import com.westreicher.birdsim.artemis.components.MapCoordinate;
 import com.westreicher.birdsim.artemis.components.ModelComponent;
 import com.westreicher.birdsim.artemis.components.RenderTransform;
 import com.westreicher.birdsim.artemis.components.Speed2;
+import com.westreicher.birdsim.artemis.components.TerrainCollision;
 import com.westreicher.birdsim.artemis.managers.ModelManager;
 import com.westreicher.birdsim.util.ColorAttr;
 
@@ -27,8 +28,8 @@ public class UberFactory extends Manager {
         Entity e = w.createEntity();
         EntityEdit edit = e.edit();
         MapCoordinate coord = edit.create(MapCoordinate.class);
-        coord.x = (float) Math.random() * 100 - 50;
-        coord.y = (float) Math.random() * 100 - 50;
+        coord.x = 0;
+        coord.y = 0;
         Speed2 speed = edit.create(Speed2.class);
         RenderTransform transform = edit.create(RenderTransform.class);
         InputComponent input = edit.create(InputComponent.class);
@@ -36,6 +37,8 @@ public class UberFactory extends Manager {
         ModelComponent model = edit.create(ModelComponent.class);
         model.type = ModelManager.Models.PLAYER;
         model.col = ColorAttr.random();
+        model.scale = 10;
+        edit.create(TerrainCollision.class);
         w.getManager(GroupManager.class).add(e, Artemis.PLAYER_GROUP);
         Health health = edit.create(Health.class);
         health.health = 10;
@@ -67,9 +70,11 @@ public class UberFactory extends Manager {
         RenderTransform transform = edit.create(RenderTransform.class);
         ModelComponent model = edit.create(ModelComponent.class);
         AIComponent ai = edit.create(AIComponent.class);
-        model.type = ModelManager.modelsarr[(int) (Math.random() * ModelManager.modelsarr.length)];
+        model.type = ModelManager.Models.PLAYER;
         model.col = ColorAttr.random();
         Health health = edit.create(Health.class);
+        edit.create(TerrainCollision.class);
+        w.getManager(GroupManager.class).add(e, Artemis.ENEMY_GROUP);
         health.health = 10;
         return e;
     }
@@ -89,6 +94,23 @@ public class UberFactory extends Manager {
         model.col = ColorAttr.random();
         Health health = edit.create(Health.class);
         health.health = 10;
+        edit.create(TerrainCollision.class);
+        w.getManager(GroupManager.class).add(e, Artemis.BULLET_GROUP);
+        return e;
+    }
+
+    public static Entity createItem(World w, float x, float y) {
+        Entity e = w.createEntity();
+        EntityEdit edit = e.edit();
+        MapCoordinate coord = edit.create(MapCoordinate.class);
+        coord.x = x;
+        coord.y = y;
+        RenderTransform transform = edit.create(RenderTransform.class);
+        ModelComponent model = edit.create(ModelComponent.class);
+        model.type = ModelManager.Models.ITEM;
+        model.col = ColorAttr.random();
+        model.scale = (float) (Math.random() * 5 + 1);
+        w.getManager(GroupManager.class).add(e, Artemis.ITEM_GROUP);
         return e;
     }
 }

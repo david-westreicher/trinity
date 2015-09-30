@@ -46,6 +46,7 @@ public class RegenerateMeshesAndSpawn extends EntityProcessingSystem {
             if (!mi.isReady) {
                 if (cm.chunks[x][y].genMesh(cm)) {
                     maxupdates -= 1;
+                    //TODO don't spawn in regenerate mesh but when the position of chunks changes -.-
                     if (x == 0 || y == 0 || x == Config.CHUNKNUMS - 1 || y == Config.CHUNKNUMS - 1) {
                         maybespawn(spos.x * Config.TILES_PER_CHUNK, spos.y * Config.TILES_PER_CHUNK, mi.rand);
                     }
@@ -57,7 +58,11 @@ public class RegenerateMeshesAndSpawn extends EntityProcessingSystem {
     }
 
     private void maybespawn(float x, float y, Random rand) {
-        if (rand.nextDouble() > 0.9)
-            UberFactory.createEnemy(world, x, y);
+        if (rand.nextDouble() > 0.3)
+            return;
+        if (rand.nextDouble() > 0.5)
+            UberFactory.createEnemy(world, (float) (x + Math.random() * 5), (float) (y + Math.random() * 5));
+        else
+            UberFactory.createItem(world, (float) (x + Math.random() * 5), (float) (y + Math.random() * 5));
     }
 }

@@ -44,17 +44,17 @@ public class ChunkManager extends Component {
         chunks[x2][y2] = tmp;
     }
 
-    public void explode2(Vector3 position, float dist) {
+    public void explode2(float ex, float ey, float dist) {
         if (dist == 0) {
-            addVal(position.x, position.y, -0.5f);
+            addVal(ex, ey, -0.5f);
             return;
         }
         float distsq = dist * dist;
         for (float x = -dist; x <= dist; x++) {
             for (float y = -dist; y <= dist; y++) {
                 float distfac = (x * x + y * y) / distsq;
-                if (getVal(x + position.x, y + position.y) > 0 && distfac < 1)
-                    addVal(x + position.x, y + position.y, (distfac - 1) / 2f);
+                if (getVal(x + ex, y + ey) > 0 && distfac < 1)
+                    addVal(x + ex, y + ey, (distfac - 1) / 2f);
             }
         }
     }
@@ -111,7 +111,7 @@ public class ChunkManager extends Component {
     }
 
     public void resize(int width, int height) {
-        this.pointsize = (Math.min(width, height) / 80f);
+        this.pointsize = (Math.min(width, height) / 100f);
     }
 
     private static class TileResult {

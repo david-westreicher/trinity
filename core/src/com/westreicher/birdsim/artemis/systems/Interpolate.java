@@ -12,6 +12,7 @@ import com.westreicher.birdsim.artemis.components.CameraComponent;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
 import com.westreicher.birdsim.artemis.components.RenderTransform;
 import com.westreicher.birdsim.artemis.components.Speed2;
+import com.westreicher.birdsim.util.Util;
 
 /**
  * Created by david on 9/28/15.
@@ -24,7 +25,7 @@ public class Interpolate extends EntityProcessingSystem {
     private float delta;
 
     public Interpolate() {
-        super(Aspect.all(MapCoordinate.class, Speed2.class, RenderTransform.class));
+        super(Aspect.all(MapCoordinate.class, RenderTransform.class));
     }
 
     @Override
@@ -35,12 +36,20 @@ public class Interpolate extends EntityProcessingSystem {
     @Override
     protected void process(Entity e) {
         MapCoordinate pos = coordMapper.get(e);
-        Speed2 speed = speedMapper.get(e);
         RenderTransform transform = transformMapper.get(e);
-        transform.x = pos.x + speed.x * delta;
-        transform.y = pos.y + speed.y * delta;
-        if (speed.x != 0 || speed.y != 0)
-            transform.radiant = (float) -Math.atan2(-speed.y, speed.x);
+        if (speedMapper.has(e)) {
+            Speed2 speed = speedMapper.get(e);
+            transform.x = pos.x + speed.x * delta;
+            transform.y = pos.y + speed.y * delta;
+            if (speed.x != 0 || speed.y != 0) {
+                //float toRot = Util.interpolateRot(transform.radiant, -(float) Math.atan2(-speed.y, speed.x), 0.05f);
+                //transform.radiant += toRot;
+                transform.radiant = -(float) Math.atan2(-speed.y, speed.x);
+            }
+        } else {
+            transform.x = pos.x;
+            transform.y = pos.y;
+        }
     }
 
     @Override

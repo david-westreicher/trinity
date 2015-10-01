@@ -12,7 +12,6 @@ import com.westreicher.birdsim.artemis.components.CameraComponent;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
 import com.westreicher.birdsim.artemis.components.RenderTransform;
 import com.westreicher.birdsim.artemis.components.Speed2;
-import com.westreicher.birdsim.util.Util;
 
 /**
  * Created by david on 9/28/15.
@@ -61,7 +60,8 @@ public class Interpolate extends EntityProcessingSystem {
         Entity camentity = world.getManager(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG);
         RenderTransform pos = camentity.getComponent(RenderTransform.class);
         Camera cam = camentity.getComponent(CameraComponent.class).cam;
-        cam.position.set(pos.x, pos.y, 250);
+        cam.position.set(pos.x, pos.y, 200);
+        cam.far = 500;
         cam.update();
     }
 }

@@ -56,10 +56,8 @@ public class ShaderManager extends Manager {
                 + "uniform vec3 trans;\n" //
                 + (Config.POST_PROCESSING ? ""//
                 + "  uniform vec2 virtualcam;\n"//
-                //+ "  varying float dstfrac;"
                 : "")//
                 + "uniform float pointsize;\n" //
-                + "uniform float maxdstsqinv;\n" //
                 + "uniform float chunksize;\n" //
                 + "uniform float heightscale;\n" //
                 + "\n" //
@@ -68,9 +66,10 @@ public class ShaderManager extends Manager {
                 + "  vec3 pos = " + ShaderProgram.POSITION_ATTRIBUTE + "*chunksize + trans;\n" //
                 + "  pos.z *= heightscale;\n" //
                 + (Config.POST_PROCESSING ? ""//
-                + "    float dst = length(pos.xy-virtualcam);\n" //
-                + "    float dstfrac = (dst*dst*maxdstsqinv);\n" //
-                + "    pos.z+=(1.0-dstfrac)*140.0;\n" : "")//
+                + "    vec2 dst = pos.xy-virtualcam;\n" //
+                + "    float dist = " + Config.SPHERE_RADIUS_SQUARED + "-dst.x*dst.x-dst.y*dst.y;\n"//
+                + "    if(dist>0.0)pos.z+=sqrt(dist);\n"//
+                + "    else pos.z = 10000.0;\n" : "")//
                 + "  gl_Position =  u_projTrans * vec4(pos,1.0);\n" //
                 + "  gl_PointSize = pointsize;\n"//
                 + "  col =  " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
@@ -86,7 +85,6 @@ public class ShaderManager extends Manager {
                 + "#define LOWP \n" //
                 + "#endif\n" //
                 + "varying vec3 col;\n" //
-                //+ "varying float dstfrac;\n" //
                 + "void main()\n"//
                 + "{\n" //
                 //+ "  if(dstfrac>1.0)discard;\n" //

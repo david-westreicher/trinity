@@ -39,10 +39,8 @@ public class RenderChunks extends EntityProcessingSystem {
         Gdx.gl20.glEnable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);
         shader.begin();
         shader.setUniformMatrix("u_projTrans", cam.combined);
-        if (Config.POST_PROCESSING) {
+        if (Config.POST_PROCESSING)
             shader.setUniformf("virtualcam", cam.position.x, cam.position.y);
-            shader.setUniformf("maxdstsqinv", 1f / (140f * 140f));
-        }
         shader.setUniformf("pointsize", cm.pointsize);
         shader.setUniformf("chunksize", Config.TILES_PER_CHUNK);
         shader.setUniformf("heightscale", 2.5f * Config.TERRAIN_HEIGHT / Config.TILES_PER_CHUNK);

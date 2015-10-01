@@ -10,6 +10,7 @@ public class RenderTransform extends PooledComponent {
     public float y;
     public float z;
     public float radiant;
+    public float dist;
 
     @Override
     protected void reset() {

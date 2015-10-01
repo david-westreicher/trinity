@@ -17,6 +17,8 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
+import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pool;
 import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.artemis.Artemis;
@@ -29,6 +31,8 @@ import com.westreicher.birdsim.artemis.components.RenderTransform;
  */
 @Wire
 public class RenderModels extends EntityProcessingSystem {
+    private static final Quaternion TMP_QUAT = new Quaternion();
+    private static final Vector3 TMP_VEC = new Vector3();
     private ComponentMapper<RenderTransform> interpMapper;
     private ComponentMapper<ModelComponent> modelMapper;
     private ModelBatch mb;
@@ -36,6 +40,7 @@ public class RenderModels extends EntityProcessingSystem {
     private Material[] materialpool = new Material[1000];
     private int entindex;
     private Environment env;
+    private Camera cam;
 
     public RenderModels() {
         super(Aspect.all(RenderTransform.class, ModelComponent.class));
@@ -44,7 +49,8 @@ public class RenderModels extends EntityProcessingSystem {
     @Override
     protected void initialize() {
         env = new Environment();
-        env.add(new DirectionalLight().set(Color.WHITE, 1, -1, -1));
+        env.set(new ColorAttribute(ColorAttribute.AmbientLight, new Color(0x1e90ffff)));
+        env.add(new DirectionalLight().set(new Color(0xb67e5bff), 1, -1, -1));
         mb = new ModelBatch();
         for (int i = 0; i < materialpool.length; i++)
             materialpool[i] = new Material();
@@ -52,7 +58,7 @@ public class RenderModels extends EntityProcessingSystem {
 
     @Override
     protected void begin() {
-        Camera cam = world.getManager(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).cam;
+        cam = world.getManager(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).cam;
         mb.begin(cam);
         entindex = 0;
     }
@@ -72,7 +78,11 @@ public class RenderModels extends EntityProcessingSystem {
         RenderTransform transform = interpMapper.get(e);
         mi.transform.setToTranslation(transform.x, transform.y, transform.z);
         mi.transform.scl(model.scale);
-        mi.transform.rotateRad(Config.UPAXIS, transform.radiant);
+
+        float yaw = -(float) Math.atan((cam.position.x - transform.x) / transform.dist);
+        float pitch = (float) Math.atan((cam.position.y - transform.y) / transform.dist);
+        TMP_QUAT.setEulerAnglesRad(yaw, pitch, transform.radiant);
+        mi.transform.rotate(TMP_QUAT);
         mb.render(mi, env);
     }
 

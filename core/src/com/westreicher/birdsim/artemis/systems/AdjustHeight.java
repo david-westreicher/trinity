@@ -48,13 +48,12 @@ public class AdjustHeight extends EntityProcessingSystem {
         float orig = val * Config.TERRAIN_HEIGHT;
         float dstx = transform.x - cam.x;
         float dsty = transform.y - cam.y;
-        float dstsq = dstx * dstx + dsty * dsty;
-        float dstfrac = (dstsq / (140f * 140f));
-        model.visible = Config.POST_PROCESSING ? dstfrac <= 1 : true;
-        if (Config.POST_PROCESSING)
-            //TODO optimize Z projection
-            transform.z = (orig + (1.0f - dstfrac) * 140.0f + 5);
-        else
-            transform.z = (orig + 5);
+        double dist = Config.SPHERE_RADIUS_SQUARED - dstx * dstx - dsty * dsty;
+        model.visible = Config.POST_PROCESSING ? dist > 0 : true;
+        if (Config.POST_PROCESSING) {
+            transform.dist = (float) Math.sqrt(dist);
+            transform.z = orig + transform.dist + model.scale;
+        } else
+            transform.z = (orig + model.scale);
     }
 }

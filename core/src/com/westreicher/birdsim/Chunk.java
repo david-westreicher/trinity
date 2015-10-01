@@ -64,6 +64,7 @@ public class Chunk {
         for (int i = 10; i > 10 - NOISE_OCTAVES; i -= 2)
             noise += getNoise(x, y, i);
         return noise / ((float) Math.pow(8, 2));
+        //return 0;
     }
 
     public void clear() {
@@ -142,26 +143,26 @@ public class Chunk {
                 //if (!MyGdxGame.isDesktop && scale > -1 && scale < 0)
                 //    continue;
                 tmp.set(getCol(scale));
-                if (scale > 0) {
-                    float dark = 0;//randdark;
-                    for (int x1 = x - 3; x1 <= x; x1++) {
-                        for (int y1 = y - 3; y1 <= y; y1++) {
-                            float other = 0;
-                            if (x1 < 0 || y1 < 0) {
-                                float neighborval = chunkman.getValAbs(x1, SIZE - y1 - 1, absx, absy);
-                                if (neighborval == ChunkManager.OUTSIDE)
-                                    other = getNoise((x1 + absx * SIZE), (-y1 + absy * SIZE));
-                                else
-                                    other = neighborval;
-                            } else
-                                other = map[x1][y1];
-                            float diff = other - scale;
-                            if (diff > 0)
-                                dark += diff * 0.3f;
-                        }
+                //if (scale > 0) {
+                float dark = 0;//randdark;
+                for (int x1 = x - 3; x1 <= x; x1++) {
+                    for (int y1 = y - 3; y1 <= y; y1++) {
+                        float other = 0;
+                        if (x1 < 0 || y1 < 0) {
+                            float neighborval = chunkman.getValAbs(x1, SIZE - y1 - 1, absx, absy);
+                            if (neighborval == ChunkManager.OUTSIDE)
+                                other = getNoise((x1 + absx * SIZE), (-y1 + absy * SIZE));
+                            else
+                                other = neighborval;
+                        } else
+                            other = map[x1][y1];
+                        float diff = other - scale;
+                        if (other > 0 && diff > 0)
+                            dark += diff * 0.2f;
                     }
-                    tmp.scl(Math.max(0, 1 - dark));
-                } else
+                }
+                tmp.scl(Math.max(0, 1 - dark));
+                if (scale <= 0)
                     tmp.scl(Math.min(1, 0.5f - scale * 0.25f));
                 float z = Math.min(1, Math.max(0, scale * (1.0f / 2.5f)));
                 // x,y,z should be in range 0-1 (min-max)

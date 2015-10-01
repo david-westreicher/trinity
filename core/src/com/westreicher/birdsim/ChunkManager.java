@@ -111,7 +111,7 @@ public class ChunkManager extends Component {
     }
 
     public void resize(int width, int height) {
-        this.pointsize = (Math.min(width, height) / 100f);
+        this.pointsize = (Math.min(width, height) / 80f);
     }
 
     private static class TileResult {

@@ -6,7 +6,11 @@ import com.artemis.PooledComponent;
  * Created by david on 9/30/15.
  */
 public class TerrainCollision extends PooledComponent {
+    public Types type;
+
     @Override
     protected void reset() {
     }
+
+    public enum Types {PLAYER, BULLET, ENEMY}
 }

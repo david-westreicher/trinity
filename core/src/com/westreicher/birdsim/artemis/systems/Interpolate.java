@@ -60,8 +60,7 @@ public class Interpolate extends EntityProcessingSystem {
         Entity camentity = world.getManager(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG);
         RenderTransform pos = camentity.getComponent(RenderTransform.class);
         Camera cam = camentity.getComponent(CameraComponent.class).cam;
-        cam.position.set(pos.x, pos.y, 200);
-        cam.far = 500;
+        cam.position.set(pos.x, pos.y, cam.position.z);
         cam.update();
     }
 }

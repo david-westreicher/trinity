@@ -43,9 +43,6 @@ public class Artemis extends World {
     public static final String VIRTUAL_CAM_TAG = "virtualcam";
     public static final String CHUNKMANAGER_TAG = "chunkmanager";
     public static final String PLAYER_GROUP = "players";
-    public static final String BULLET_GROUP = "bullets";
-    public static final String ENEMY_GROUP = "enemies";
-    public static final String ITEM_GROUP = "items";
 
     private Artemis(WorldConfiguration config) {
         super(config);
@@ -99,7 +96,7 @@ public class Artemis extends World {
         CameraComponent camcomp = UberFactory.createCam(a);
         camcomp.cam.near = 1f;
         camcomp.cam.far = 500f;
-        camcomp.cam.position.set(0, 0, 250);
+        camcomp.cam.position.set(0, 0, 200);
         camcomp.cam.update();
     }
 

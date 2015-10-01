@@ -24,6 +24,8 @@ import com.westreicher.birdsim.util.ColorAttr;
  */
 public class UberFactory extends Manager {
 
+    g
+
     public static Entity createPlayer(World w, int id) {
         Entity e = w.createEntity();
         EntityEdit edit = e.edit();
@@ -38,10 +40,11 @@ public class UberFactory extends Manager {
         model.type = ModelManager.Models.PLAYER;
         model.col = ColorAttr.random();
         model.scale = 10;
-        edit.create(TerrainCollision.class);
         w.getManager(GroupManager.class).add(e, Artemis.PLAYER_GROUP);
         Health health = edit.create(Health.class);
         health.health = 10;
+        TerrainCollision tc = edit.create(TerrainCollision.class);
+        tc.type = TerrainCollision.Types.PLAYER;
         return e;
     }
 
@@ -73,8 +76,8 @@ public class UberFactory extends Manager {
         model.type = ModelManager.Models.PLAYER;
         model.col = ColorAttr.random();
         Health health = edit.create(Health.class);
-        edit.create(TerrainCollision.class);
-        w.getManager(GroupManager.class).add(e, Artemis.ENEMY_GROUP);
+        TerrainCollision tc = edit.create(TerrainCollision.class);
+        tc.type = TerrainCollision.Types.ENEMY;
         health.health = 10;
         return e;
     }
@@ -94,8 +97,8 @@ public class UberFactory extends Manager {
         model.col = ColorAttr.random();
         Health health = edit.create(Health.class);
         health.health = 10;
-        edit.create(TerrainCollision.class);
-        w.getManager(GroupManager.class).add(e, Artemis.BULLET_GROUP);
+        TerrainCollision tc = edit.create(TerrainCollision.class);
+        tc.type = TerrainCollision.Types.BULLET;
         return e;
     }
 
@@ -110,7 +113,6 @@ public class UberFactory extends Manager {
         model.type = ModelManager.Models.ITEM;
         model.col = ColorAttr.random();
         model.scale = (float) (Math.random() * 5 + 1);
-        w.getManager(GroupManager.class).add(e, Artemis.ITEM_GROUP);
         return e;
     }
 }

@@ -7,7 +7,6 @@ import com.artemis.annotations.Wire;
 import com.artemis.managers.GroupManager;
 import com.artemis.managers.TagManager;
 import com.artemis.systems.EntityProcessingSystem;
-import com.artemis.utils.ImmutableBag;
 import com.badlogic.gdx.math.Vector3;
 import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.artemis.Artemis;
@@ -40,14 +39,10 @@ public class CollideTerrain extends EntityProcessingSystem {
     @Override
     protected void process(Entity e) {
         MapCoordinate pos = posMapper.get(e);
+        TerrainCollision.Types type = tcMapper.get(e).type;
         float val = cm.getVal(pos.x, pos.y);
         if (val <= 0) return;
-        ImmutableBag<String> groups = groupmanager.getGroups(e);
-        if (groups.size() > 1)
-            throw new RuntimeException("i thought only one group per entity");
-        String type = groups.get(0);
-        if (type.equals(Artemis.BULLET_GROUP)) {
-            //BULLET
+        if (type == TerrainCollision.Types.BULLET) {
             cm.explode2(pos.x, pos.y, 10);
             world.deleteEntity(e);
         } else {
@@ -56,10 +51,10 @@ public class CollideTerrain extends EntityProcessingSystem {
             pos.x -= speed.x;
             pos.y -= speed.y;
             if (!tryToMove(pos, speed)) {
-                if (type.equals(Artemis.PLAYER_GROUP)) {
+                if (type == TerrainCollision.Types.PLAYER) {
                     speed.x = 0;
                     speed.y = 0;
-                } else if (type.equals(Artemis.ENEMY_GROUP)) {
+                } else if (type == TerrainCollision.Types.ENEMY) {
                     speed.x = (float) (Math.random() - 0.5);
                     speed.y = (float) (Math.random() - 0.5);
                 }

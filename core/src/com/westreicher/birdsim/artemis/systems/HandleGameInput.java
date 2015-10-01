@@ -54,7 +54,9 @@ public class HandleGameInput extends EntityProcessingSystem {
         }
         if (playerinput.isShooting() && tick % 10 == 0) {
             float rad = playerinput.getShootRadiant();
-            factory.shoot(world, pos.x, pos.y, (float) Math.cos(rad) * 3, (float) Math.sin(rad) * 3);
+            float xspeed = (float) Math.cos(rad) * 3;
+            float yspeed = (float) Math.sin(rad) * 3;
+            factory.shoot(world, pos.x, pos.y, xspeed, yspeed);
         }
     }
 }

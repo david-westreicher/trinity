@@ -13,6 +13,8 @@ import com.artemis.managers.TagManager;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.AIComponent;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
+import com.westreicher.birdsim.artemis.components.Collidable;
+import com.westreicher.birdsim.artemis.components.EntityType;
 import com.westreicher.birdsim.artemis.components.Health;
 import com.westreicher.birdsim.artemis.components.InputComponent;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
@@ -33,6 +35,9 @@ public class UberFactory extends Manager {
     private ComponentMapper<TerrainCollision> tcMapper;
     private ComponentMapper<ModelComponent> modelMapper;
     private ComponentMapper<Speed2> speedMapper;
+    protected ComponentMapper<Health> mHealth;
+    private ComponentMapper<Collidable> collidableMapper;
+    protected ComponentMapper<EntityType> mEntityType;
     private EntityTransmuter playerCreator;
     private EntityTransmuter enemyCreator;
     private EntityTransmuter itemCreator;
@@ -47,6 +52,8 @@ public class UberFactory extends Manager {
                 add(InputComponent.class).
                 add(ModelComponent.class).
                 add(TerrainCollision.class).
+                add(Collidable.class).
+                add(EntityType.class).
                 add(Health.class).
                 build();
 
@@ -57,6 +64,8 @@ public class UberFactory extends Manager {
                 add(AIComponent.class).
                 add(ModelComponent.class).
                 add(TerrainCollision.class).
+                add(Collidable.class).
+                add(EntityType.class).
                 add(Health.class).
                 build();
         bulletCreator = new EntityTransmuterFactory(world).
@@ -66,6 +75,8 @@ public class UberFactory extends Manager {
                 add(AIComponent.class).
                 add(ModelComponent.class).
                 add(TerrainCollision.class).
+                add(Collidable.class).
+                add(EntityType.class).
                 add(Health.class).
                 build();
 
@@ -74,6 +85,8 @@ public class UberFactory extends Manager {
                 add(RenderTransform.class).
                 add(ModelComponent.class).
                 add(TerrainCollision.class).
+                add(Collidable.class).
+                add(EntityType.class).
                 add(Health.class).
                 build();
     }
@@ -87,7 +100,8 @@ public class UberFactory extends Manager {
         model.type = ModelManager.Models.PLAYER;
         model.col = ColorAttr.RED;
         model.scale = 10;
-        tcMapper.get(e).type = TerrainCollision.Types.PLAYER;
+        collidableMapper.get(e).scale = model.scale;
+        mEntityType.get(e).type = EntityType.Types.PLAYER;
         return e;
     }
 
@@ -117,7 +131,9 @@ public class UberFactory extends Manager {
         model.type = ModelManager.Models.PLAYER;
         model.col = ColorAttr.random();
         model.scale = 8;
-        tcMapper.get(e).type = TerrainCollision.Types.ENEMY;
+        collidableMapper.get(e).scale = model.scale;
+        mEntityType.get(e).type = EntityType.Types.ENEMY;
+        mHealth.get(e).health = 10;
         return e;
     }
 
@@ -135,7 +151,8 @@ public class UberFactory extends Manager {
         model.type = ModelManager.Models.BULLET;
         model.col = ColorAttr.random();
         model.scale = 5;
-        tcMapper.get(e).type = TerrainCollision.Types.BULLET;
+        collidableMapper.get(e).scale = model.scale;
+        mEntityType.get(e).type = EntityType.Types.BULLET;
         return e;
     }
 
@@ -149,6 +166,8 @@ public class UberFactory extends Manager {
         model.type = ModelManager.Models.ITEM;
         model.col = ColorAttr.random();
         model.scale = (float) (Math.random() * 5 + 1);
+        collidableMapper.get(e).scale = model.scale;
+        mEntityType.get(e).type = EntityType.Types.ITEM;
         return e;
     }
 }

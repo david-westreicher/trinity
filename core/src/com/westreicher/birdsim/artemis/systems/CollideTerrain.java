@@ -10,6 +10,7 @@ import com.artemis.systems.EntityProcessingSystem;
 import com.badlogic.gdx.math.Vector3;
 import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.artemis.Artemis;
+import com.westreicher.birdsim.artemis.components.EntityType;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
 import com.westreicher.birdsim.artemis.components.Speed2;
 import com.westreicher.birdsim.artemis.components.TerrainCollision;
@@ -23,11 +24,12 @@ public class CollideTerrain extends EntityProcessingSystem {
     ComponentMapper<TerrainCollision> tcMapper;
     ComponentMapper<MapCoordinate> posMapper;
     ComponentMapper<Speed2> speedMapper;
+    protected ComponentMapper<EntityType> mEntityType;
     private ChunkManager cm;
     private GroupManager groupmanager;
 
     public CollideTerrain() {
-        super(Aspect.all(TerrainCollision.class, Speed2.class, MapCoordinate.class));
+        super(Aspect.all(TerrainCollision.class, Speed2.class, MapCoordinate.class, EntityType.class));
     }
 
     @Override
@@ -39,10 +41,10 @@ public class CollideTerrain extends EntityProcessingSystem {
     @Override
     protected void process(Entity e) {
         MapCoordinate pos = posMapper.get(e);
-        TerrainCollision.Types type = tcMapper.get(e).type;
+        EntityType.Types type = mEntityType.get(e).type;
         float val = cm.getVal(pos.x, pos.y);
         if (val <= 0) return;
-        if (type == TerrainCollision.Types.BULLET) {
+        if (type == EntityType.Types.BULLET) {
             cm.explode2(pos.x, pos.y, 10);
             world.deleteEntity(e);
         } else {
@@ -51,10 +53,10 @@ public class CollideTerrain extends EntityProcessingSystem {
             pos.x -= speed.x;
             pos.y -= speed.y;
             if (!tryToMove(pos, speed)) {
-                if (type == TerrainCollision.Types.PLAYER) {
+                if (type == EntityType.Types.PLAYER) {
                     speed.x = 0;
                     speed.y = 0;
-                } else if (type == TerrainCollision.Types.ENEMY) {
+                } else if (type == EntityType.Types.ENEMY) {
                     speed.x = (float) (Math.random() - 0.5);
                     speed.y = (float) (Math.random() - 0.5);
                 }

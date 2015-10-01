@@ -1,11 +1,18 @@
 package com.westreicher.birdsim.util;
 
+import com.artemis.Component;
+import com.artemis.Entity;
+import com.artemis.utils.Bag;
 import com.badlogic.gdx.Gdx;
+import com.westreicher.birdsim.artemis.components.EntityType;
+import com.westreicher.birdsim.artemis.components.MapCoordinate;
 
 /**
  * Created by david on 9/26/15.
  */
 public class Util {
+    private static final Bag<Component> TMP_BAG = new Bag<Component>();
+
     public static <T> boolean contains(final T[] array, final T v) {
         for (final T e : array)
             if (e == v)
@@ -30,4 +37,17 @@ public class Util {
         return rot;
     }
 
+    public static void log(Entity e) {
+        TMP_BAG.clear();
+        for (Component c : e.getComponents(TMP_BAG)) {
+            if (c != null)
+                Gdx.app.log("components: ", c.getClass().getSimpleName());
+            if (c instanceof MapCoordinate) {
+                Gdx.app.log("components: ", ((MapCoordinate) c).x + "," + ((MapCoordinate) c).y);
+            }
+            if (c instanceof EntityType) {
+                Gdx.app.log("components: ", ((EntityType) c).type.toString());
+            }
+        }
+    }
 }

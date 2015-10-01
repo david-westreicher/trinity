@@ -43,7 +43,7 @@ public class PositionCam extends BaseSystem {
                 float rad = input.getShootRadiant();
                 TMP_VEC2.add((float) Math.cos(rad), (float) Math.sin(rad));
             }// else
-            TMP_VEC2.add(speed.x, speed.y);
+            TMP_VEC2.add(speed.x * 2, speed.y * 2);
         }
         if (players.size() > 0) {
             TMP_VEC.scl(1.0f / players.size());

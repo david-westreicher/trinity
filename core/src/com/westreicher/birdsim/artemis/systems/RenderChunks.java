@@ -8,14 +8,22 @@ import com.artemis.managers.TagManager;
 import com.artemis.systems.EntityProcessingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.VertexAttributes;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.westreicher.birdsim.Chunk;
 import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
+import com.westreicher.birdsim.artemis.components.ModelComponent;
+import com.westreicher.birdsim.artemis.components.RenderTransform;
 import com.westreicher.birdsim.artemis.managers.ShaderManager;
 import com.westreicher.birdsim.util.BatchShaderProgram;
+import com.westreicher.birdsim.util.MaxArray;
 
 /**
  * Created by david on 9/28/15.
@@ -23,17 +31,28 @@ import com.westreicher.birdsim.util.BatchShaderProgram;
 @Wire
 public class RenderChunks extends EntityProcessingSystem {
     private static final float[] tmpfloat = new float[3];
-    ComponentMapper<ChunkManager> chunkMapper;
+    private static final Color TMP_COL = new Color();
+    ComponentMapper<RenderTransform> transformMapper;
+    ComponentMapper<ModelComponent> modelMapper;
+    private final Mesh shadowMesh;
+    public final MaxArray.MaxArrayFloat verts;
+    private BatchShaderProgram shader;
+    private ChunkManager cm;
 
     public RenderChunks() {
-        super(Aspect.all(ChunkManager.class));
+        super(Aspect.all(RenderTransform.class, ModelComponent.class));
+        verts = new MaxArray.MaxArrayFloat(800 * (3 + 1));
+        shadowMesh = new Mesh(false, verts.maxSize(), 0,
+                new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
+                new VertexAttribute(VertexAttributes.Usage.ColorPacked, 3, ShaderProgram.COLOR_ATTRIBUTE));
+
     }
 
     @Override
-    protected void process(Entity e) {
+    protected void begin() {
         Camera cam = world.getManager(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).cam;
-        ChunkManager cm = chunkMapper.get(e);
-        BatchShaderProgram shader = world.getManager(ShaderManager.class).getShader(ShaderManager.Shaders.CHUNK);
+        cm = world.getManager(TagManager.class).getEntity(Artemis.CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
+        shader = world.getManager(ShaderManager.class).getShader(ShaderManager.Shaders.CHUNK);
 
         Gdx.gl20.glEnable(GL20.GL_DEPTH_TEST);
         Gdx.gl20.glEnable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);
@@ -56,9 +75,53 @@ public class RenderChunks extends EntityProcessingSystem {
                 }
             }
         }
+        verts.reset();
+    }
+
+    @Override
+    protected void process(Entity e) {
+        RenderTransform rt = transformMapper.get(e);
+        ModelComponent model = modelMapper.get(e);
+        int scale = Math.max(1, (int) (model.scale / 2));
+        float scaleSq = (scale - 1) * (scale - 1);
+        for (int x = -scale; x <= scale; x++) {
+            for (int y = -scale; y <= scale; y++) {
+                if (verts.size() > verts.maxSize() - 4)
+                    return;
+                float realX = (int) (rt.x + x) + 2f;
+                float realY = (int) (rt.y + y) - 2f;
+                ChunkManager.TileResult tr = cm.setTileResult(realX, realY);
+                if (tr == null)
+                    continue;
+                float dist = scaleSq - x * x - y * y;
+                if (dist <= 0)
+                    continue;
+                float z = Math.max(0, tr.c.getVal(tr.innerx, tr.innery)) * Config.TERRAIN_HEIGHT / Config.TILES_PER_CHUNK + 0.02f;
+                verts.add(realX / Config.TILES_PER_CHUNK, realY / Config.TILES_PER_CHUNK, z);
+                TMP_COL.set(tr.c.colors[tr.innerx][tr.innery]);
+                float asd = 1 - (float) (Math.sqrt(dist) / (scale * 2));
+                TMP_COL.mul(asd);
+                verts.add(Color.toFloatBits(TMP_COL.r, TMP_COL.g, TMP_COL.b, 1));
+                //verts.add(Color.toFloatBits(0.2f, 0.2f, 0.2f, 1));
+            }
+        }
+    }
+
+    @Override
+    protected void end() {
+        Gdx.gl20.glDepthFunc(GL20.GL_LEQUAL);
+        shadowMesh.setVertices(verts.arr, 0, verts.size());
+        tmpfloat[0] = 0;
+        tmpfloat[1] = 0;
+        shader.setUniform3fv("trans", tmpfloat, 0, 3);
+        shader.setUniformf("pointsize", cm.pointsize);
+        shader.setUniformf("heightscale", 1);
+        shadowMesh.render(shader, GL20.GL_POINTS);
+
         shader.unbind();
         shader.end();
         Gdx.gl20.glDisable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);
         Gdx.gl20.glDisable(GL20.GL_DEPTH_TEST);
+        Gdx.gl20.glDepthFunc(GL20.GL_LESS);
     }
 }

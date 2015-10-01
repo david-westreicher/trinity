@@ -79,9 +79,13 @@ public class RenderModels extends EntityProcessingSystem {
         mi.transform.setToTranslation(transform.x, transform.y, transform.z);
         mi.transform.scl(model.scale);
 
-        float yaw = -(float) Math.atan((cam.position.x - transform.x) / transform.dist);
-        float pitch = (float) Math.atan((cam.position.y - transform.y) / transform.dist);
-        TMP_QUAT.setEulerAnglesRad(yaw, pitch, transform.radiant);
+        if (Config.POST_PROCESSING) {
+            float yaw = -(float) Math.atan((cam.position.x - transform.x) / transform.dist);
+            float pitch = (float) Math.atan((cam.position.y - transform.y) / transform.dist);
+            TMP_QUAT.setEulerAnglesRad(yaw, pitch, transform.radiant);
+        } else {
+            TMP_QUAT.setEulerAnglesRad(0, 0, transform.radiant);
+        }
         mi.transform.rotate(TMP_QUAT);
         mb.render(mi, env);
     }

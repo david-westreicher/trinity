@@ -37,6 +37,7 @@ public class Chunk {
     private static int NOISE_OCTAVES = 10;
     private static final int SIZE = Config.TILES_PER_CHUNK;
     private float[][] map = new float[SIZE][SIZE];
+    public Color[][] colors = new Color[SIZE][SIZE];
     public Mesh m;
     public boolean isReady = false;
     public final MaxArray.MaxArrayFloat verts = new MaxArray.MaxArrayFloat((int) Math.pow(Config.TILES_PER_CHUNK, 2) * 2);
@@ -51,6 +52,9 @@ public class Chunk {
         m = new Mesh(false, verts.maxSize(), 0,
                 new VertexAttribute(VertexAttributes.Usage.ColorPacked, 3, ShaderProgram.POSITION_ATTRIBUTE),
                 new VertexAttribute(VertexAttributes.Usage.ColorPacked, 3, ShaderProgram.COLOR_ATTRIBUTE));
+        for (int x = 0; x < SIZE; x++)
+            for (int y = 0; y < SIZE; y++)
+                colors[x][y] = new Color();
     }
 
     public float getNoise(double x, double y, int octave) {
@@ -169,6 +173,7 @@ public class Chunk {
                 //TODO could encode occlusion + colormap uv in alpha
                 verts.add(Color.toFloatBits((float) x / SIZE, (float) (SIZE - y - 1) / SIZE, z, 1f));
                 verts.add(Color.toFloatBits(tmp.x, tmp.y, tmp.z, 1f));
+                colors[x][y].set(tmp.x, tmp.y, tmp.z, 1);
             }
         }
         shouldDraw = verts.size() > 0;

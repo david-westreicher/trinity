@@ -67,7 +67,7 @@ public class Artemis extends World {
         addLogic(config, MovementSystem.class);
         addLogic(config, TranslateMapCoordinates.class);
         addLogic(config, RegenerateMeshesAndSpawn.class);
-        addLogic(config, CollideTerrain.class);
+        //addLogic(config, CollideTerrain.class);
         addLogic(config, DeleteEntities.class);
         addLogic(config, PositionCam.class);
 
@@ -96,7 +96,7 @@ public class Artemis extends World {
     private static void addCamAndViewport(Artemis a) {
         CameraComponent camcomp = UberFactory.createCam(a);
         camcomp.cam.near = 1f;
-        camcomp.cam.far = 500f;
+        camcomp.cam.far = 200f;
         camcomp.cam.position.set(0, 0, 200);
         camcomp.cam.update();
     }

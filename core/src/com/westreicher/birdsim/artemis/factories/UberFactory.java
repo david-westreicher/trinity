@@ -85,7 +85,7 @@ public class UberFactory extends Manager {
         inputMapper.get(e).id = id;
         ModelComponent model = modelMapper.get(e);
         model.type = ModelManager.Models.PLAYER;
-        model.col = ColorAttr.random();
+        model.col = ColorAttr.RED;
         model.scale = 10;
         tcMapper.get(e).type = TerrainCollision.Types.PLAYER;
         return e;
@@ -116,7 +116,7 @@ public class UberFactory extends Manager {
         ModelComponent model = modelMapper.get(e);
         model.type = ModelManager.Models.PLAYER;
         model.col = ColorAttr.random();
-        model.scale = 5;
+        model.scale = 8;
         tcMapper.get(e).type = TerrainCollision.Types.ENEMY;
         return e;
     }

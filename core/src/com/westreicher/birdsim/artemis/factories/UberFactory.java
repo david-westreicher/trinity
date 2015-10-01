@@ -1,9 +1,13 @@
 package com.westreicher.birdsim.artemis.factories;
 
+import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.EntityEdit;
+import com.artemis.EntityTransmuter;
+import com.artemis.EntityTransmuterFactory;
 import com.artemis.Manager;
 import com.artemis.World;
+import com.artemis.annotations.Wire;
 import com.artemis.managers.GroupManager;
 import com.artemis.managers.TagManager;
 import com.westreicher.birdsim.artemis.Artemis;
@@ -22,29 +26,68 @@ import com.westreicher.birdsim.util.ColorAttr;
 /**
  * Created by david on 9/28/15.
  */
+@Wire
 public class UberFactory extends Manager {
+    private ComponentMapper<MapCoordinate> coordMapper;
+    private ComponentMapper<InputComponent> inputMapper;
+    private ComponentMapper<TerrainCollision> tcMapper;
+    private ComponentMapper<ModelComponent> modelMapper;
+    private ComponentMapper<Speed2> speedMapper;
+    private EntityTransmuter playerCreator;
+    private EntityTransmuter enemyCreator;
+    private EntityTransmuter itemCreator;
+    private EntityTransmuter bulletCreator;
 
-    g
+    @Override
+    protected void initialize() {
+        playerCreator = new EntityTransmuterFactory(world).
+                add(MapCoordinate.class).
+                add(Speed2.class).
+                add(RenderTransform.class).
+                add(InputComponent.class).
+                add(ModelComponent.class).
+                add(TerrainCollision.class).
+                add(Health.class).
+                build();
 
-    public static Entity createPlayer(World w, int id) {
+        enemyCreator = new EntityTransmuterFactory(world).
+                add(MapCoordinate.class).
+                add(Speed2.class).
+                add(RenderTransform.class).
+                add(AIComponent.class).
+                add(ModelComponent.class).
+                add(TerrainCollision.class).
+                add(Health.class).
+                build();
+        bulletCreator = new EntityTransmuterFactory(world).
+                add(MapCoordinate.class).
+                add(Speed2.class).
+                add(RenderTransform.class).
+                add(AIComponent.class).
+                add(ModelComponent.class).
+                add(TerrainCollision.class).
+                add(Health.class).
+                build();
+
+        itemCreator = new EntityTransmuterFactory(world).
+                add(MapCoordinate.class).
+                add(RenderTransform.class).
+                add(ModelComponent.class).
+                add(TerrainCollision.class).
+                add(Health.class).
+                build();
+    }
+
+    public Entity createPlayer(World w, int id) {
         Entity e = w.createEntity();
-        EntityEdit edit = e.edit();
-        MapCoordinate coord = edit.create(MapCoordinate.class);
-        coord.x = 0;
-        coord.y = 0;
-        Speed2 speed = edit.create(Speed2.class);
-        RenderTransform transform = edit.create(RenderTransform.class);
-        InputComponent input = edit.create(InputComponent.class);
-        input.id = id;
-        ModelComponent model = edit.create(ModelComponent.class);
+        playerCreator.transmute(e);
+        w.getManager(GroupManager.class).add(e, Artemis.PLAYER_GROUP);
+        inputMapper.get(e).id = id;
+        ModelComponent model = modelMapper.get(e);
         model.type = ModelManager.Models.PLAYER;
         model.col = ColorAttr.random();
         model.scale = 10;
-        w.getManager(GroupManager.class).add(e, Artemis.PLAYER_GROUP);
-        Health health = edit.create(Health.class);
-        health.health = 10;
-        TerrainCollision tc = edit.create(TerrainCollision.class);
-        tc.type = TerrainCollision.Types.PLAYER;
+        tcMapper.get(e).type = TerrainCollision.Types.PLAYER;
         return e;
     }
 
@@ -59,57 +102,50 @@ public class UberFactory extends Manager {
         return cc;
     }
 
-    public static Entity createEnemy(World w, float x, float y) {
+    public Entity createEnemy(World w, float x, float y) {
         Entity e = w.createEntity();
-        EntityEdit edit = e.edit();
-        MapCoordinate coord = edit.create(MapCoordinate.class);
+        enemyCreator.transmute(e);
+        MapCoordinate coord = coordMapper.get(e);
         coord.x = x;
         coord.y = y;
-        Speed2 speed = edit.create(Speed2.class);
+        Speed2 speed = speedMapper.get(e);
         speed.x = (float) (Math.random() - 0.5);
         speed.y = (float) (Math.random() - 0.5);
         coord.x += speed.x;
         coord.y += speed.y;
-        RenderTransform transform = edit.create(RenderTransform.class);
-        ModelComponent model = edit.create(ModelComponent.class);
-        AIComponent ai = edit.create(AIComponent.class);
+        ModelComponent model = modelMapper.get(e);
         model.type = ModelManager.Models.PLAYER;
         model.col = ColorAttr.random();
-        Health health = edit.create(Health.class);
-        TerrainCollision tc = edit.create(TerrainCollision.class);
-        tc.type = TerrainCollision.Types.ENEMY;
-        health.health = 10;
+        model.scale = 5;
+        tcMapper.get(e).type = TerrainCollision.Types.ENEMY;
         return e;
     }
 
-    public static Entity shoot(World w, float x, float y, float xspeed, float yspeed) {
+    public Entity shoot(World w, float x, float y, float xspeed, float yspeed) {
         Entity e = w.createEntity();
-        EntityEdit edit = e.edit();
-        MapCoordinate coord = edit.create(MapCoordinate.class);
+        bulletCreator.transmute(e);
+
+        MapCoordinate coord = coordMapper.get(e);
         coord.x = x;
         coord.y = y;
-        Speed2 speed = edit.create(Speed2.class);
+        Speed2 speed = speedMapper.get(e);
         speed.x = xspeed;
         speed.y = yspeed;
-        RenderTransform transform = edit.create(RenderTransform.class);
-        ModelComponent model = edit.create(ModelComponent.class);
+        ModelComponent model = modelMapper.get(e);
         model.type = ModelManager.Models.BULLET;
         model.col = ColorAttr.random();
-        Health health = edit.create(Health.class);
-        health.health = 10;
-        TerrainCollision tc = edit.create(TerrainCollision.class);
-        tc.type = TerrainCollision.Types.BULLET;
+        model.scale = 5;
+        tcMapper.get(e).type = TerrainCollision.Types.BULLET;
         return e;
     }
 
-    public static Entity createItem(World w, float x, float y) {
+    public Entity createItem(World w, float x, float y) {
         Entity e = w.createEntity();
-        EntityEdit edit = e.edit();
-        MapCoordinate coord = edit.create(MapCoordinate.class);
+        itemCreator.transmute(e);
+        MapCoordinate coord = coordMapper.get(e);
         coord.x = x;
         coord.y = y;
-        RenderTransform transform = edit.create(RenderTransform.class);
-        ModelComponent model = edit.create(ModelComponent.class);
+        ModelComponent model = modelMapper.get(e);
         model.type = ModelManager.Models.ITEM;
         model.col = ColorAttr.random();
         model.scale = (float) (Math.random() * 5 + 1);

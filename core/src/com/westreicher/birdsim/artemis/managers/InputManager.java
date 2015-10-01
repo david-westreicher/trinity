@@ -30,7 +30,7 @@ public class InputManager extends Manager {
             players.add(new TouchInput());
         int id = 0;
         for (AbstractInput pi : players)
-            UberFactory.createPlayer(world, id++);
+            world.getManager(UberFactory.class).createPlayer(world, id++);
     }
 
     public void resize() {

@@ -11,5 +11,7 @@ public class Speed2 extends PooledComponent {
 
     @Override
     protected void reset() {
+        x = 0;
+        y = 0;
     }
 }

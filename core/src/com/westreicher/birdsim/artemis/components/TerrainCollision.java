@@ -6,7 +6,7 @@ import com.artemis.PooledComponent;
  * Created by david on 9/30/15.
  */
 public class TerrainCollision extends PooledComponent {
-    public Types type;
+    public Types type = Types.PLAYER;
 
     @Override
     protected void reset() {

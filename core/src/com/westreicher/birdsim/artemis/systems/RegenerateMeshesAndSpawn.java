@@ -21,6 +21,7 @@ import java.util.Random;
 public class RegenerateMeshesAndSpawn extends EntityProcessingSystem {
     ComponentMapper<ChunkManager> chunkMapper;
     private Spiral spiral;
+    private UberFactory factory;
 
     public RegenerateMeshesAndSpawn() {
         super(Aspect.all(ChunkManager.class));
@@ -61,8 +62,8 @@ public class RegenerateMeshesAndSpawn extends EntityProcessingSystem {
         if (rand.nextDouble() > 0.3)
             return;
         if (rand.nextDouble() > 0.5)
-            UberFactory.createEnemy(world, (float) (x + Math.random() * 5), (float) (y + Math.random() * 5));
+            factory.createEnemy(world, (float) (x + Math.random() * 5), (float) (y + Math.random() * 5));
         else
-            UberFactory.createItem(world, (float) (x + Math.random() * 5), (float) (y + Math.random() * 5));
+            factory.createItem(world, (float) (x + Math.random() * 5), (float) (y + Math.random() * 5));
     }
 }

@@ -52,6 +52,7 @@ public class Artemis extends World {
         Config.IS_DESKTOP = Gdx.app.getType() == Application.ApplicationType.Desktop;
         LOGIC_SYSTEMS.clear();
         WorldConfiguration config = new WorldConfiguration();
+        config.setManager(UberFactory.class);
         config.setManager(TagManager.class);
         config.setManager(GroupManager.class);
         config.setManager(ModelManager.class);

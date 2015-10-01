@@ -10,10 +10,11 @@ import com.westreicher.birdsim.util.ColorAttr;
 public class ModelComponent extends PooledComponent {
     public boolean visible;
     public float scale = 5f;
-    public ModelManager.Models type;
-    public ColorAttr col;
+    public ModelManager.Models type = ModelManager.Models.PLAYER;
+    public ColorAttr col = ColorAttr.GOLD;
 
     @Override
     protected void reset() {
+        scale = 5f;
     }
 }

@@ -25,6 +25,7 @@ public class HandleGameInput extends EntityProcessingSystem {
     private ComponentMapper<InputComponent> inputMapper;
     private long tick;
     private ArrayList<AbstractInput> players;
+    private UberFactory factory;
 
     public HandleGameInput() {
         super(Aspect.all(InputComponent.class, MapCoordinate.class, Speed2.class));
@@ -53,7 +54,7 @@ public class HandleGameInput extends EntityProcessingSystem {
         }
         if (playerinput.isShooting() && tick % 10 == 0) {
             float rad = playerinput.getShootRadiant();
-            UberFactory.shoot(world, pos.x, pos.y, (float) Math.cos(rad) * 5, (float) Math.sin(rad) * 5);
+            factory.shoot(world, pos.x, pos.y, (float) Math.cos(rad) * 5, (float) Math.sin(rad) * 5);
         }
     }
 }

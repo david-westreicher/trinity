@@ -100,7 +100,7 @@ public class ChunkManager extends Component {
         int innerx = (int) (xoffset);
         int innery = Config.TILES_PER_CHUNK - (int) (yoffset) - 1;
         int xChunk = divx + (CHUNKNUMS / 2);
-        int yChunk = divy + (CHUNKNUMS / 2);
+        int yChunk = divy + (CHUNKNUMS / 2);g
         if (xChunk < 0 || yChunk < 0 || xChunk >= CHUNKNUMS || yChunk >= CHUNKNUMS)
             return null;
         TILE_RESULT.chunkx = xChunk;

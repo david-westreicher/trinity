@@ -6,8 +6,12 @@ import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
 import com.westreicher.birdsim.Config;
+import com.westreicher.birdsim.artemis.components.AnimationComponent;
+import com.westreicher.birdsim.artemis.components.Collidable;
 import com.westreicher.birdsim.artemis.components.Health;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
+import com.westreicher.birdsim.artemis.components.Speed2;
+import com.westreicher.birdsim.artemis.components.TerrainCollision;
 
 /**
  * Created by david on 9/29/15.
@@ -27,7 +31,13 @@ public class DeleteEntities extends EntityProcessingSystem {
         Health health = healthMapper.get(e);
         MapCoordinate pos = posMapper.get(e);
         if (health.health <= 0) {
-            world.deleteEntity(e);
+            e.edit().
+                    remove(Health.class).
+                    remove(Speed2.class).
+                    remove(Collidable.class).
+                    remove(TerrainCollision.class).
+                    create(AnimationComponent.class);
+            //world.deleteEntity(e);
             return;
         }
         if (Math.abs(pos.x) > EDGE || Math.abs(pos.y) > EDGE)

@@ -18,6 +18,7 @@ import com.westreicher.birdsim.artemis.managers.ModelManager;
 import com.westreicher.birdsim.artemis.managers.ShaderManager;
 import com.westreicher.birdsim.artemis.managers.TextureManager;
 import com.westreicher.birdsim.artemis.systems.AdjustHeight;
+import com.westreicher.birdsim.artemis.systems.Animation;
 import com.westreicher.birdsim.artemis.systems.CollideTerrain;
 import com.westreicher.birdsim.artemis.systems.EntityCollisions;
 import com.westreicher.birdsim.artemis.systems.DeleteEntities;
@@ -72,6 +73,7 @@ public class Artemis extends World {
         addLogic(config, CollideTerrain.class);
         addLogic(config, EntityCollisions.class);
         addLogic(config, DeleteEntities.class);
+        addLogic(config, Animation.class);
         addLogic(config, PositionCam.class);
 
         //RENDERING

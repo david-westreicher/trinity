@@ -16,5 +16,6 @@ public class Config {
     public static final float TERRAIN_HEIGHT = 8;
     public static final boolean SPAWN_STUFF = true;
     public static final Vector3 UPAXIS = new Vector3(0, 0, 1);
+    public static final boolean PROFILE = true;
     public static boolean IS_DESKTOP = true;
 }

@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.loader.ObjLoader;
+import com.badlogic.gdx.graphics.g3d.model.Node;
+import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 
 /**
@@ -20,6 +22,7 @@ public class ModelManager extends Manager {
         private final String file;
         public ModelInstance modelinst;
         public Model m;
+        public NodePart part;
 
         Models() {
             this(null);
@@ -34,7 +37,11 @@ public class ModelManager extends Manager {
                 m = new ObjLoader().loadModel(Gdx.files.internal(file));
             else
                 m = new ModelBuilder().createBox(1, 1, 1, new Material(ColorAttribute.createDiffuse(1, 1, 1, 0)), VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
+
+            Gdx.app.log("modelinstance", file);
             modelinst = new ModelInstance(m);
+            //TODO export from blender with only one part!!!!
+            part = modelinst.nodes.get(0).parts.get(0);
         }
     }
 

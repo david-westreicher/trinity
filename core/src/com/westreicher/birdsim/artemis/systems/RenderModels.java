@@ -71,10 +71,7 @@ public class RenderModels extends EntityProcessingSystem {
         ModelInstance mi = model.type.modelinst;
         Material mat = materialpool[entindex++];
         mat.set(model.col.attr);
-        for (Node n : mi.nodes) {
-            for (NodePart p : n.parts)
-                p.material = mat;
-        }
+        model.type.part.material = mat;
         RenderTransform transform = interpMapper.get(e);
         mi.transform.setToTranslation(transform.x, transform.y, transform.z);
         mi.transform.scl(model.scale);

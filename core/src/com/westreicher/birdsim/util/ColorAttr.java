@@ -9,7 +9,13 @@ import java.util.Random;
  * Created by david on 9/29/15.
  */
 public enum ColorAttr {
-    RED(new Color(1, 0, 0, 1)), VIOLET(new Color(1, 0, 1, 1)), YELLOW(new Color(0.9f, 1, 0, 1)), TEAL(new Color(1, 0.2f, 0.2f, 1)), GOLD(new Color(1, 0.5f, 0.5f, 1)), BLUE(new Color(0.3f, 0.3f, 1, 1));
+    RED(new Color(1, 0, 0, 1)),
+    VIOLET(new Color(1, 0, 1, 1)),
+    YELLOW(new Color(0.9f, 1, 0, 1)),
+    TEAL(new Color(1, 0.2f, 0.2f, 1)),
+    GOLD(new Color(1, 0.5f, 0.5f, 1)),
+    BLUE(new Color(0.3f, 0.3f, 1, 1)),
+    WHITE(new Color(1, 1, 1, 1));
     public final ColorAttribute attr;
     private static final ColorAttr[] cols = ColorAttr.values();
 
@@ -18,7 +24,7 @@ public enum ColorAttr {
     }
 
     public static ColorAttr random(Random rand) {
-        return cols[(int) (rand == null ? Math.random() : rand.nextDouble() * cols.length)];
+        return cols[(int) ((rand == null ? Math.random() : rand.nextDouble()) * cols.length)];
     }
 
     public static ColorAttr random() {

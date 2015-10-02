@@ -167,7 +167,7 @@ public class UberFactory extends Manager {
         ModelComponent model = modelMapper.get(e);
         model.type = ModelManager.Models.ITEM;
         model.col = ColorAttr.random(rand);
-        model.scale = rand.nextFloat() * 5 + 1;
+        model.scale = 2;
         collidableMapper.get(e).scale = model.scale;
         mEntityType.get(e).type = EntityType.Types.ITEM;
         return e;

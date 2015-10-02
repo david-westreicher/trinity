@@ -78,6 +78,7 @@ public class EntityCollisions extends EntitySystem {
                     case BULLET:
                         break;
                     case ITEM:
+                        playerItem(one, two);
                         break;
                     case ENEMY:
                         break;
@@ -109,6 +110,10 @@ public class EntityCollisions extends EntitySystem {
                 }
                 break;
         }
+    }
+
+    private void playerItem(int player, int item) {
+        mHealth.get(item).health = 0;
     }
 
     private void bulletEnemy(int bullet, int enemy) {

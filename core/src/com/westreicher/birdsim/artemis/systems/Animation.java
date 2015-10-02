@@ -7,6 +7,7 @@ import com.artemis.annotations.Wire;
 import com.artemis.systems.IteratingSystem;
 import com.westreicher.birdsim.artemis.components.AnimationComponent;
 import com.westreicher.birdsim.artemis.components.ModelComponent;
+import com.westreicher.birdsim.util.ColorAttr;
 
 /**
  * Created by david on 10/2/15.
@@ -24,7 +25,8 @@ public class Animation extends IteratingSystem {
     protected void process(int entityId) {
         ModelComponent model = mModelComponent.get(entityId);
         AnimationComponent animation = mAnimationComponent.get(entityId);
-        model.scale *= 0.9;
+        model.scale *= 0.92;
+        model.col = ColorAttr.WHITE;
         if (model.scale < 0.1)
             world.delete(entityId);
     }

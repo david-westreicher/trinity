@@ -8,10 +8,12 @@ import com.artemis.systems.EntityProcessingSystem;
 import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.artemis.components.AnimationComponent;
 import com.westreicher.birdsim.artemis.components.Collidable;
+import com.westreicher.birdsim.artemis.components.EntityType;
 import com.westreicher.birdsim.artemis.components.Health;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
 import com.westreicher.birdsim.artemis.components.Speed2;
 import com.westreicher.birdsim.artemis.components.TerrainCollision;
+import com.westreicher.birdsim.artemis.factories.UberFactory;
 
 /**
  * Created by david on 9/29/15.
@@ -21,9 +23,10 @@ public class DeleteEntities extends EntityProcessingSystem {
     private static final float EDGE = Config.TILES_PER_CHUNK * Config.CHUNKNUMS / 2;
     private ComponentMapper<Health> healthMapper;
     private ComponentMapper<MapCoordinate> posMapper;
+    protected ComponentMapper<EntityType> mEntityType;
 
     public DeleteEntities() {
-        super(Aspect.all(Health.class, MapCoordinate.class));
+        super(Aspect.all(Health.class, MapCoordinate.class, EntityType.class));
     }
 
     @Override
@@ -31,13 +34,20 @@ public class DeleteEntities extends EntityProcessingSystem {
         Health health = healthMapper.get(e);
         MapCoordinate pos = posMapper.get(e);
         if (health.health <= 0) {
-            e.edit().
-                    remove(Health.class).
-                    remove(Speed2.class).
-                    remove(Collidable.class).
-                    remove(TerrainCollision.class).
-                    create(AnimationComponent.class);
-            //world.deleteEntity(e);
+            switch (mEntityType.get(e).type) {
+                case ENEMY:
+                    world.getSystem(UberFactory.class).createItem(world, pos.x, pos.y, null);
+                case ITEM:
+                    e.edit().
+                            remove(Health.class).
+                            remove(Speed2.class).
+                            remove(Collidable.class).
+                            remove(TerrainCollision.class).
+                            create(AnimationComponent.class);
+                    break;
+                default:
+                    world.deleteEntity(e);
+            }
             return;
         }
         if (Math.abs(pos.x) > EDGE || Math.abs(pos.y) > EDGE)

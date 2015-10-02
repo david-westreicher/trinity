@@ -25,6 +25,8 @@ import com.westreicher.birdsim.artemis.components.TerrainCollision;
 import com.westreicher.birdsim.artemis.managers.ModelManager;
 import com.westreicher.birdsim.util.ColorAttr;
 
+import java.util.Random;
+
 /**
  * Created by david on 9/28/15.
  */
@@ -116,7 +118,7 @@ public class UberFactory extends Manager {
         return cc;
     }
 
-    public Entity createEnemy(World w, float x, float y) {
+    public Entity createEnemy(World w, float x, float y, Random rand) {
         Entity e = w.createEntity();
         enemyCreator.transmute(e);
         MapCoordinate coord = coordMapper.get(e);
@@ -129,7 +131,7 @@ public class UberFactory extends Manager {
         coord.y += speed.y;
         ModelComponent model = modelMapper.get(e);
         model.type = ModelManager.Models.PLAYER;
-        model.col = ColorAttr.random();
+        model.col = ColorAttr.random(rand);
         model.scale = 8;
         collidableMapper.get(e).scale = model.scale;
         mEntityType.get(e).type = EntityType.Types.ENEMY;
@@ -156,7 +158,7 @@ public class UberFactory extends Manager {
         return e;
     }
 
-    public Entity createItem(World w, float x, float y) {
+    public Entity createItem(World w, float x, float y, Random rand) {
         Entity e = w.createEntity();
         itemCreator.transmute(e);
         MapCoordinate coord = coordMapper.get(e);
@@ -164,8 +166,8 @@ public class UberFactory extends Manager {
         coord.y = y;
         ModelComponent model = modelMapper.get(e);
         model.type = ModelManager.Models.ITEM;
-        model.col = ColorAttr.random();
-        model.scale = (float) (Math.random() * 5 + 1);
+        model.col = ColorAttr.random(rand);
+        model.scale = rand.nextFloat() * 5 + 1;
         collidableMapper.get(e).scale = model.scale;
         mEntityType.get(e).type = EntityType.Types.ITEM;
         return e;

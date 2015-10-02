@@ -3,6 +3,8 @@ package com.westreicher.birdsim.util;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 
+import java.util.Random;
+
 /**
  * Created by david on 9/29/15.
  */
@@ -15,7 +17,11 @@ public enum ColorAttr {
         this.attr = new ColorAttribute(ColorAttribute.Diffuse, col);
     }
 
+    public static ColorAttr random(Random rand) {
+        return cols[(int) (rand == null ? Math.random() : rand.nextDouble() * cols.length)];
+    }
+
     public static ColorAttr random() {
-        return cols[(int) (Math.random() * cols.length)];
+        return random(null);
     }
 }

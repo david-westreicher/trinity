@@ -56,21 +56,27 @@ public class FixedTimestepStrategy extends InvocationStrategy {
     private void updateLogicIfNecc(Bag<BaseSystem> systems) {
         int loops = 0;
         long currentTime = System.nanoTime();
+        if ((currentTime - nextTick) / 1000000000 >= 5) {
+            //probably debugging??
+            Gdx.app.log("fixedtimestep", "reset nexttick");
+            nextTick = currentTime - 1;
+        }
         //TODO GWT compat??
         //long currentTime = System.currentTimeMillis() * 1000000L;
         while (currentTime > nextTick && loops < MAX_FRAME_SKIPS) {
             process(systems, true);
-            FPS_LOGGER.log();
             nextTick += skipTicks;
             loops++;
             currenttick++;
-            if (Config.PROFILE && currenttick % 600 == 0)
+            if (Config.PROFILE && currenttick % 600 == 0) {
                 logProfiler();
+                FPS_LOGGER.log();
+            }
             //TODO GWT compat??
             currentTime = System.nanoTime();
             //currentTime = System.currentTimeMillis() * 1000000L;
         }
-        if (loops > 1 && Config.DEBUG)
+        if (loops > 1 && Config.PROFILE)
             Gdx.app.log("FRAMESKIP", "" + (loops - 1));
 
     }

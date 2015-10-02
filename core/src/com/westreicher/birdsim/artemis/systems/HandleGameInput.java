@@ -5,6 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
+import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.artemis.FixedTimestepStrategy;
 import com.westreicher.birdsim.artemis.components.InputComponent;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
@@ -46,8 +47,8 @@ public class HandleGameInput extends EntityProcessingSystem {
         playerinput.update();
         if (playerinput.isMoving()) {
             float rad = playerinput.getMoveRadiant();
-            speed.x = (float) Math.cos(rad);
-            speed.y = (float) Math.sin(rad);
+            speed.x = (float) Math.cos(rad) * Config.MOVE_SPEED;
+            speed.y = (float) Math.sin(rad) * Config.MOVE_SPEED;
         } else {
             speed.x = 0;
             speed.y = 0;

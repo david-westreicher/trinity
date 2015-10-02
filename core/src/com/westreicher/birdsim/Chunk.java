@@ -44,8 +44,8 @@ public class Chunk {
     private static final Vector3 tmp = new Vector3();
     public Random rand = new Random();
     public boolean shouldDraw;
-    private long absx;
-    private long absy;
+    public long absx;
+    public long absy;
     private float randdark;
 
     public Chunk() {

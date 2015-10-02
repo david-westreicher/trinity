@@ -8,6 +8,7 @@ import com.artemis.managers.GroupManager;
 import com.artemis.managers.TagManager;
 import com.artemis.utils.ImmutableBag;
 import com.badlogic.gdx.math.Vector2;
+import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.InputComponent;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
@@ -48,6 +49,11 @@ public class PositionCam extends BaseSystem {
         if (players.size() > 0) {
             TMP_VEC.scl(1.0f / players.size());
             TMP_VEC2.scl(1.0f / players.size());
+        }
+        if (Config.FIXED_CAM) {
+            campos.x = TMP_VEC.x;
+            campos.y = TMP_VEC.y;
+            return;
         }
         camspeed.x = (TMP_VEC.x + TMP_VEC2.x * 25 - campos.x) / 80.0f;
         camspeed.y = (TMP_VEC.y + TMP_VEC2.y * 25 - campos.y) / 80.0f;

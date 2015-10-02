@@ -113,7 +113,7 @@ public class EntityCollisions extends EntitySystem {
 
     private void bulletEnemy(int bullet, int enemy) {
         mHealth.get(enemy).health--;
-        world.deleteEntity(bullet);
+        world.delete(bullet);
         Gdx.input.vibrate(100);
     }
 }

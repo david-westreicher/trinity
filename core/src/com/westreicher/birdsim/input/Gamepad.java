@@ -70,6 +70,11 @@ public class Gamepad extends AbstractInput {
 
     @Override
     public void update() {
+        if (false) {
+            //TODO is windows
+            updateWindows();
+            return;
+        }
         int axe = 0;
         movx = (int) (ctrl.getAxis(axe * 2) * 100);
         movy = (int) (ctrl.getAxis(axe * 2 + 1) * 100);
@@ -77,6 +82,17 @@ public class Gamepad extends AbstractInput {
         axe = 1;
         shootx = (int) (ctrl.getAxis(axe * 2) * 100);
         shooty = (int) (ctrl.getAxis(axe * 2 + 1) * 100);
+        isshooting = Math.abs(shootx) > 20 || Math.abs(shooty) > 20;
+    }
+
+    public void updateWindows() {
+        int axe = 1;
+        movx = (int) (ctrl.getAxis(axe * 2 + 1) * 100);
+        movy = (int) (ctrl.getAxis(axe * 2) * 100);
+        ismoving = Math.abs(movx) > 20 || Math.abs(movy) > 20;
+        axe = 0;
+        shootx = (int) (ctrl.getAxis(axe * 2 + 1) * 100);
+        shooty = (int) (ctrl.getAxis(axe * 2) * 100);
         isshooting = Math.abs(shootx) > 20 || Math.abs(shooty) > 20;
     }
 

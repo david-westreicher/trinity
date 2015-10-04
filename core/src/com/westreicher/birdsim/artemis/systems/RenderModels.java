@@ -14,17 +14,14 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.environment.PointLight;
-import com.badlogic.gdx.graphics.g3d.model.Node;
-import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Pool;
 import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
 import com.westreicher.birdsim.artemis.components.ModelComponent;
 import com.westreicher.birdsim.artemis.components.RenderTransform;
+import com.westreicher.birdsim.artemis.managers.PostProcessingShaders;
 
 /**
  * Created by david on 9/28/15.
@@ -32,10 +29,9 @@ import com.westreicher.birdsim.artemis.components.RenderTransform;
 @Wire
 public class RenderModels extends EntityProcessingSystem {
     private static final Quaternion TMP_QUAT = new Quaternion();
-    private static final Vector3 TMP_VEC = new Vector3();
     private ComponentMapper<RenderTransform> interpMapper;
     private ComponentMapper<ModelComponent> modelMapper;
-    private ModelBatch mb;
+    protected ModelBatch mb;
     //TODO hacky, maybe use nicer pool
     private Material[] materialpool = new Material[1000];
     private int entindex;
@@ -96,4 +92,5 @@ public class RenderModels extends EntityProcessingSystem {
     protected void dispose() {
         mb.dispose();
     }
+
 }

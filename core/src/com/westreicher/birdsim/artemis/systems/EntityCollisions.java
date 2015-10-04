@@ -7,12 +7,13 @@ import com.artemis.World;
 import com.artemis.annotations.Wire;
 import com.artemis.utils.IntBag;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.controllers.Controller;
-import com.badlogic.gdx.controllers.Controllers;
+import com.westreicher.birdsim.MyGdxGame;
+import com.westreicher.birdsim.SlotSystem;
 import com.westreicher.birdsim.artemis.components.Collidable;
 import com.westreicher.birdsim.artemis.components.EntityType;
 import com.westreicher.birdsim.artemis.components.Health;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
+import com.westreicher.birdsim.artemis.components.SlotComponent;
 
 /**
  * Created by david on 10/1/15.
@@ -24,6 +25,7 @@ public class EntityCollisions extends EntitySystem {
     protected ComponentMapper<Collidable> mCollidable;
     protected ComponentMapper<EntityType> mEntityType;
     protected ComponentMapper<Health> mHealth;
+    protected ComponentMapper<SlotComponent> mSlotComponent;
 
     public EntityCollisions() {
         super(Aspect.all(MapCoordinate.class, Collidable.class, EntityType.class));
@@ -114,11 +116,53 @@ public class EntityCollisions extends EntitySystem {
 
     private void playerItem(int player, int item) {
         mHealth.get(item).health = 0;
+        SlotComponent playerSlot = mSlotComponent.get(player);
+
+        int poss = (int) (Math.random() * 5);
+        if (poss == 4) {
+            mHealth.get(player).health++;
+            Gdx.app.log("item", "lives");
+        } else if (poss == 3) {
+            Gdx.app.log("item", "respawn");
+            //if (!manager.respawnOnePlayer(pos)) {
+            //TODO hacky stuff + implement
+            playerItem(player, item);
+            return;
+            //}
+        } else if (poss == 2) {
+            SlotSystem.Specialty randomSpecialty = SlotSystem.randomSpecialty();
+            Gdx.app.log("item", randomSpecialty.toString());
+            if (playerSlot.special.type == randomSpecialty) {
+                playerSlot.special.multiplier += 1000;
+            } else {
+                playerSlot.special.type = randomSpecialty;
+                playerSlot.special.multiplier = 1000;
+            }
+        } else if (poss == 1) {
+            SlotSystem.GunSpecialty randomSpecialty = SlotSystem.randomGunSpecialty();
+            Gdx.app.log("item", randomSpecialty.toString());
+            if (playerSlot.gunSpecial.type == randomSpecialty) {
+                playerSlot.gunSpecial.multiplier++;
+            } else {
+                playerSlot.gunSpecial.type = randomSpecialty;
+                playerSlot.gunSpecial.multiplier = 1;
+            }
+        } else {
+            SlotSystem.GunType randomgun = SlotSystem.randomGun();
+            Gdx.app.log("item", randomgun.toString());
+            if (playerSlot.gunType.type == randomgun) {
+                playerSlot.gunType.multiplier++;
+            } else {
+                playerSlot.gunType.type = randomgun;
+                playerSlot.gunType.multiplier = 1;
+            }
+        }
+        Gdx.app.log("item", playerSlot.toString());
     }
 
     private void bulletEnemy(int bullet, int enemy) {
-        mHealth.get(enemy).health--;
-        world.delete(bullet);
+        mHealth.get(enemy).health -= mSlotComponent.get(bullet).gunType.type.damage;
+        mHealth.get(bullet).health = 0;
         Gdx.input.vibrate(100);
     }
 }

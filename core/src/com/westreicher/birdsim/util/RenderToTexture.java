@@ -23,7 +23,7 @@ public class RenderToTexture {
     private RenderToTexture(int width, int height, boolean hasDepth) {
         //Gdx.app.log("", width + "+" + height);
         this.hasDepth = hasDepth;
-        m_fbo = new FrameBuffer(Pixmap.Format.RGB565, width, height, hasDepth);
+        m_fbo = new FrameBuffer(hasDepth ? Pixmap.Format.RGBA8888 : Pixmap.Format.RGB565, width, height, hasDepth);
         Texture colbuf = m_fbo.getColorBufferTexture();
         //colbuf.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         m_fboRegion = new TextureRegion(colbuf);
@@ -50,7 +50,7 @@ public class RenderToTexture {
 
     public void dispose() {
         m_fbo.dispose();
-        Gdx.app.log("dispose", m_fbo.getWidth() + "+" + m_fbo.getHeight());
+        //Gdx.app.log("dispose", m_fbo.getWidth() + "+" + m_fbo.getHeight());
     }
 
     public static class DownSampler {
@@ -82,8 +82,7 @@ public class RenderToTexture {
                     + "void main()\n"//
                     + "{\n" //
                     + "  vec4 col = texture2D(u_texture,v_texCoords);\n" //
-                    + "  if(thresh<1 && col.r<1.0){gl_FragColor = vec4(0,0,0,0);}\n" //
-                    + "  else{gl_FragColor = col;}\n" //
+                    + "  gl_FragColor = col;\n" //
                     + "}";
 
             ShaderProgram shader = new ShaderProgram(vertexShader, fragmentShader);
@@ -94,7 +93,6 @@ public class RenderToTexture {
 
         public DownSampler(int width, int height) {
             gathershader = createDefaultShader();
-            downsampleBatch.setBlendFunction(GL20.GL_ONE, GL20.GL_ONE);
             int first = 0;
             while (true) {
                 RenderToTexture rt = new RenderToTexture(width, height, first++ == 0);
@@ -126,20 +124,20 @@ public class RenderToTexture {
             for (int i = 1; i < texs.size(); i++) {
                 texs.get(i).begin();
                 RenderToTexture toDraw = texs.get(i - 1);
-                gathershader.setUniformi("thresh", i - 1);
                 toDraw.draw(downsampleBatch, screenWidth, screenHeight, true);
             }
             texs.get(0).end();
 
             downsampleBatch.enableBlending();
+            downsampleBatch.setBlendFunction(GL20.GL_ONE, GL20.GL_ONE);
             downsampleBatch.setShader(null);
             if (true)
                 for (int i = 0; i < texs.size(); i++)
                     texs.get(i).draw(downsampleBatch, screenWidth, screenHeight, false);
             else {
-                int tex = ((int) Gdx.graphics.getFrameId() / 100) % texs.size();
-                if (Gdx.graphics.getFrameId() % 100 == 1)
-                    Gdx.app.log("tex", tex + ", " + texs.get(tex).m_fbo.getWidth() + "x" + texs.get(tex).m_fbo.getHeight());
+                int tex = ((int) Gdx.graphics.getFrameId() / 1000) % texs.size();
+                //if (Gdx.graphics.getFrameId() % 10000 == 1)
+                    //Gdx.app.log("tex", tex + ", " + texs.get(tex).m_fbo.getWidth() + "x" + texs.get(tex).m_fbo.getHeight());
                 texs.get(tex).draw(downsampleBatch, screenWidth, screenHeight, false);
             }
             downsampleBatch.end();

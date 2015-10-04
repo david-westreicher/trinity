@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.EntityType;
+import com.westreicher.birdsim.artemis.components.Health;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
 import com.westreicher.birdsim.artemis.components.Speed2;
 import com.westreicher.birdsim.artemis.components.TerrainCollision;
@@ -24,6 +25,7 @@ public class CollideTerrain extends EntityProcessingSystem {
     ComponentMapper<TerrainCollision> tcMapper;
     ComponentMapper<MapCoordinate> posMapper;
     ComponentMapper<Speed2> speedMapper;
+    protected ComponentMapper<Health> mHealth;
     protected ComponentMapper<EntityType> mEntityType;
     private ChunkManager cm;
     private GroupManager groupmanager;
@@ -45,8 +47,7 @@ public class CollideTerrain extends EntityProcessingSystem {
         float val = cm.getVal(pos.x, pos.y);
         if (val <= 0) return;
         if (type == EntityType.Types.BULLET) {
-            cm.explode2(pos.x, pos.y, 10);
-            world.deleteEntity(e);
+            mHealth.get(e).health = 0;
         } else {
             //PLAYER/ENEMY
             Speed2 speed = speedMapper.get(e);

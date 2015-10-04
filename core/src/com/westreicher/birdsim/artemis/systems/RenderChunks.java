@@ -21,6 +21,7 @@ import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
 import com.westreicher.birdsim.artemis.components.ModelComponent;
 import com.westreicher.birdsim.artemis.components.RenderTransform;
+import com.westreicher.birdsim.artemis.managers.PostProcessingShaders;
 import com.westreicher.birdsim.artemis.managers.ShaderManager;
 import com.westreicher.birdsim.util.BatchShaderProgram;
 import com.westreicher.birdsim.util.MaxArray;
@@ -50,6 +51,7 @@ public class RenderChunks extends EntityProcessingSystem {
 
     @Override
     protected void begin() {
+
         Camera cam = world.getManager(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).cam;
         cm = world.getManager(TagManager.class).getEntity(Artemis.CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
         shader = world.getManager(ShaderManager.class).getShader(ShaderManager.Shaders.CHUNK);
@@ -80,6 +82,7 @@ public class RenderChunks extends EntityProcessingSystem {
 
     @Override
     protected void process(Entity e) {
+        if (!Config.DRAW_SHADOWS) return;
         RenderTransform rt = transformMapper.get(e);
         ModelComponent model = modelMapper.get(e);
         int scale = Math.max(1, (int) (model.scale / 2));
@@ -109,6 +112,14 @@ public class RenderChunks extends EntityProcessingSystem {
 
     @Override
     protected void end() {
+        if (Config.DRAW_SHADOWS) drawShadows();
+        shader.unbind();
+        shader.end();
+        Gdx.gl20.glDisable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);
+        Gdx.gl20.glDisable(GL20.GL_DEPTH_TEST);
+    }
+
+    private void drawShadows() {
         Gdx.gl20.glDepthFunc(GL20.GL_LEQUAL);
         shadowMesh.setVertices(verts.arr, 0, verts.size());
         tmpfloat[0] = 0;
@@ -117,11 +128,6 @@ public class RenderChunks extends EntityProcessingSystem {
         shader.setUniformf("pointsize", cm.pointsize);
         shader.setUniformf("heightscale", 1);
         shadowMesh.render(shader, GL20.GL_POINTS);
-
-        shader.unbind();
-        shader.end();
-        Gdx.gl20.glDisable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);
-        Gdx.gl20.glDisable(GL20.GL_DEPTH_TEST);
         Gdx.gl20.glDepthFunc(GL20.GL_LESS);
     }
 }

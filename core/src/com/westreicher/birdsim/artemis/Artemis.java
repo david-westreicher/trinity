@@ -15,6 +15,7 @@ import com.westreicher.birdsim.artemis.components.CameraComponent;
 import com.westreicher.birdsim.artemis.factories.UberFactory;
 import com.westreicher.birdsim.artemis.managers.InputManager;
 import com.westreicher.birdsim.artemis.managers.ModelManager;
+import com.westreicher.birdsim.artemis.managers.PostProcessingShaders;
 import com.westreicher.birdsim.artemis.managers.ShaderManager;
 import com.westreicher.birdsim.artemis.managers.TextureManager;
 import com.westreicher.birdsim.artemis.systems.AdjustHeight;
@@ -31,8 +32,11 @@ import com.westreicher.birdsim.artemis.systems.RegenerateChunks;
 import com.westreicher.birdsim.artemis.systems.RenderChunks;
 import com.westreicher.birdsim.artemis.systems.RenderGui;
 import com.westreicher.birdsim.artemis.systems.RenderModels;
+import com.westreicher.birdsim.artemis.systems.RenderModelsGlow;
+import com.westreicher.birdsim.artemis.systems.RenderProfiler;
 import com.westreicher.birdsim.artemis.systems.StartRendering;
 import com.westreicher.birdsim.artemis.systems.TranslateMapAndSpawn;
+import com.westreicher.birdsim.artemis.systems.UpdateSlotSystem;
 
 import java.util.ArrayList;
 
@@ -62,10 +66,12 @@ public class Artemis extends World {
         config.setSystem(ShaderManager.class);
         config.setSystem(TextureManager.class);
         config.setSystem(InputManager.class);
+        config.setSystem(PostProcessingShaders.class);
 
 
         config.setSystem(HandlePause.class);
         //LOGIC
+        addLogic(config, UpdateSlotSystem.class);
         addLogic(config, HandleGameInput.class);
         addLogic(config, MovementSystem.class);
         addLogic(config, TranslateMapAndSpawn.class);
@@ -80,9 +86,11 @@ public class Artemis extends World {
         config.setSystem(Interpolate.class);
         config.setSystem(AdjustHeight.class);
         config.setSystem(StartRendering.class);
-        config.setSystem(RenderChunks.class);
         config.setSystem(RenderModels.class);
+        config.setSystem(RenderChunks.class);
+        //config.setSystem(RenderModelsGlow.class);
         config.setSystem(RenderGui.class);
+        if (Config.PROFILE) config.setSystem(RenderProfiler.class);
         //config.setSystem(TextRendering.class);
 
         Artemis a = new Artemis(config);
@@ -125,6 +133,7 @@ public class Artemis extends World {
         cm.resize(width, height);
         Viewport viewport = this.getManager(TagManager.class).getEntity(VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).viewport;
         viewport.update(width, height);
+        this.getSystem(PostProcessingShaders.class).resize(width, height);
         this.getManager(InputManager.class).resize();
     }
 }

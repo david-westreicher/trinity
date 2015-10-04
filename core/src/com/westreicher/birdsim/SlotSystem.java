@@ -11,7 +11,7 @@ public class SlotSystem {
     public enum GunSpecialty {DAMAGE, SPEED, FREQUENCY}
 
     public enum GunType {
-        ROCKETGUN(5, 10, 1, 25, 4, 100), MACHINEGUN(1, 0, 2, 5, 2, 0);
+        ROCKETGUN(5, 10, 1, 50, 5, 100), MACHINEGUN(1, 0, 2, 3, 2, 0);
 
         public final int damage;
         public final float speed;

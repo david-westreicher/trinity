@@ -9,7 +9,12 @@ import com.badlogic.gdx.graphics.FPSLogger;
 import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.util.Util;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,7 +23,13 @@ import java.util.Map;
 public class FixedTimestepStrategy extends InvocationStrategy {
     private static final FPSLogger FPS_LOGGER = new FPSLogger();
     private static final int MAX_FRAME_SKIPS = 5;
-    private final Map<Class<? extends BaseSystem>, Long> map = new HashMap<Class<? extends BaseSystem>, Long>();
+    private static final Comparator<ProfileInfo> PROFILE_COMP = new Comparator<ProfileInfo>() {
+        @Override
+        public int compare(ProfileInfo p1, ProfileInfo p2) {
+            return -Double.compare(p1.percent, p2.percent);
+        }
+    };
+    private final Map<Class<? extends BaseSystem>, ProfileInfo> profileCounterMap = new HashMap<Class<? extends BaseSystem>, ProfileInfo>();
     private World world;
     private long nextTick;
     private float interpolation;
@@ -26,6 +37,7 @@ public class FixedTimestepStrategy extends InvocationStrategy {
     private float fps;
     private long skipTicks;
     public boolean isPaused;
+    private List<ProfileInfo> profileVals = new ArrayList<ProfileInfo>();
 
     public FixedTimestepStrategy(World world) {
         nextTick = System.nanoTime(); //System.currentTimeMillis() * 1000000L;//
@@ -34,7 +46,10 @@ public class FixedTimestepStrategy extends InvocationStrategy {
         this.world = world;
         setFPS(Config.LOGIC_FPS);
         for (BaseSystem bs : world.getSystems()) {
-            map.put(bs.getClass(), 0L);
+            Class<? extends BaseSystem> clss = bs.getClass();
+            ProfileInfo pi = new ProfileInfo(clss);
+            profileCounterMap.put(clss, pi);
+            profileVals.add(pi);
         }
     }
 
@@ -78,22 +93,21 @@ public class FixedTimestepStrategy extends InvocationStrategy {
         }
         if (loops > 1 && Config.PROFILE)
             Gdx.app.log("FRAMESKIP", "" + (loops - 1));
-
     }
 
     private void logProfiler() {
         long sum = 0;
-        for (Map.Entry<Class<? extends BaseSystem>, Long> e : map.entrySet()) {
-            sum += e.getValue() / 1000;
+        for (ProfileInfo pi : profileVals) {
+            sum += pi.val / 1000;
         }
         if (sum <= 0)
             return;
-        for (Map.Entry<Class<? extends BaseSystem>, Long> e : Util.sortByValue(map).entrySet()) {
-            Gdx.app.log(String.format("%.2f", ((double) (e.getValue() / 1000)) / sum) + "\t", e.getKey().getSimpleName());
+        for (ProfileInfo pi : profileVals)
+            pi.percent = (double) (pi.val / 1000) / sum;
+        for (ProfileInfo pi : profileVals) {
+            pi.val = 0;
         }
-        for (Class<? extends BaseSystem> e : map.keySet()) {
-            map.put(e, 0L);
-        }
+        Collections.sort(profileVals, PROFILE_COMP);
     }
 
     private void process(Bag<BaseSystem> systems, boolean logics) {
@@ -115,8 +129,7 @@ public class FixedTimestepStrategy extends InvocationStrategy {
                 long start = System.nanoTime();
                 system.process();
                 long duration = System.nanoTime() - start;
-                long current = map.get(clss);
-                map.put(clss, current + duration);
+                profileCounterMap.get(clss).val += duration;
             }
         }
     }
@@ -128,5 +141,19 @@ public class FixedTimestepStrategy extends InvocationStrategy {
     public void continueLogic() {
         nextTick = System.nanoTime();
         isPaused = false;
+    }
+
+    public List<ProfileInfo> getProfileMap() {
+        return profileVals;
+    }
+
+    public static class ProfileInfo {
+        public Class<? extends BaseSystem> clss;
+        public long val;
+        public double percent;
+
+        public ProfileInfo(Class<? extends BaseSystem> clss) {
+            this.clss = clss;
+        }
     }
 }

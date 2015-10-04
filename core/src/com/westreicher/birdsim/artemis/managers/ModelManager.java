@@ -37,8 +37,8 @@ public class ModelManager extends Manager {
                 m = new ObjLoader().loadModel(Gdx.files.internal(file));
             else
                 m = new ModelBuilder().createBox(1, 1, 1, new Material(ColorAttribute.createDiffuse(1, 1, 1, 0)), VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
-
-            Gdx.app.log("modelinstance", file);
+            if (file != null)
+              Gdx.app.log("modelinstance", file);
             modelinst = new ModelInstance(m);
             //TODO export from blender with only one part!!!!
             part = modelinst.nodes.get(0).parts.get(0);

@@ -52,9 +52,9 @@ public class RenderChunks extends EntityProcessingSystem {
     @Override
     protected void begin() {
 
-        Camera cam = world.getManager(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).cam;
-        cm = world.getManager(TagManager.class).getEntity(Artemis.CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
-        shader = world.getManager(ShaderManager.class).getShader(ShaderManager.Shaders.CHUNK);
+        Camera cam = world.getSystem(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).cam;
+        cm = world.getSystem(TagManager.class).getEntity(Artemis.CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
+        shader = world.getSystem(ShaderManager.class).getShader(ShaderManager.Shaders.CHUNK);
 
         Gdx.gl20.glEnable(GL20.GL_DEPTH_TEST);
         Gdx.gl20.glEnable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);

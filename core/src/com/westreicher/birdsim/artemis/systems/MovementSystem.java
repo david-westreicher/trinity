@@ -37,7 +37,7 @@ public class MovementSystem extends EntityProcessingSystem {
         long currentTick = ((FixedTimestepStrategy) world.getInvocationStrategy()).currenttick;
         if (currentTick % 2 == 0)
             return true;
-        ImmutableBag<Entity> players = world.getManager(GroupManager.class).getEntities(Artemis.PLAYER_GROUP);
+        ImmutableBag<Entity> players = world.getSystem(GroupManager.class).getEntities(Artemis.PLAYER_GROUP);
         hasSlowmo = false;
         for (Entity player : players) {
             if (mSlotComponent.get(player).special.type == SlotSystem.Specialty.SLOWMO) {

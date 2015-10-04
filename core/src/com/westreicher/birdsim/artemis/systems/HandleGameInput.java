@@ -38,7 +38,7 @@ public class HandleGameInput extends EntityProcessingSystem {
     @Override
     protected void begin() {
         tick = ((FixedTimestepStrategy) world.getInvocationStrategy()).currenttick;
-        players = world.getManager(InputManager.class).players;
+        players = world.getSystem(InputManager.class).players;
     }
 
     @Override

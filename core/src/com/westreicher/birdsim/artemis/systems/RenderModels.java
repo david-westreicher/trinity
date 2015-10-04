@@ -54,7 +54,7 @@ public class RenderModels extends EntityProcessingSystem {
 
     @Override
     protected void begin() {
-        cam = world.getManager(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).cam;
+        cam = world.getSystem(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).cam;
         mb.begin(cam);
         entindex = 0;
     }

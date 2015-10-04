@@ -36,7 +36,7 @@ public class DeleteEntities extends EntityProcessingSystem {
 
     @Override
     protected void begin() {
-        cm = world.getManager(TagManager.class).getEntity(Artemis.CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
+        cm = world.getSystem(TagManager.class).getEntity(Artemis.CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
     }
 
     @Override

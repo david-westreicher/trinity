@@ -21,8 +21,8 @@ import com.westreicher.birdsim.artemis.managers.TextureManager;
 import com.westreicher.birdsim.artemis.systems.AdjustHeight;
 import com.westreicher.birdsim.artemis.systems.Animation;
 import com.westreicher.birdsim.artemis.systems.CollideTerrain;
-import com.westreicher.birdsim.artemis.systems.EntityCollisions;
 import com.westreicher.birdsim.artemis.systems.DeleteEntities;
+import com.westreicher.birdsim.artemis.systems.EntityCollisions;
 import com.westreicher.birdsim.artemis.systems.HandleGameInput;
 import com.westreicher.birdsim.artemis.systems.HandlePause;
 import com.westreicher.birdsim.artemis.systems.Interpolate;
@@ -32,7 +32,6 @@ import com.westreicher.birdsim.artemis.systems.RegenerateChunks;
 import com.westreicher.birdsim.artemis.systems.RenderChunks;
 import com.westreicher.birdsim.artemis.systems.RenderGui;
 import com.westreicher.birdsim.artemis.systems.RenderModels;
-import com.westreicher.birdsim.artemis.systems.RenderModelsGlow;
 import com.westreicher.birdsim.artemis.systems.RenderProfiler;
 import com.westreicher.birdsim.artemis.systems.StartRendering;
 import com.westreicher.birdsim.artemis.systems.TranslateMapAndSpawn;
@@ -124,16 +123,16 @@ public class Artemis extends World {
     @Override
     public void dispose() {
         super.dispose();
-        ChunkManager cm = this.getManager(TagManager.class).getEntity(CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
+        ChunkManager cm = this.getSystem(TagManager.class).getEntity(CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
         cm.dispose();
     }
 
     public void resize(int width, int height) {
-        ChunkManager cm = this.getManager(TagManager.class).getEntity(CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
+        ChunkManager cm = this.getSystem(TagManager.class).getEntity(CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
         cm.resize(width, height);
-        Viewport viewport = this.getManager(TagManager.class).getEntity(VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).viewport;
+        Viewport viewport = this.getSystem(TagManager.class).getEntity(VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).viewport;
         viewport.update(width, height);
         this.getSystem(PostProcessingShaders.class).resize(width, height);
-        this.getManager(InputManager.class).resize();
+        this.getSystem(InputManager.class).resize();
     }
 }

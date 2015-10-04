@@ -33,7 +33,7 @@ public class TranslateMapAndSpawn extends EntityProcessingSystem {
 
     @Override
     protected boolean checkProcessing() {
-        Entity camentity = world.getManager(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG);
+        Entity camentity = world.getSystem(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG);
         MapCoordinate coord = camentity.getComponent(MapCoordinate.class);
         this.dx = 0;
         this.dy = 0;
@@ -46,7 +46,7 @@ public class TranslateMapAndSpawn extends EntityProcessingSystem {
 
     @Override
     protected void begin() {
-        ChunkManager cm = world.getManager(TagManager.class).getEntity(Artemis.CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
+        ChunkManager cm = world.getSystem(TagManager.class).getEntity(Artemis.CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
         cm.pos[0] += dx;
         if (dx != 0) {
             int stax = dx > 0 ? 0 : CHUNKNUMS - 1;

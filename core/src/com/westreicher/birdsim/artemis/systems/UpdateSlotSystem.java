@@ -17,7 +17,7 @@ public class UpdateSlotSystem extends BaseSystem {
 
     @Override
     protected void processSystem() {
-        ImmutableBag<Entity> players = world.getManager(GroupManager.class).getEntities(Artemis.PLAYER_GROUP);
+        ImmutableBag<Entity> players = world.getSystem(GroupManager.class).getEntities(Artemis.PLAYER_GROUP);
         for (Entity player : players) {
             SlotSystem.Slot<SlotSystem.Specialty> s = mSlotComponent.get(player).special;
             s.multiplier--;

@@ -101,7 +101,7 @@ public class UberFactory extends Manager {
     public Entity createPlayer(World w, int id) {
         Entity e = w.createEntity();
         playerCreator.transmute(e);
-        w.getManager(GroupManager.class).add(e, Artemis.PLAYER_GROUP);
+        w.getSystem(GroupManager.class).add(e, Artemis.PLAYER_GROUP);
         inputMapper.get(e).id = id;
         ModelComponent model = modelMapper.get(e);
         model.type = ModelManager.Models.PLAYER;
@@ -117,18 +117,18 @@ public class UberFactory extends Manager {
     }
 
     public static CameraComponent createCam(World w) {
-        Entity e = w.createEntity();
-        EntityEdit edit = e.edit();
+        int e = w.create();
+        EntityEdit edit = w.edit(e);
         CameraComponent cc = edit.create(CameraComponent.class);
         edit.create(MapCoordinate.class);
         edit.create(Speed2.class);
         edit.create(RenderTransform.class);
-        w.getManager(TagManager.class).register(Artemis.VIRTUAL_CAM_TAG, e);
+        w.getSystem(TagManager.class).register(Artemis.VIRTUAL_CAM_TAG, e);
         return cc;
     }
 
-    public Entity createEnemy(World w, float x, float y, Random rand) {
-        Entity e = w.createEntity();
+    public int createEnemy(World w, float x, float y, Random rand) {
+        int e = w.create();
         enemyCreator.transmute(e);
         MapCoordinate coord = coordMapper.get(e);
         coord.x = x;
@@ -148,8 +148,8 @@ public class UberFactory extends Manager {
         return e;
     }
 
-    public Entity shoot(World w, float x, float y, float xspeed, float yspeed, SlotComponent sc) {
-        Entity e = w.createEntity();
+    public int shoot(World w, float x, float y, float xspeed, float yspeed, SlotComponent sc) {
+        int e = w.create();
         bulletCreator.transmute(e);
         MapCoordinate coord = coordMapper.get(e);
         coord.x = x;
@@ -167,8 +167,8 @@ public class UberFactory extends Manager {
         return e;
     }
 
-    public Entity createItem(World w, float x, float y, Random rand) {
-        Entity e = w.createEntity();
+    public int createItem(World w, float x, float y, Random rand) {
+        int e = w.create();
         itemCreator.transmute(e);
         MapCoordinate coord = coordMapper.get(e);
         coord.x = x;

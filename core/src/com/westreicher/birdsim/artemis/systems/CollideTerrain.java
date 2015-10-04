@@ -28,7 +28,6 @@ public class CollideTerrain extends EntityProcessingSystem {
     protected ComponentMapper<Health> mHealth;
     protected ComponentMapper<EntityType> mEntityType;
     private ChunkManager cm;
-    private GroupManager groupmanager;
 
     public CollideTerrain() {
         super(Aspect.all(TerrainCollision.class, Speed2.class, MapCoordinate.class, EntityType.class));
@@ -36,8 +35,7 @@ public class CollideTerrain extends EntityProcessingSystem {
 
     @Override
     protected void begin() {
-        cm = world.getManager(TagManager.class).getEntity(Artemis.CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
-        groupmanager = world.getManager(GroupManager.class);
+        cm = world.getSystem(TagManager.class).getEntity(Artemis.CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
     }
 
     @Override

@@ -2,9 +2,8 @@ package com.westreicher.birdsim.artemis.systems;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.Entity;
 import com.artemis.annotations.Wire;
-import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -17,7 +16,7 @@ import com.westreicher.birdsim.artemis.factories.TextEntity;
  * Created by david on 9/25/15.
  */
 @Wire
-public class TextRendering extends EntityProcessingSystem {
+public class TextRendering extends IteratingSystem {
 
     private TextEntity te;
     private SpriteBatch spritebatch;
@@ -53,7 +52,7 @@ public class TextRendering extends EntityProcessingSystem {
     }
 
     @Override
-    protected void process(Entity e) {
+    protected void process(int e) {
         Position2 pos = positionMapper.get(e);
         Speed2 speed = speedMapper.get(e);
         float drawx = pos.x + speed.x * delta;

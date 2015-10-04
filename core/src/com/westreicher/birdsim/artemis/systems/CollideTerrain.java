@@ -2,11 +2,9 @@ package com.westreicher.birdsim.artemis.systems;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.Entity;
 import com.artemis.annotations.Wire;
-import com.artemis.managers.GroupManager;
 import com.artemis.managers.TagManager;
-import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.math.Vector3;
 import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.artemis.Artemis;
@@ -20,7 +18,7 @@ import com.westreicher.birdsim.artemis.components.TerrainCollision;
  * Created by david on 9/30/15.
  */
 @Wire
-public class CollideTerrain extends EntityProcessingSystem {
+public class CollideTerrain extends IteratingSystem {
     private static final int MOVEMENT_TESTS = 4;
     ComponentMapper<TerrainCollision> tcMapper;
     ComponentMapper<MapCoordinate> posMapper;
@@ -39,7 +37,7 @@ public class CollideTerrain extends EntityProcessingSystem {
     }
 
     @Override
-    protected void process(Entity e) {
+    protected void process(int e) {
         MapCoordinate pos = posMapper.get(e);
         EntityType.Types type = mEntityType.get(e).type;
         float val = cm.getVal(pos.x, pos.y);

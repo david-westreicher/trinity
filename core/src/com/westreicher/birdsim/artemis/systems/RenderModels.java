@@ -2,10 +2,9 @@ package com.westreicher.birdsim.artemis.systems;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.managers.TagManager;
-import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Environment;
@@ -15,19 +14,17 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.math.Quaternion;
-import com.badlogic.gdx.math.Vector3;
 import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
 import com.westreicher.birdsim.artemis.components.ModelComponent;
 import com.westreicher.birdsim.artemis.components.RenderTransform;
-import com.westreicher.birdsim.artemis.managers.PostProcessingShaders;
 
 /**
  * Created by david on 9/28/15.
  */
 @Wire
-public class RenderModels extends EntityProcessingSystem {
+public class RenderModels extends IteratingSystem {
     private static final Quaternion TMP_QUAT = new Quaternion();
     private ComponentMapper<RenderTransform> interpMapper;
     private ComponentMapper<ModelComponent> modelMapper;
@@ -61,7 +58,7 @@ public class RenderModels extends EntityProcessingSystem {
 
 
     @Override
-    protected void process(Entity e) {
+    protected void process(int e) {
         ModelComponent model = modelMapper.get(e);
         if (!model.visible) return;
         ModelInstance mi = model.type.modelinst;

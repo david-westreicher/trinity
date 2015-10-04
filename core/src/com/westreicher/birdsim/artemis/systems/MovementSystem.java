@@ -5,11 +5,8 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.managers.GroupManager;
-import com.artemis.managers.TagManager;
-import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.ImmutableBag;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.westreicher.birdsim.SlotSystem;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.FixedTimestepStrategy;
@@ -21,7 +18,7 @@ import com.westreicher.birdsim.artemis.components.Speed2;
  * Created by david on 9/25/15.
  */
 @Wire
-public class MovementSystem extends EntityProcessingSystem {
+public class MovementSystem extends IteratingSystem {
     private boolean hasSlowmo;
 
     public MovementSystem() {
@@ -49,7 +46,7 @@ public class MovementSystem extends EntityProcessingSystem {
     }
 
     @Override
-    protected void process(Entity e) {
+    protected void process(int e) {
         MapCoordinate pos = coordMapper.get(e);
         Speed2 speed = speedMapper.get(e);
         pos.x += speed.x;

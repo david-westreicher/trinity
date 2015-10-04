@@ -5,7 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.managers.TagManager;
-import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.westreicher.birdsim.Chunk;
 import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.Config;
@@ -20,7 +20,7 @@ import java.util.Random;
  */
 
 @Wire
-public class TranslateMapAndSpawn extends EntityProcessingSystem {
+public class TranslateMapAndSpawn extends IteratingSystem {
     private static final int CHUNKNUMS = Config.CHUNKNUMS;
     private int dx;
     private int dy;
@@ -100,7 +100,7 @@ public class TranslateMapAndSpawn extends EntityProcessingSystem {
     }
 
     @Override
-    protected void process(Entity e) {
+    protected void process(int e) {
         MapCoordinate coord = coordMapper.get(e);
         coord.x -= dx * Config.TILES_PER_CHUNK;
         coord.y -= dy * Config.TILES_PER_CHUNK;

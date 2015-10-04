@@ -62,8 +62,10 @@ public class RenderProfiler extends BaseSystem {
         shapes.begin(ShapeRenderer.ShapeType.Filled);
         shapes.setColor(0.3f, 0.3f, 0.3f, 1);
         for (FixedTimestepStrategy.ProfileInfo pi : profiles) {
-            shapes.rect(0, height - (i++ + 1) * 20, (float) (pi.percent * 100), 20);
+            shapes.rect(150, height - (i++ + 1) * 20, (float) (pi.percent * 100), 20);
         }
+        shapes.rectLine(150, height, 150, height - i * 20, 1);
+        shapes.rectLine(250, height, 250, height - i * 20, 1);
         shapes.end();
 
         spritebatch.begin();

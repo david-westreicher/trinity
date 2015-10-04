@@ -2,10 +2,9 @@ package com.westreicher.birdsim.artemis.systems;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.managers.TagManager;
-import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
@@ -21,7 +20,6 @@ import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
 import com.westreicher.birdsim.artemis.components.ModelComponent;
 import com.westreicher.birdsim.artemis.components.RenderTransform;
-import com.westreicher.birdsim.artemis.managers.PostProcessingShaders;
 import com.westreicher.birdsim.artemis.managers.ShaderManager;
 import com.westreicher.birdsim.util.BatchShaderProgram;
 import com.westreicher.birdsim.util.MaxArray;
@@ -30,7 +28,7 @@ import com.westreicher.birdsim.util.MaxArray;
  * Created by david on 9/28/15.
  */
 @Wire
-public class RenderChunks extends EntityProcessingSystem {
+public class RenderChunks extends IteratingSystem {
     private static final float[] tmpfloat = new float[3];
     private static final Color TMP_COL = new Color();
     ComponentMapper<RenderTransform> transformMapper;
@@ -81,7 +79,7 @@ public class RenderChunks extends EntityProcessingSystem {
     }
 
     @Override
-    protected void process(Entity e) {
+    protected void process(int e) {
         if (!Config.DRAW_SHADOWS) return;
         RenderTransform rt = transformMapper.get(e);
         ModelComponent model = modelMapper.get(e);

@@ -1,13 +1,13 @@
 package com.westreicher.birdsim.artemis.systems;
 
 import com.artemis.Aspect;
+import com.artemis.BaseEntitySystem;
 import com.artemis.ComponentMapper;
 import com.artemis.EntitySystem;
 import com.artemis.World;
 import com.artemis.annotations.Wire;
 import com.artemis.utils.IntBag;
 import com.badlogic.gdx.Gdx;
-import com.westreicher.birdsim.MyGdxGame;
 import com.westreicher.birdsim.SlotSystem;
 import com.westreicher.birdsim.artemis.components.Collidable;
 import com.westreicher.birdsim.artemis.components.EntityType;
@@ -19,7 +19,7 @@ import com.westreicher.birdsim.artemis.components.SlotComponent;
  * Created by david on 10/1/15.
  */
 @Wire
-public class EntityCollisions extends EntitySystem {
+public class EntityCollisions extends BaseEntitySystem {
 
     protected ComponentMapper<MapCoordinate> mMapCoordinate;
     protected ComponentMapper<Collidable> mCollidable;
@@ -38,7 +38,7 @@ public class EntityCollisions extends EntitySystem {
 
     @Override
     protected void processSystem() {
-        IntBag ents = super.subscription.getEntities();
+        IntBag ents = getSubscription().getEntities();
         int numents = ents.size();
         int[] entities = ents.getData();
         for (int i = 0; i < numents - 1; i++) {
@@ -161,7 +161,8 @@ public class EntityCollisions extends EntitySystem {
     }
 
     private void bulletEnemy(int bullet, int enemy) {
-        mHealth.get(enemy).health -= mSlotComponent.get(bullet).gunType.type.damage;
+        SlotComponent slot = mSlotComponent.get(bullet);
+        mHealth.get(enemy).health -= slot.gunType.type.damage * slot.gunSpecial.getMultiplier(SlotSystem.GunSpecialty.DAMAGE);
         mHealth.get(bullet).health = 0;
         Gdx.input.vibrate(100);
     }

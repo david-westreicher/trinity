@@ -2,9 +2,8 @@ package com.westreicher.birdsim.artemis.systems;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.Entity;
 import com.artemis.annotations.Wire;
-import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.SlotSystem;
 import com.westreicher.birdsim.artemis.FixedTimestepStrategy;
@@ -22,7 +21,7 @@ import java.util.ArrayList;
  * Created by david on 9/29/15.
  */
 @Wire
-public class HandleGameInput extends EntityProcessingSystem {
+public class HandleGameInput extends IteratingSystem {
     private ComponentMapper<Speed2> speedMapper;
     private ComponentMapper<MapCoordinate> posMapper;
     private ComponentMapper<InputComponent> inputMapper;
@@ -42,7 +41,7 @@ public class HandleGameInput extends EntityProcessingSystem {
     }
 
     @Override
-    protected void process(Entity e) {
+    protected void process(int e) {
         MapCoordinate pos = posMapper.get(e);
         Speed2 speed = speedMapper.get(e);
         InputComponent input = inputMapper.get(e);

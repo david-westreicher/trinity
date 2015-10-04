@@ -2,10 +2,9 @@ package com.westreicher.birdsim.artemis.systems;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.managers.TagManager;
-import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.SlotSystem;
@@ -23,7 +22,7 @@ import com.westreicher.birdsim.artemis.factories.UberFactory;
  * Created by david on 9/29/15.
  */
 @Wire
-public class DeleteEntities extends EntityProcessingSystem {
+public class DeleteEntities extends IteratingSystem {
     private static final float EDGE = Config.TILES_PER_CHUNK * Config.CHUNKNUMS / 2;
     private ComponentMapper<Health> healthMapper;
     private ComponentMapper<MapCoordinate> posMapper;
@@ -41,7 +40,7 @@ public class DeleteEntities extends EntityProcessingSystem {
     }
 
     @Override
-    protected void process(Entity e) {
+    protected void process(int e) {
         Health health = healthMapper.get(e);
         MapCoordinate pos = posMapper.get(e);
         if (health.health <= 0) {
@@ -51,23 +50,25 @@ public class DeleteEntities extends EntityProcessingSystem {
                     int worlddamage = slot.gunType.type.worlddamage * slot.gunSpecial.getMultiplier(SlotSystem.GunSpecialty.DAMAGE);
                     if (worlddamage > 0)
                         cm.explode2(pos.x, pos.y, worlddamage);
-                    world.deleteEntity(e);
-                    return;
+                    break;
                 case ENEMY:
                     world.getSystem(UberFactory.class).createItem(world, pos.x, pos.y, null);
                 case ITEM:
-                    e.edit().
-                            remove(Health.class).
-                            remove(Collidable.class).
-                            remove(TerrainCollision.class).
-                            create(AnimationComponent.class);
-                    break;
-                default:
-                    world.deleteEntity(e);
+                    deathAnim(e);
+                    return;
             }
+            world.delete(e);
             return;
         }
         if (Math.abs(pos.x) > EDGE || Math.abs(pos.y) > EDGE)
-            world.deleteEntity(e);
+            world.delete(e);
+    }
+
+    private void deathAnim(int e) {
+        world.edit(e).
+                remove(Health.class).
+                remove(Collidable.class).
+                remove(TerrainCollision.class).
+                create(AnimationComponent.class);
     }
 }

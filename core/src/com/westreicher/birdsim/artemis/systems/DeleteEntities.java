@@ -8,6 +8,7 @@ import com.artemis.managers.TagManager;
 import com.artemis.systems.EntityProcessingSystem;
 import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.Config;
+import com.westreicher.birdsim.SlotSystem;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.AnimationComponent;
 import com.westreicher.birdsim.artemis.components.Collidable;
@@ -46,7 +47,8 @@ public class DeleteEntities extends EntityProcessingSystem {
         if (health.health <= 0) {
             switch (mEntityType.get(e).type) {
                 case BULLET:
-                    int worlddamage = mSlotComponent.get(e).gunType.type.worlddamage;
+                    SlotComponent slot = mSlotComponent.get(e);
+                    int worlddamage = slot.gunType.type.worlddamage * slot.gunSpecial.getMultiplier(SlotSystem.GunSpecialty.DAMAGE);
                     if (worlddamage > 0)
                         cm.explode2(pos.x, pos.y, worlddamage);
                     world.deleteEntity(e);

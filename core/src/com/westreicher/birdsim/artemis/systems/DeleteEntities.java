@@ -69,6 +69,7 @@ public class DeleteEntities extends IteratingSystem {
                     deathAnim(e);
                     return;
             }
+            //TODO delete bullet entities is expensive
             world.delete(e);
             return;
         }

@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.Vector2;
 import com.westreicher.birdsim.Chunk;
 import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.Config;
@@ -23,6 +24,7 @@ import com.westreicher.birdsim.artemis.components.RenderTransform;
 import com.westreicher.birdsim.artemis.managers.ShaderManager;
 import com.westreicher.birdsim.util.BatchShaderProgram;
 import com.westreicher.birdsim.util.MaxArray;
+import com.westreicher.birdsim.util.Spiral;
 
 /**
  * Created by david on 9/28/15.
@@ -33,18 +35,24 @@ public class RenderChunks extends IteratingSystem {
     private static final Color TMP_COL = new Color();
     ComponentMapper<RenderTransform> transformMapper;
     ComponentMapper<ModelComponent> modelMapper;
-    private final Mesh shadowMesh;
-    public final MaxArray.MaxArrayFloat verts;
+    private Mesh shadowMesh;
+    private MaxArray.MaxArrayFloat verts;
     private BatchShaderProgram shader;
     private ChunkManager cm;
+    private Spiral spiral;
+
 
     public RenderChunks() {
         super(Aspect.all(RenderTransform.class, ModelComponent.class));
+    }
+
+    @Override
+    protected void initialize() {
         verts = new MaxArray.MaxArrayFloat(800 * (3 + 1));
         shadowMesh = new Mesh(false, verts.maxSize(), 0,
                 new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
                 new VertexAttribute(VertexAttributes.Usage.ColorPacked, 3, ShaderProgram.COLOR_ATTRIBUTE));
-
+        spiral = new Spiral();
     }
 
     @Override
@@ -64,15 +72,19 @@ public class RenderChunks extends IteratingSystem {
         shader.setUniformf("chunksize", Config.TILES_PER_CHUNK);
         shader.setUniformf("heightscale", 2.5f * Config.TERRAIN_HEIGHT / Config.TILES_PER_CHUNK);
         shader.bind();
-        for (int x = 0; x < Config.CHUNKNUMS; x++) {
-            for (int y = 0; y < Config.CHUNKNUMS; y++) {
-                Chunk mi = cm.chunks[x][y];
-                if (mi.shouldDraw) {
-                    tmpfloat[0] = (x - (Config.CHUNKNUMS / 2)) * Config.TILES_PER_CHUNK - Config.TILES_PER_CHUNK / 2;
-                    tmpfloat[1] = (y - (Config.CHUNKNUMS / 2)) * Config.TILES_PER_CHUNK - Config.TILES_PER_CHUNK / 2;
-                    shader.setUniform3fv("trans", tmpfloat, 0, 3);
-                    mi.m.render(shader, GL20.GL_POINTS);
-                }
+        spiral.reset();
+        while (true) {
+            Vector2 spos = spiral.next();
+            int x = ((int) spos.x) + Config.CHUNKNUMS / 2;
+            int y = ((int) spos.y) + Config.CHUNKNUMS / 2;
+            if (x < 0 || y < 0 || x >= Config.CHUNKNUMS || y >= Config.CHUNKNUMS)
+                break;
+            Chunk mi = cm.chunks[x][y];
+            if (mi.shouldDraw) {
+                tmpfloat[0] = (x - (Config.CHUNKNUMS / 2)) * Config.TILES_PER_CHUNK - Config.TILES_PER_CHUNK / 2;
+                tmpfloat[1] = (y - (Config.CHUNKNUMS / 2)) * Config.TILES_PER_CHUNK - Config.TILES_PER_CHUNK / 2;
+                shader.setUniform3fv("trans", tmpfloat, 0, 3);
+                mi.m.render(shader, GL20.GL_POINTS);
             }
         }
         verts.reset();

@@ -7,10 +7,8 @@ import com.artemis.utils.Bag;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.FPSLogger;
 import com.westreicher.birdsim.Config;
-import com.westreicher.birdsim.util.Util;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -83,16 +81,17 @@ public class FixedTimestepStrategy extends InvocationStrategy {
             nextTick += skipTicks;
             loops++;
             currenttick++;
-            if (Config.PROFILE && currenttick % 600 == 0) {
-                logProfiler();
+            if (Config.PROFILE) {
+                if (currenttick % 600 == 0)
+                    logProfiler();
                 FPS_LOGGER.log();
             }
             //TODO GWT compat??
             currentTime = System.nanoTime();
             //currentTime = System.currentTimeMillis() * 1000000L;
         }
-        if (loops > 1 && Config.PROFILE)
-            Gdx.app.log("FRAMESKIP", "" + (loops - 1));
+        //if (loops > 1 && Config.PROFILE)
+        //    Gdx.app.log("FRAMESKIP", "" + (loops - 1));
     }
 
     private void logProfiler() {

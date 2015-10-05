@@ -68,11 +68,15 @@ public class ShaderManager extends Manager {
                 + (Config.POST_PROCESSING ? ""//
                 + "    vec2 dst = pos.xy-virtualcam;\n" //
                 + "    float dist = " + Config.SPHERE_RADIUS_SQUARED + "-dst.x*dst.x-dst.y*dst.y;\n"//
-                + "    if(dist>0.0)pos.z+=sqrt(dist);\n"//
-                + "    else pos.z = 10000.0;\n" : "")//
+                + "    if(dist>0.0){\n" //
+                + "      float denom = sqrt(dist);\n"//
+                + "      pos.z+=denom;\n"//
+                + "      float denominv = 1.0/denom;\n"// take the dot product of normal (dst.x/denom,dst.y/denom,-(1/140)*denom) and lightvec(-1,1,-1)
+                + "      float dotproduct = (-dst.x+dst.y)*denominv+denom*" + (1.0 / Config.SPHERE_RADIUS) + ";\n"//
+                + "      col =  " + ShaderProgram.COLOR_ATTRIBUTE + "*dotproduct;\n" //
+                + "    }else pos.z = 10000.0;\n" : "")//
                 + "  gl_Position =  u_projTrans * vec4(pos,1.0);\n" //
                 + "  gl_PointSize = pointsize;\n"//
-                + "  col =  " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
                 + "}\n";
     }
 

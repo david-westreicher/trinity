@@ -20,5 +20,6 @@ public class Config {
     public static final boolean PROFILE = false;
     public static final boolean FIXED_CAM = false;
     public static final boolean DRAW_SHADOWS = true;
+    public static final boolean FIRST_PERSON = false;
     public static boolean IS_DESKTOP = true;
 }

@@ -50,7 +50,7 @@ public class HandleGameInput extends IteratingSystem {
         playerinput.update();
         if (playerinput.isMoving()) {
             float rad = playerinput.getMoveRadiant();
-            float movspeed = Config.MOVE_SPEED * (slot.special.type == SlotSystem.Specialty.FASTER ? 2 : 1);
+            float movspeed = Config.MOVE_SPEED * (slot.special.type == SlotSystem.Specialty.FASTER ? 1.5f : 1);
             speed.x = (float) Math.cos(rad) * movspeed;
             speed.y = (float) Math.sin(rad) * movspeed;
         } else {

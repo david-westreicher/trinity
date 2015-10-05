@@ -115,7 +115,7 @@ public class Artemis extends World {
         CameraComponent camcomp = UberFactory.createCam(a);
         camcomp.cam.near = 1f;
         camcomp.cam.far = 200f;
-        camcomp.cam.position.set(0, 0, 200);
+        camcomp.cam.position.set(0, 0, Config.FIRST_PERSON ? 160 : 200);
         camcomp.cam.update();
     }
 

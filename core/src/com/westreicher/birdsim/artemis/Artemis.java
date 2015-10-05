@@ -19,6 +19,7 @@ import com.westreicher.birdsim.artemis.managers.PostProcessingShaders;
 import com.westreicher.birdsim.artemis.managers.ShaderManager;
 import com.westreicher.birdsim.artemis.managers.TextureManager;
 import com.westreicher.birdsim.artemis.systems.AdjustHeight;
+import com.westreicher.birdsim.artemis.systems.AnimateParticles;
 import com.westreicher.birdsim.artemis.systems.Animation;
 import com.westreicher.birdsim.artemis.systems.CollideTerrain;
 import com.westreicher.birdsim.artemis.systems.DeleteEntities;
@@ -32,6 +33,8 @@ import com.westreicher.birdsim.artemis.systems.RegenerateChunks;
 import com.westreicher.birdsim.artemis.systems.RenderChunks;
 import com.westreicher.birdsim.artemis.systems.RenderGui;
 import com.westreicher.birdsim.artemis.systems.RenderModels;
+import com.westreicher.birdsim.artemis.systems.RenderModelsGlow;
+import com.westreicher.birdsim.artemis.systems.RenderParticles;
 import com.westreicher.birdsim.artemis.systems.RenderProfiler;
 import com.westreicher.birdsim.artemis.systems.StartRendering;
 import com.westreicher.birdsim.artemis.systems.TranslateMapAndSpawn;
@@ -48,6 +51,7 @@ public class Artemis extends World {
     public static final String VIRTUAL_CAM_TAG = "virtualcam";
     public static final String CHUNKMANAGER_TAG = "chunkmanager";
     public static final String PLAYER_GROUP = "players";
+    public static final String PARTICLE_SYS_TAG = "particlesystem";
 
     private Artemis(WorldConfiguration config) {
         super(config);
@@ -80,11 +84,13 @@ public class Artemis extends World {
         addLogic(config, DeleteEntities.class);
         addLogic(config, Animation.class);
         addLogic(config, PositionCam.class);
+        addLogic(config, AnimateParticles.class);
 
         //RENDERING
         config.setSystem(Interpolate.class);
         config.setSystem(AdjustHeight.class);
         config.setSystem(StartRendering.class);
+        config.setSystem(RenderParticles.class);
         config.setSystem(RenderModels.class);
         config.setSystem(RenderChunks.class);
         //config.setSystem(RenderModelsGlow.class);

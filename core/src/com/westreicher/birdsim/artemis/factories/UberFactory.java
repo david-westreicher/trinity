@@ -20,6 +20,7 @@ import com.westreicher.birdsim.artemis.components.Health;
 import com.westreicher.birdsim.artemis.components.InputComponent;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
 import com.westreicher.birdsim.artemis.components.ModelComponent;
+import com.westreicher.birdsim.artemis.components.ParticleComponent;
 import com.westreicher.birdsim.artemis.components.RenderTransform;
 import com.westreicher.birdsim.artemis.components.SlotComponent;
 import com.westreicher.birdsim.artemis.components.Speed2;
@@ -47,6 +48,7 @@ public class UberFactory extends Manager {
     private EntityTransmuter enemyCreator;
     private EntityTransmuter itemCreator;
     private EntityTransmuter bulletCreator;
+    private EntityTransmuter particleCreator;
 
     @Override
     protected void initialize() {
@@ -96,6 +98,10 @@ public class UberFactory extends Manager {
                 add(EntityType.class).
                 add(Health.class).
                 build();
+
+        particleCreator = new EntityTransmuterFactory(world).
+                add(ParticleComponent.class).
+                build();
     }
 
     public Entity createPlayer(World w, int id) {
@@ -111,8 +117,8 @@ public class UberFactory extends Manager {
         mEntityType.get(e).type = EntityType.Types.PLAYER;
         mSlotComponent.get(e).gunType.type = SlotSystem.GunType.MACHINEGUN;
         mSlotComponent.get(e).gunType.multiplier = 1;
-        /*mSlotComponent.get(e).gunSpecial.type = SlotSystem.GunSpecialty.FREQUENCY;
-        mSlotComponent.get(e).gunSpecial.multiplier = 2;*/
+        //mSlotComponent.get(e).gunSpecial.type = SlotSystem.GunSpecialty.DAMAGE;
+        //mSlotComponent.get(e).gunSpecial.multiplier = 1;
         return e;
     }
 
@@ -179,6 +185,13 @@ public class UberFactory extends Manager {
         model.scale = 2;
         collidableMapper.get(e).scale = model.scale;
         mEntityType.get(e).type = EntityType.Types.ITEM;
+        return e;
+    }
+
+    public int createParticleSystem(World w) {
+        int e = w.create();
+        particleCreator.transmute(e);
+        w.getSystem(TagManager.class).register(Artemis.PARTICLE_SYS_TAG, e);
         return e;
     }
 }

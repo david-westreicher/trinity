@@ -85,6 +85,8 @@ public class TranslateMapAndSpawn extends IteratingSystem {
                 maybespawn(x, endy, c);
             }
         }
+
+        world.getSystem(AnimateParticles.class).translateAll(dx * Config.TILES_PER_CHUNK, dy * Config.TILES_PER_CHUNK);
     }
 
     private void maybespawn(float x, float y, Chunk c) {

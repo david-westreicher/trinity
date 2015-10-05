@@ -14,18 +14,23 @@ import com.westreicher.birdsim.artemis.components.Collidable;
 import com.westreicher.birdsim.artemis.components.EntityType;
 import com.westreicher.birdsim.artemis.components.Health;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
+import com.westreicher.birdsim.artemis.components.ModelComponent;
 import com.westreicher.birdsim.artemis.components.SlotComponent;
 import com.westreicher.birdsim.artemis.components.TerrainCollision;
 import com.westreicher.birdsim.artemis.factories.UberFactory;
+
+import java.util.Random;
 
 /**
  * Created by david on 9/29/15.
  */
 @Wire
 public class DeleteEntities extends IteratingSystem {
+    private static final Random TMP_RAND = new Random();
     private static final float EDGE = Config.TILES_PER_CHUNK * Config.CHUNKNUMS / 2;
     private ComponentMapper<Health> healthMapper;
     private ComponentMapper<MapCoordinate> posMapper;
+    protected ComponentMapper<ModelComponent> mModelComponent;
     protected ComponentMapper<EntityType> mEntityType;
     protected ComponentMapper<SlotComponent> mSlotComponent;
     private ChunkManager cm;
@@ -43,16 +48,23 @@ public class DeleteEntities extends IteratingSystem {
     protected void process(int e) {
         Health health = healthMapper.get(e);
         MapCoordinate pos = posMapper.get(e);
+        EntityType.Types type = mEntityType.get(e).type;
         if (health.health <= 0) {
-            switch (mEntityType.get(e).type) {
+            switch (type) {
                 case BULLET:
                     SlotComponent slot = mSlotComponent.get(e);
                     int worlddamage = slot.gunType.type.worlddamage * slot.gunSpecial.getMultiplier(SlotSystem.GunSpecialty.DAMAGE);
+                    for (int i = 0; i < worlddamage * 3 + 1; i++)
+                        world.getSystem(AnimateParticles.class).spawnParticle(pos.x + (float) TMP_RAND.nextGaussian() * worlddamage / 4, pos.y + (float) TMP_RAND.nextGaussian() * worlddamage / 4);
                     if (worlddamage > 0)
                         cm.explode2(pos.x, pos.y, worlddamage);
                     break;
                 case ENEMY:
+                    for (int i = 0; i < Math.max(1, mModelComponent.get(e).scale); i++)
+                        world.getSystem(AnimateParticles.class).spawnParticle(pos.x, pos.y);
                     world.getSystem(UberFactory.class).createItem(world, pos.x, pos.y, null);
+                    deathAnim(e);
+                    return;
                 case ITEM:
                     deathAnim(e);
                     return;

@@ -3,6 +3,8 @@ package com.westreicher.birdsim.input;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.InputProcessor;
 
 /**
  * Created by david on 9/29/15.
@@ -21,10 +23,21 @@ public class Keyboard extends AbstractInput {
             new int[]{0, 1},//DOWN
     };
 
+    public Keyboard() {
+        Gdx.input.setInputProcessor(new InputAdapter() {
+            @Override
+            public boolean keyDown (int keycode) {
+                if (keycode == Input.Keys.ESCAPE){
+                    isPaused = !isPaused;
+                }
+                return true;
+            }
+        });
+    }
+
     @Override
     public void update() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
-            isPaused = !isPaused;
+        // TODO handle other keys with the InputAdapter?
         movx = 0;
         movy = 0;
         for (int i = 0; i < KEYS.length; i++)

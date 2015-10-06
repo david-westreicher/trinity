@@ -27,6 +27,7 @@ import com.westreicher.birdsim.artemis.systems.EntityCollisions;
 import com.westreicher.birdsim.artemis.systems.HandleGameInput;
 import com.westreicher.birdsim.artemis.systems.HandlePause;
 import com.westreicher.birdsim.artemis.systems.Interpolate;
+import com.westreicher.birdsim.artemis.systems.MenuGui;
 import com.westreicher.birdsim.artemis.systems.MovementSystem;
 import com.westreicher.birdsim.artemis.systems.PositionCam;
 import com.westreicher.birdsim.artemis.systems.RegenerateChunks;
@@ -95,7 +96,8 @@ public class Artemis extends World {
         //config.setSystem(RenderModelsGlow.class);
         config.setSystem(RenderGui.class);
         if (Config.PROFILE) config.setSystem(RenderProfiler.class);
-        //config.setSystem(TextRendering.class);
+
+        config.setSystem(MenuGui.class);
 
         Artemis a = new Artemis(config);
         a.setInvocationStrategy(new FixedTimestepStrategy(a));

@@ -3,6 +3,7 @@ package com.westreicher.birdsim.artemis.systems;
 import com.artemis.BaseSystem;
 import com.artemis.Entity;
 import com.artemis.managers.GroupManager;
+import com.badlogic.gdx.Gdx;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.FixedTimestepStrategy;
 import com.westreicher.birdsim.artemis.components.InputComponent;
@@ -23,6 +24,7 @@ public class HandlePause extends BaseSystem {
         for (Entity e : world.getSystem(GroupManager.class).getEntities(Artemis.PLAYER_GROUP)) {
             InputComponent input = e.getComponent(InputComponent.class);
             AbstractInput control = players.get(input.id);
+            control.update();
             if (control.isPaused()) {
                 shouldpause = true;
                 break;

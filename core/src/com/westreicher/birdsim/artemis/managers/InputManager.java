@@ -16,6 +16,7 @@ import java.util.ArrayList;
  * Created by david on 9/30/15.
  */
 public class InputManager extends Manager {
+    //TODO bad reference?
     public ArrayList<AbstractInput> players;
 
     @Override
@@ -30,7 +31,7 @@ public class InputManager extends Manager {
             players.add(new TouchInput());
         int id = 0;
         for (AbstractInput pi : players)
-            world.getManager(UberFactory.class).createPlayer(world, id++);
+            world.getSystem(UberFactory.class).createPlayer(world, id++);
     }
 
     public void resize() {

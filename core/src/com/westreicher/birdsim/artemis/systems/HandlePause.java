@@ -19,8 +19,8 @@ public class HandlePause extends BaseSystem {
     @Override
     protected void processSystem() {
         boolean shouldpause = false;
-        ArrayList<AbstractInput> players = world.getManager(InputManager.class).players;
-        for (Entity e : world.getManager(GroupManager.class).getEntities(Artemis.PLAYER_GROUP)) {
+        ArrayList<AbstractInput> players = world.getSystem(InputManager.class).players;
+        for (Entity e : world.getSystem(GroupManager.class).getEntities(Artemis.PLAYER_GROUP)) {
             InputComponent input = e.getComponent(InputComponent.class);
             AbstractInput control = players.get(input.id);
             if (control.isPaused()) {

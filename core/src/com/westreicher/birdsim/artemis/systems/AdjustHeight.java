@@ -2,10 +2,9 @@ package com.westreicher.birdsim.artemis.systems;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.managers.TagManager;
-import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.math.Vector3;
 import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.Config;
@@ -18,7 +17,7 @@ import com.westreicher.birdsim.artemis.components.RenderTransform;
  * Created by david on 9/28/15.
  */
 @Wire
-public class AdjustHeight extends EntityProcessingSystem {
+public class AdjustHeight extends IteratingSystem {
     private ChunkManager cm;
     private Vector3 cam;
     private ComponentMapper<RenderTransform> transformMapper;
@@ -31,13 +30,13 @@ public class AdjustHeight extends EntityProcessingSystem {
 
     @Override
     protected void begin() {
-        cm = world.getManager(TagManager.class).getEntity(Artemis.CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
-        cam = world.getManager(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).cam.position;
+        cm = world.getSystem(TagManager.class).getEntity(Artemis.CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
+        cam = world.getSystem(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).cam.position;
         delta = world.getDelta();
     }
 
     @Override
-    protected void process(Entity e) {
+    protected void process(int e) {
         RenderTransform transform = transformMapper.get(e);
         ModelComponent model = modelMapper.get(e);
         float val = cm.getVal(transform.x, transform.y);

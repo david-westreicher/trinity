@@ -99,7 +99,7 @@ public class TouchInput extends AbstractInput {
 
     @Override
     public void resize(World w) {
-        Viewport v = w.getManager(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).viewport;
+        Viewport v = w.getSystem(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).viewport;
         startMovX = v.getScreenWidth() * 0.15f;
         startMovY = v.getScreenHeight() * 0.7f;
         startShootX = v.getScreenWidth() * 0.85f;

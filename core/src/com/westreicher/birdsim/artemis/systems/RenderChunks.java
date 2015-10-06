@@ -2,10 +2,9 @@ package com.westreicher.birdsim.artemis.systems;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.managers.TagManager;
-import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
@@ -29,7 +28,7 @@ import com.westreicher.birdsim.util.MaxArray;
  * Created by david on 9/28/15.
  */
 @Wire
-public class RenderChunks extends EntityProcessingSystem {
+public class RenderChunks extends IteratingSystem {
     private static final float[] tmpfloat = new float[3];
     private static final Color TMP_COL = new Color();
     ComponentMapper<RenderTransform> transformMapper;
@@ -50,9 +49,10 @@ public class RenderChunks extends EntityProcessingSystem {
 
     @Override
     protected void begin() {
-        Camera cam = world.getManager(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).cam;
-        cm = world.getManager(TagManager.class).getEntity(Artemis.CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
-        shader = world.getManager(ShaderManager.class).getShader(ShaderManager.Shaders.CHUNK);
+
+        Camera cam = world.getSystem(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).cam;
+        cm = world.getSystem(TagManager.class).getEntity(Artemis.CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
+        shader = world.getSystem(ShaderManager.class).getShader(ShaderManager.Shaders.CHUNK);
 
         Gdx.gl20.glEnable(GL20.GL_DEPTH_TEST);
         Gdx.gl20.glEnable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);
@@ -79,7 +79,8 @@ public class RenderChunks extends EntityProcessingSystem {
     }
 
     @Override
-    protected void process(Entity e) {
+    protected void process(int e) {
+        if (!Config.DRAW_SHADOWS) return;
         RenderTransform rt = transformMapper.get(e);
         ModelComponent model = modelMapper.get(e);
         int scale = Math.max(1, (int) (model.scale / 2));
@@ -109,6 +110,14 @@ public class RenderChunks extends EntityProcessingSystem {
 
     @Override
     protected void end() {
+        if (Config.DRAW_SHADOWS) drawShadows();
+        shader.unbind();
+        shader.end();
+        Gdx.gl20.glDisable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);
+        Gdx.gl20.glDisable(GL20.GL_DEPTH_TEST);
+    }
+
+    private void drawShadows() {
         Gdx.gl20.glDepthFunc(GL20.GL_LEQUAL);
         shadowMesh.setVertices(verts.arr, 0, verts.size());
         tmpfloat[0] = 0;
@@ -117,11 +126,6 @@ public class RenderChunks extends EntityProcessingSystem {
         shader.setUniformf("pointsize", cm.pointsize);
         shader.setUniformf("heightscale", 1);
         shadowMesh.render(shader, GL20.GL_POINTS);
-
-        shader.unbind();
-        shader.end();
-        Gdx.gl20.glDisable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);
-        Gdx.gl20.glDisable(GL20.GL_DEPTH_TEST);
         Gdx.gl20.glDepthFunc(GL20.GL_LESS);
     }
 }

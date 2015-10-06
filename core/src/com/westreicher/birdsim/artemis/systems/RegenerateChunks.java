@@ -2,25 +2,19 @@ package com.westreicher.birdsim.artemis.systems;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.Entity;
 import com.artemis.annotations.Wire;
-import com.artemis.systems.EntityProcessingSystem;
-import com.badlogic.gdx.Gdx;
+import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.math.Vector2;
 import com.westreicher.birdsim.Chunk;
 import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.Config;
-import com.westreicher.birdsim.artemis.FixedTimestepStrategy;
-import com.westreicher.birdsim.artemis.factories.UberFactory;
 import com.westreicher.birdsim.util.Spiral;
-
-import java.util.Random;
 
 /**
  * Created by david on 9/29/15.
  */
 @Wire
-public class RegenerateChunks extends EntityProcessingSystem {
+public class RegenerateChunks extends IteratingSystem {
     ComponentMapper<ChunkManager> chunkMapper;
     private Spiral spiral;
 
@@ -34,7 +28,7 @@ public class RegenerateChunks extends EntityProcessingSystem {
     }
 
     @Override
-    protected void process(Entity e) {
+    protected void process(int e) {
         ChunkManager cm = chunkMapper.get(e);
         spiral.reset();
         int maxupdates = 1;

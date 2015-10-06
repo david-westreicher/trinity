@@ -15,13 +15,15 @@ import com.westreicher.birdsim.artemis.components.CameraComponent;
 import com.westreicher.birdsim.artemis.factories.UberFactory;
 import com.westreicher.birdsim.artemis.managers.InputManager;
 import com.westreicher.birdsim.artemis.managers.ModelManager;
+import com.westreicher.birdsim.artemis.managers.PostProcessingShaders;
 import com.westreicher.birdsim.artemis.managers.ShaderManager;
 import com.westreicher.birdsim.artemis.managers.TextureManager;
 import com.westreicher.birdsim.artemis.systems.AdjustHeight;
+import com.westreicher.birdsim.artemis.systems.AnimateParticles;
 import com.westreicher.birdsim.artemis.systems.Animation;
 import com.westreicher.birdsim.artemis.systems.CollideTerrain;
-import com.westreicher.birdsim.artemis.systems.EntityCollisions;
 import com.westreicher.birdsim.artemis.systems.DeleteEntities;
+import com.westreicher.birdsim.artemis.systems.EntityCollisions;
 import com.westreicher.birdsim.artemis.systems.HandleGameInput;
 import com.westreicher.birdsim.artemis.systems.HandlePause;
 import com.westreicher.birdsim.artemis.systems.Interpolate;
@@ -31,8 +33,12 @@ import com.westreicher.birdsim.artemis.systems.RegenerateChunks;
 import com.westreicher.birdsim.artemis.systems.RenderChunks;
 import com.westreicher.birdsim.artemis.systems.RenderGui;
 import com.westreicher.birdsim.artemis.systems.RenderModels;
+import com.westreicher.birdsim.artemis.systems.RenderModelsGlow;
+import com.westreicher.birdsim.artemis.systems.RenderParticles;
+import com.westreicher.birdsim.artemis.systems.RenderProfiler;
 import com.westreicher.birdsim.artemis.systems.StartRendering;
 import com.westreicher.birdsim.artemis.systems.TranslateMapAndSpawn;
+import com.westreicher.birdsim.artemis.systems.UpdateSlotSystem;
 
 import java.util.ArrayList;
 
@@ -45,6 +51,7 @@ public class Artemis extends World {
     public static final String VIRTUAL_CAM_TAG = "virtualcam";
     public static final String CHUNKMANAGER_TAG = "chunkmanager";
     public static final String PLAYER_GROUP = "players";
+    public static final String PARTICLE_SYS_TAG = "particlesystem";
 
     private Artemis(WorldConfiguration config) {
         super(config);
@@ -62,10 +69,12 @@ public class Artemis extends World {
         config.setSystem(ShaderManager.class);
         config.setSystem(TextureManager.class);
         config.setSystem(InputManager.class);
+        config.setSystem(PostProcessingShaders.class);
 
 
         config.setSystem(HandlePause.class);
         //LOGIC
+        addLogic(config, UpdateSlotSystem.class);
         addLogic(config, HandleGameInput.class);
         addLogic(config, MovementSystem.class);
         addLogic(config, TranslateMapAndSpawn.class);
@@ -75,14 +84,18 @@ public class Artemis extends World {
         addLogic(config, DeleteEntities.class);
         addLogic(config, Animation.class);
         addLogic(config, PositionCam.class);
+        addLogic(config, AnimateParticles.class);
 
         //RENDERING
         config.setSystem(Interpolate.class);
         config.setSystem(AdjustHeight.class);
         config.setSystem(StartRendering.class);
-        config.setSystem(RenderChunks.class);
+        config.setSystem(RenderParticles.class);
         config.setSystem(RenderModels.class);
+        config.setSystem(RenderChunks.class);
+        //config.setSystem(RenderModelsGlow.class);
         config.setSystem(RenderGui.class);
+        if (Config.PROFILE) config.setSystem(RenderProfiler.class);
         //config.setSystem(TextRendering.class);
 
         Artemis a = new Artemis(config);
@@ -116,15 +129,16 @@ public class Artemis extends World {
     @Override
     public void dispose() {
         super.dispose();
-        ChunkManager cm = this.getManager(TagManager.class).getEntity(CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
+        ChunkManager cm = this.getSystem(TagManager.class).getEntity(CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
         cm.dispose();
     }
 
     public void resize(int width, int height) {
-        ChunkManager cm = this.getManager(TagManager.class).getEntity(CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
+        ChunkManager cm = this.getSystem(TagManager.class).getEntity(CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
         cm.resize(width, height);
-        Viewport viewport = this.getManager(TagManager.class).getEntity(VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).viewport;
+        Viewport viewport = this.getSystem(TagManager.class).getEntity(VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).viewport;
         viewport.update(width, height);
-        this.getManager(InputManager.class).resize();
+        this.getSystem(PostProcessingShaders.class).resize(width, height);
+        this.getSystem(InputManager.class).resize();
     }
 }

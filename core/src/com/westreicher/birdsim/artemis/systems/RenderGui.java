@@ -27,7 +27,7 @@ public class RenderGui extends BaseSystem {
 
     @Override
     protected void processSystem() {
-        Viewport v = world.getManager(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).viewport;
+        Viewport v = world.getSystem(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).viewport;
         spritebatch.begin();
         if (!Config.IS_DESKTOP)
             drawThumbs(v.getScreenWidth(), v.getScreenHeight());
@@ -38,7 +38,7 @@ public class RenderGui extends BaseSystem {
     private void drawThumbs(int w, int h) {
         if (Config.IS_DESKTOP)
             return;
-        Texture thumbTex = world.getManager(TextureManager.class).get(TextureManager.Textures.THUMB);
+        Texture thumbTex = world.getSystem(TextureManager.class).get(TextureManager.Textures.THUMB);
         int size = 50;
         float y = h * 0.3f;
         spritebatch.draw(thumbTex, w * 0.15f - size, y - size, size * 2, size * 2, 0, 0, 1, 1);
@@ -47,8 +47,8 @@ public class RenderGui extends BaseSystem {
 
     private void drawLives() {
         int size = 50;
-        ImmutableBag<Entity> players = world.getManager(GroupManager.class).getEntities(Artemis.PLAYER_GROUP);
-        Texture thumbTex = world.getManager(TextureManager.class).get(TextureManager.Textures.THUMB);
+        ImmutableBag<Entity> players = world.getSystem(GroupManager.class).getEntities(Artemis.PLAYER_GROUP);
+        Texture thumbTex = world.getSystem(TextureManager.class).get(TextureManager.Textures.THUMB);
         for (int i = 0; i < players.size(); i++) {
             Entity player = players.get(i);
             for (int j = 0; j < player.getComponent(Health.class).health; j++) {

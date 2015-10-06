@@ -29,16 +29,16 @@ public class PositionCam extends BaseSystem {
 
     @Override
     protected void processSystem() {
-        Entity camentity = world.getManager(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG);
+        Entity camentity = world.getSystem(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG);
         MapCoordinate campos = camentity.getComponent(MapCoordinate.class);
         Speed2 camspeed = camentity.getComponent(Speed2.class);
-        ImmutableBag<Entity> players = world.getManager(GroupManager.class).getEntities(Artemis.PLAYER_GROUP);
+        ImmutableBag<Entity> players = world.getSystem(GroupManager.class).getEntities(Artemis.PLAYER_GROUP);
         TMP_VEC.set(0, 0);
         TMP_VEC2.set(0, 0);
         for (Entity e : players) {
             MapCoordinate pos = coordMapper.get(e);
             Speed2 speed = speedMapper.get(e);
-            AbstractInput input = world.getManager(InputManager.class).players.get(inputMapper.get(e).id);
+            AbstractInput input = world.getSystem(InputManager.class).players.get(inputMapper.get(e).id);
             TMP_VEC.add(pos.x, pos.y);
             if (input.isShooting()) {
                 float rad = input.getShootRadiant();

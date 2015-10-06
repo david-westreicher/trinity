@@ -5,7 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.managers.TagManager;
-import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.westreicher.birdsim.Chunk;
 import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.Config;
@@ -20,7 +20,7 @@ import java.util.Random;
  */
 
 @Wire
-public class TranslateMapAndSpawn extends EntityProcessingSystem {
+public class TranslateMapAndSpawn extends IteratingSystem {
     private static final int CHUNKNUMS = Config.CHUNKNUMS;
     private int dx;
     private int dy;
@@ -33,7 +33,7 @@ public class TranslateMapAndSpawn extends EntityProcessingSystem {
 
     @Override
     protected boolean checkProcessing() {
-        Entity camentity = world.getManager(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG);
+        Entity camentity = world.getSystem(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG);
         MapCoordinate coord = camentity.getComponent(MapCoordinate.class);
         this.dx = 0;
         this.dy = 0;
@@ -46,7 +46,7 @@ public class TranslateMapAndSpawn extends EntityProcessingSystem {
 
     @Override
     protected void begin() {
-        ChunkManager cm = world.getManager(TagManager.class).getEntity(Artemis.CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
+        ChunkManager cm = world.getSystem(TagManager.class).getEntity(Artemis.CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
         cm.pos[0] += dx;
         if (dx != 0) {
             int stax = dx > 0 ? 0 : CHUNKNUMS - 1;
@@ -85,6 +85,8 @@ public class TranslateMapAndSpawn extends EntityProcessingSystem {
                 maybespawn(x, endy, c);
             }
         }
+
+        world.getSystem(AnimateParticles.class).translateAll(dx * Config.TILES_PER_CHUNK, dy * Config.TILES_PER_CHUNK);
     }
 
     private void maybespawn(float x, float y, Chunk c) {
@@ -100,7 +102,7 @@ public class TranslateMapAndSpawn extends EntityProcessingSystem {
     }
 
     @Override
-    protected void process(Entity e) {
+    protected void process(int e) {
         MapCoordinate coord = coordMapper.get(e);
         coord.x -= dx * Config.TILES_PER_CHUNK;
         coord.y -= dy * Config.TILES_PER_CHUNK;

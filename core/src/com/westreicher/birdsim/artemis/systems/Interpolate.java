@@ -5,7 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.managers.TagManager;
-import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.Camera;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
@@ -17,7 +17,7 @@ import com.westreicher.birdsim.artemis.components.Speed2;
  * Created by david on 9/28/15.
  */
 @Wire
-public class Interpolate extends EntityProcessingSystem {
+public class Interpolate extends IteratingSystem {
     private ComponentMapper<MapCoordinate> coordMapper;
     private ComponentMapper<Speed2> speedMapper;
     private ComponentMapper<RenderTransform> transformMapper;
@@ -33,7 +33,7 @@ public class Interpolate extends EntityProcessingSystem {
     }
 
     @Override
-    protected void process(Entity e) {
+    protected void process(int e) {
         MapCoordinate pos = coordMapper.get(e);
         RenderTransform transform = transformMapper.get(e);
         if (speedMapper.has(e)) {
@@ -57,7 +57,7 @@ public class Interpolate extends EntityProcessingSystem {
     }
 
     private void interpolateCam() {
-        Entity camentity = world.getManager(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG);
+        Entity camentity = world.getSystem(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG);
         RenderTransform pos = camentity.getComponent(RenderTransform.class);
         Camera cam = camentity.getComponent(CameraComponent.class).cam;
         cam.position.set(pos.x, pos.y, cam.position.z);

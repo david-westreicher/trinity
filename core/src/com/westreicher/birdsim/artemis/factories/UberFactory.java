@@ -10,6 +10,7 @@ import com.artemis.World;
 import com.artemis.annotations.Wire;
 import com.artemis.managers.GroupManager;
 import com.artemis.managers.TagManager;
+import com.westreicher.birdsim.SlotSystem;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.AIComponent;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
@@ -19,7 +20,9 @@ import com.westreicher.birdsim.artemis.components.Health;
 import com.westreicher.birdsim.artemis.components.InputComponent;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
 import com.westreicher.birdsim.artemis.components.ModelComponent;
+import com.westreicher.birdsim.artemis.components.ParticleComponent;
 import com.westreicher.birdsim.artemis.components.RenderTransform;
+import com.westreicher.birdsim.artemis.components.SlotComponent;
 import com.westreicher.birdsim.artemis.components.Speed2;
 import com.westreicher.birdsim.artemis.components.TerrainCollision;
 import com.westreicher.birdsim.artemis.managers.ModelManager;
@@ -40,10 +43,12 @@ public class UberFactory extends Manager {
     protected ComponentMapper<Health> mHealth;
     private ComponentMapper<Collidable> collidableMapper;
     protected ComponentMapper<EntityType> mEntityType;
+    protected ComponentMapper<SlotComponent> mSlotComponent;
     private EntityTransmuter playerCreator;
     private EntityTransmuter enemyCreator;
     private EntityTransmuter itemCreator;
     private EntityTransmuter bulletCreator;
+    private EntityTransmuter particleCreator;
 
     @Override
     protected void initialize() {
@@ -57,6 +62,7 @@ public class UberFactory extends Manager {
                 add(Collidable.class).
                 add(EntityType.class).
                 add(Health.class).
+                add(SlotComponent.class).
                 build();
 
         enemyCreator = new EntityTransmuterFactory(world).
@@ -80,6 +86,7 @@ public class UberFactory extends Manager {
                 add(Collidable.class).
                 add(EntityType.class).
                 add(Health.class).
+                add(SlotComponent.class).
                 build();
 
         itemCreator = new EntityTransmuterFactory(world).
@@ -91,12 +98,16 @@ public class UberFactory extends Manager {
                 add(EntityType.class).
                 add(Health.class).
                 build();
+
+        particleCreator = new EntityTransmuterFactory(world).
+                add(ParticleComponent.class).
+                build();
     }
 
     public Entity createPlayer(World w, int id) {
         Entity e = w.createEntity();
         playerCreator.transmute(e);
-        w.getManager(GroupManager.class).add(e, Artemis.PLAYER_GROUP);
+        w.getSystem(GroupManager.class).add(e, Artemis.PLAYER_GROUP);
         inputMapper.get(e).id = id;
         ModelComponent model = modelMapper.get(e);
         model.type = ModelManager.Models.PLAYER;
@@ -104,22 +115,26 @@ public class UberFactory extends Manager {
         model.scale = 10;
         collidableMapper.get(e).scale = model.scale;
         mEntityType.get(e).type = EntityType.Types.PLAYER;
+        mSlotComponent.get(e).gunType.type = SlotSystem.GunType.MACHINEGUN;
+        mSlotComponent.get(e).gunType.multiplier = 1;
+        //mSlotComponent.get(e).gunSpecial.type = SlotSystem.GunSpecialty.DAMAGE;
+        //mSlotComponent.get(e).gunSpecial.multiplier = 1;
         return e;
     }
 
     public static CameraComponent createCam(World w) {
-        Entity e = w.createEntity();
-        EntityEdit edit = e.edit();
+        int e = w.create();
+        EntityEdit edit = w.edit(e);
         CameraComponent cc = edit.create(CameraComponent.class);
         edit.create(MapCoordinate.class);
         edit.create(Speed2.class);
         edit.create(RenderTransform.class);
-        w.getManager(TagManager.class).register(Artemis.VIRTUAL_CAM_TAG, e);
+        w.getSystem(TagManager.class).register(Artemis.VIRTUAL_CAM_TAG, e);
         return cc;
     }
 
-    public Entity createEnemy(World w, float x, float y, Random rand) {
-        Entity e = w.createEntity();
+    public int createEnemy(World w, float x, float y, Random rand) {
+        int e = w.create();
         enemyCreator.transmute(e);
         MapCoordinate coord = coordMapper.get(e);
         coord.x = x;
@@ -139,10 +154,9 @@ public class UberFactory extends Manager {
         return e;
     }
 
-    public Entity shoot(World w, float x, float y, float xspeed, float yspeed) {
-        Entity e = w.createEntity();
+    public int shoot(World w, float x, float y, float xspeed, float yspeed, SlotComponent sc) {
+        int e = w.create();
         bulletCreator.transmute(e);
-
         MapCoordinate coord = coordMapper.get(e);
         coord.x = x;
         coord.y = y;
@@ -151,15 +165,16 @@ public class UberFactory extends Manager {
         speed.y = yspeed;
         ModelComponent model = modelMapper.get(e);
         model.type = ModelManager.Models.BULLET;
-        model.col = ColorAttr.random();
-        model.scale = 5;
+        model.col = sc.gunType.type == SlotSystem.GunType.MACHINEGUN ? ColorAttr.TEAL : ColorAttr.RED;
+        model.scale = sc.gunType.type.scale * sc.gunSpecial.getMultiplier(SlotSystem.GunSpecialty.DAMAGE);
         collidableMapper.get(e).scale = model.scale;
         mEntityType.get(e).type = EntityType.Types.BULLET;
+        mSlotComponent.get(e).set(sc);
         return e;
     }
 
-    public Entity createItem(World w, float x, float y, Random rand) {
-        Entity e = w.createEntity();
+    public int createItem(World w, float x, float y, Random rand) {
+        int e = w.create();
         itemCreator.transmute(e);
         MapCoordinate coord = coordMapper.get(e);
         coord.x = x;
@@ -170,6 +185,13 @@ public class UberFactory extends Manager {
         model.scale = 2;
         collidableMapper.get(e).scale = model.scale;
         mEntityType.get(e).type = EntityType.Types.ITEM;
+        return e;
+    }
+
+    public int createParticleSystem(World w) {
+        int e = w.create();
+        particleCreator.transmute(e);
+        w.getSystem(TagManager.class).register(Artemis.PARTICLE_SYS_TAG, e);
         return e;
     }
 }

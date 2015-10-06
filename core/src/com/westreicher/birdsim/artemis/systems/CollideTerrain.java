@@ -2,15 +2,14 @@ package com.westreicher.birdsim.artemis.systems;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.Entity;
 import com.artemis.annotations.Wire;
-import com.artemis.managers.GroupManager;
 import com.artemis.managers.TagManager;
-import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.math.Vector3;
 import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.EntityType;
+import com.westreicher.birdsim.artemis.components.Health;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
 import com.westreicher.birdsim.artemis.components.Speed2;
 import com.westreicher.birdsim.artemis.components.TerrainCollision;
@@ -19,14 +18,14 @@ import com.westreicher.birdsim.artemis.components.TerrainCollision;
  * Created by david on 9/30/15.
  */
 @Wire
-public class CollideTerrain extends EntityProcessingSystem {
+public class CollideTerrain extends IteratingSystem {
     private static final int MOVEMENT_TESTS = 4;
     ComponentMapper<TerrainCollision> tcMapper;
     ComponentMapper<MapCoordinate> posMapper;
     ComponentMapper<Speed2> speedMapper;
+    protected ComponentMapper<Health> mHealth;
     protected ComponentMapper<EntityType> mEntityType;
     private ChunkManager cm;
-    private GroupManager groupmanager;
 
     public CollideTerrain() {
         super(Aspect.all(TerrainCollision.class, Speed2.class, MapCoordinate.class, EntityType.class));
@@ -34,19 +33,17 @@ public class CollideTerrain extends EntityProcessingSystem {
 
     @Override
     protected void begin() {
-        cm = world.getManager(TagManager.class).getEntity(Artemis.CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
-        groupmanager = world.getManager(GroupManager.class);
+        cm = world.getSystem(TagManager.class).getEntity(Artemis.CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
     }
 
     @Override
-    protected void process(Entity e) {
+    protected void process(int e) {
         MapCoordinate pos = posMapper.get(e);
         EntityType.Types type = mEntityType.get(e).type;
         float val = cm.getVal(pos.x, pos.y);
         if (val <= 0) return;
         if (type == EntityType.Types.BULLET) {
-            cm.explode2(pos.x, pos.y, 10);
-            world.deleteEntity(e);
+            mHealth.get(e).health = 0;
         } else {
             //PLAYER/ENEMY
             Speed2 speed = speedMapper.get(e);

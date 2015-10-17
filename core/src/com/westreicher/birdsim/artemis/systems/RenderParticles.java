@@ -73,7 +73,7 @@ public class RenderParticles extends IteratingSystem {
     private void draw() {
         ChunkManager cm = world.getSystem(TagManager.class).getEntity(Artemis.CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
         Camera cam = world.getSystem(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).cam;
-        shader = world.getSystem(ShaderManager.class).getShader(ShaderManager.Shaders.CHUNK);
+        shader = world.getSystem(ShaderManager.class).getShader(ShaderManager.Shaders.CHUNK_SPRITES);
 
         Gdx.gl20.glEnable(GL20.GL_DEPTH_TEST);
         Gdx.gl20.glEnable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);

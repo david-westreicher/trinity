@@ -42,7 +42,8 @@ public class MovementSystem extends IteratingSystem {
                 break;
             }
         }
-        return !hasSlowmo;
+        //return !hasSlowmo;
+        return true;
     }
 
     @Override

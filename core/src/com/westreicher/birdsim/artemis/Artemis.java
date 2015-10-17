@@ -33,7 +33,6 @@ import com.westreicher.birdsim.artemis.systems.RegenerateChunks;
 import com.westreicher.birdsim.artemis.systems.RenderChunks;
 import com.westreicher.birdsim.artemis.systems.RenderGui;
 import com.westreicher.birdsim.artemis.systems.RenderModels;
-import com.westreicher.birdsim.artemis.systems.RenderModelsGlow;
 import com.westreicher.birdsim.artemis.systems.RenderParticles;
 import com.westreicher.birdsim.artemis.systems.RenderProfiler;
 import com.westreicher.birdsim.artemis.systems.StartRendering;
@@ -114,8 +113,8 @@ public class Artemis extends World {
     private static void addCamAndViewport(Artemis a) {
         CameraComponent camcomp = UberFactory.createCam(a);
         camcomp.cam.near = 1f;
-        camcomp.cam.far = 200f;
-        camcomp.cam.position.set(0, 0, 200);
+        camcomp.cam.position.set(0, 0, Config.FIRST_PERSON ? 160 : 200);
+        camcomp.cam.far = camcomp.cam.position.z - 1;
         camcomp.cam.update();
     }
 

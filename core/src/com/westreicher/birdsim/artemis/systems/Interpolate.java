@@ -7,6 +7,7 @@ import com.artemis.annotations.Wire;
 import com.artemis.managers.TagManager;
 import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.Camera;
+import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
@@ -60,7 +61,13 @@ public class Interpolate extends IteratingSystem {
         Entity camentity = world.getSystem(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG);
         RenderTransform pos = camentity.getComponent(RenderTransform.class);
         Camera cam = camentity.getComponent(CameraComponent.class).cam;
-        cam.position.set(pos.x, pos.y, cam.position.z);
+        if (Config.FIRST_PERSON) {
+            cam.position.set(pos.x, pos.y - 20, cam.position.z);
+            cam.lookAt(cam.position.x, cam.position.y + 100, 0);
+            cam.up.set(0, 0, 1);
+        } else {
+            cam.position.set(pos.x, pos.y, cam.position.z);
+        }
         cam.update();
     }
 }

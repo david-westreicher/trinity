@@ -78,6 +78,11 @@ public class ChunkManager extends Component {
         return tr == null ? OUTSIDE : tr.c.getVal(tr.innerx, tr.innery);
     }
 
+    public TileResult getValAbs2(int x, int y, long absx, long absy) {
+        TileResult tr = setTileResult(x + (absx - pos[0]) * Config.TILES_PER_CHUNK - Config.TILES_PER_CHUNK / 2, y + (absy - pos[1]) * Config.TILES_PER_CHUNK - Config.TILES_PER_CHUNK / 2);
+        return tr;
+    }
+
     public void mulVal(float posx, float posy, float percent) {
         TileResult tr = setTileResult(posx, posy);
         if (tr != null) tr.c.mulVal(tr.innerx, tr.innery, percent);

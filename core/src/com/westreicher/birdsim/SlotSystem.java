@@ -63,7 +63,7 @@ public class SlotSystem {
 
         public void reset() {
             type = null;
-            multiplier = 0;
+            multiplier = 1;
         }
 
         public int getMultiplier(T t) {

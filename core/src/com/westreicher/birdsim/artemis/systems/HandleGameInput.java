@@ -4,6 +4,7 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.IteratingSystem;
+import com.badlogic.gdx.Gdx;
 import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.SlotSystem;
 import com.westreicher.birdsim.artemis.FixedTimestepStrategy;
@@ -57,7 +58,8 @@ public class HandleGameInput extends IteratingSystem {
             speed.x = 0;
             speed.y = 0;
         }
-        if (playerinput.isShooting() && tick % (slot.gunType.type.frequency / slot.gunSpecial.getMultiplier(SlotSystem.GunSpecialty.FREQUENCY)) == 0) {
+
+        if (playerinput.isShooting() && tick % Math.max(1, (slot.gunType.type.frequency / slot.gunSpecial.getMultiplier(SlotSystem.GunSpecialty.FREQUENCY))) == 0) {
             float rad = playerinput.getShootRadiant();
             float tmpradiant = rad;
             for (int i = 0; i < slot.gunType.multiplier; i++) {

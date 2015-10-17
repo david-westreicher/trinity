@@ -162,8 +162,10 @@ public class EntityCollisions extends BaseEntitySystem {
 
     private void bulletEnemy(int bullet, int enemy) {
         SlotComponent slot = mSlotComponent.get(bullet);
-        mHealth.get(enemy).health -= slot.gunType.type.damage * slot.gunSpecial.getMultiplier(SlotSystem.GunSpecialty.DAMAGE);
+        int damage = slot.gunType.type.damage * slot.gunSpecial.getMultiplier(SlotSystem.GunSpecialty.DAMAGE);
+        mHealth.get(enemy).health -= damage;
         mHealth.get(bullet).health = 0;
-        Gdx.input.vibrate(100);
+        Gdx.app.log("damage", ""+damage);
+        Gdx.input.vibrate(10 * damage);
     }
 }

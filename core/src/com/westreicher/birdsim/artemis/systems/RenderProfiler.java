@@ -57,8 +57,10 @@ public class RenderProfiler extends BaseSystem {
         Viewport viewport = world.getSystem(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).viewport;
         float height = viewport.getScreenHeight();
         List<FixedTimestepStrategy.ProfileInfo> profiles = ((FixedTimestepStrategy) world.getInvocationStrategy()).getProfileMap();
+        spritebatch.getProjectionMatrix().setToOrtho2D(0, 0, viewport.getScreenWidth(), height);
 
         int i = 0;
+        shapes.setProjectionMatrix(spritebatch.getProjectionMatrix());
         shapes.begin(ShapeRenderer.ShapeType.Filled);
         shapes.setColor(0.3f, 0.3f, 0.3f, 1);
         for (FixedTimestepStrategy.ProfileInfo pi : profiles) {

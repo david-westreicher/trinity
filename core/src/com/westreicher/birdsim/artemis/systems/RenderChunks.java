@@ -49,7 +49,7 @@ public class RenderChunks extends IteratingSystem {
     @Override
     protected void initialize() {
         verts = new MaxArray.MaxArrayFloat(800 * (3 + 1));
-        shadowMesh = new Mesh(false, verts.maxSize(), 0,
+        shadowMesh = new Mesh(Mesh.VertexDataType.VertexBufferObjectSubData, false, verts.maxSize(), 0,
                 new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
                 new VertexAttribute(VertexAttributes.Usage.ColorPacked, 3, ShaderProgram.COLOR_ATTRIBUTE));
         spiral = new Spiral();
@@ -57,10 +57,12 @@ public class RenderChunks extends IteratingSystem {
 
     @Override
     protected void begin() {
-
         Camera cam = world.getSystem(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).cam;
         cm = world.getSystem(TagManager.class).getEntity(Artemis.CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
-        shader = world.getSystem(ShaderManager.class).getShader(ShaderManager.Shaders.CHUNK);
+        shader = world.getSystem(ShaderManager.class).getShader(
+                Config.CHUNK_RENDER_STYLE == Chunk.Renderstyle.SPRITE ?
+                        ShaderManager.Shaders.CHUNK_SPRITES :
+                        ShaderManager.Shaders.CHUNKS);
 
         Gdx.gl20.glEnable(GL20.GL_DEPTH_TEST);
         Gdx.gl20.glEnable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);
@@ -68,7 +70,8 @@ public class RenderChunks extends IteratingSystem {
         shader.setUniformMatrix("u_projTrans", cam.combined);
         if (Config.POST_PROCESSING)
             shader.setUniformf("virtualcam", cam.position.x, cam.position.y);
-        shader.setUniformf("pointsize", cm.pointsize);
+        if (Config.CHUNK_RENDER_STYLE == Chunk.Renderstyle.SPRITE)
+            shader.setUniformf("pointsize", cm.pointsize);
         shader.setUniformf("chunksize", Config.TILES_PER_CHUNK);
         shader.setUniformf("heightscale", 2.5f * Config.TERRAIN_HEIGHT / Config.TILES_PER_CHUNK);
         shader.bind();
@@ -77,14 +80,14 @@ public class RenderChunks extends IteratingSystem {
             Vector2 spos = spiral.next();
             int x = ((int) spos.x) + Config.CHUNKNUMS / 2;
             int y = ((int) spos.y) + Config.CHUNKNUMS / 2;
-            if (x < 0 || y < 0 || x >= Config.CHUNKNUMS || y >= Config.CHUNKNUMS)
+            if (x < 1 || y < 1 || x >= Config.CHUNKNUMS - 1 || y >= Config.CHUNKNUMS - 1)
                 break;
             Chunk mi = cm.chunks[x][y];
             if (mi.shouldDraw) {
                 tmpfloat[0] = (x - (Config.CHUNKNUMS / 2)) * Config.TILES_PER_CHUNK - Config.TILES_PER_CHUNK / 2;
                 tmpfloat[1] = (y - (Config.CHUNKNUMS / 2)) * Config.TILES_PER_CHUNK - Config.TILES_PER_CHUNK / 2;
                 shader.setUniform3fv("trans", tmpfloat, 0, 3);
-                mi.m.render(shader, GL20.GL_POINTS);
+                mi.m.render(shader, mi.renderStyle.getType());
             }
         }
         verts.reset();

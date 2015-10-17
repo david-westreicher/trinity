@@ -2,6 +2,7 @@ package com.westreicher.birdsim.artemis.managers;
 
 import com.artemis.Manager;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.westreicher.birdsim.Chunk;
 import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.util.BatchShaderProgram;
 
@@ -10,7 +11,7 @@ import com.westreicher.birdsim.util.BatchShaderProgram;
  */
 public class ShaderManager extends Manager {
     public enum Shaders {
-        CHUNK;
+        CHUNKS, CHUNK_SPRITES;
 
         private BatchShaderProgram sp;
 
@@ -18,8 +19,12 @@ public class ShaderManager extends Manager {
             String vert = "";
             String frag = "";
             switch (this) {
-                case CHUNK:
-                    vert = getChunkVert();
+                case CHUNK_SPRITES:
+                    vert = getChunkVert(true);
+                    frag = getChunkFrag();
+                    break;
+                case CHUNKS:
+                    vert = getChunkVert(false);
                     frag = getChunkFrag();
                     break;
             }
@@ -47,7 +52,7 @@ public class ShaderManager extends Manager {
         }
     }
 
-    private static String getChunkVert() {
+    private static String getChunkVert(boolean pointsprites) {
         return ""//
                 + "attribute vec3 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
                 + "attribute vec3 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
@@ -55,9 +60,8 @@ public class ShaderManager extends Manager {
                 + "uniform mat4 u_projTrans;\n" //
                 + "uniform vec3 trans;\n" //
                 + (Config.POST_PROCESSING ? ""//
-                + "  uniform vec2 virtualcam;\n"//
-                : "")//
-                + "uniform float pointsize;\n" //
+                + "  uniform vec2 virtualcam;\n" : "")//
+                + (pointsprites ? "uniform float pointsize;\n" : "") //
                 + "uniform float chunksize;\n" //
                 + "uniform float heightscale;\n" //
                 + "\n" //
@@ -74,9 +78,9 @@ public class ShaderManager extends Manager {
                 + "      float denominv = 1.0/denom;\n"// take the dot product of normal (dst.x/denom,dst.y/denom,-(1/140)*denom) and lightvec(-1,1,-1)
                 + "      float dotproduct = (-dst.x+dst.y)*denominv+denom*" + (1.0 / Config.SPHERE_RADIUS) + ";\n"//
                 + "      col =  " + ShaderProgram.COLOR_ATTRIBUTE + "*dotproduct;\n" //
-                + "    }else pos.z = 10000.0;\n" : "")//
+                + "    }else pos.z = 0.0;\n" : "")//
                 + "  gl_Position =  u_projTrans * vec4(pos,1.0);\n" //
-                + "  gl_PointSize = pointsize;\n"//
+                + (pointsprites ? "gl_PointSize = pointsize;\n" : "") //
                 + "}\n";
     }
 

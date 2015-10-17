@@ -1,6 +1,8 @@
 package com.westreicher.birdsim;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
@@ -17,6 +19,20 @@ import java.util.Random;
 public class Chunk {
 
 
+    /**
+     * TODO
+     * use state machine for chunk states (INIT, HEIGHT, COLOR, SHADOW, MESH)
+     * a chunk can only advance to the next state if its (dependent) neighbours are in the same state
+     * INIT: no data at all, don't draw this
+     * HEIGHT: the noise function was applied and saved its height data in the map[][]
+     * COLOR: the color was calculated and saved in the colors[][]
+     * SHADOW: the shadow was calculated and saved in the shadows[][]
+     * MESH: the vertex data (height+color+shadow) was synced to the GPU
+     * <p>
+     * the state will be resetted: * to INIT if the chunk will be reused at the border
+     * * to HEIGHT if the height data was changed (explosion, building, ...)
+     * ? should the state be resetted for dependent neighbours too ?
+     */
     private enum Tiles {
         SAND(0.929f, 0.788f, 0.686f),
         GRASS(0.271f, 0.545f, 0f),
@@ -40,16 +56,29 @@ public class Chunk {
     public Color[][] colors = new Color[SIZE][SIZE];
     public Mesh m;
     public boolean isReady = false;
-    public final MaxArray.MaxArrayFloat verts = new MaxArray.MaxArrayFloat((int) Math.pow(Config.TILES_PER_CHUNK, 2) * 2);
     private static final Vector3 tmp = new Vector3();
     public Random rand = new Random();
     public boolean shouldDraw;
     public long absx;
     public long absy;
     private float randdark;
+    public final ChunkRenderStyle renderStyle;
 
     public Chunk() {
-        m = new Mesh(false, verts.maxSize(), 0,
+        switch (Config.CHUNK_RENDER_STYLE) {
+            case MINECRAFT:
+                renderStyle = new MineCraftStyle();
+                break;
+            case SPRITE:
+                renderStyle = new SpriteStyle();
+                break;
+            default:
+            case TERRAIN:
+                renderStyle = new TerrainStyle();
+                break;
+        }
+        //TODO use VertexBufferObjectSubData
+        m = new Mesh(Mesh.VertexDataType.VertexBufferObjectSubData, false, renderStyle.vertNum(), renderStyle.indsNum(),
                 new VertexAttribute(VertexAttributes.Usage.ColorPacked, 3, ShaderProgram.POSITION_ATTRIBUTE),
                 new VertexAttribute(VertexAttributes.Usage.ColorPacked, 3, ShaderProgram.COLOR_ATTRIBUTE));
         for (int x = 0; x < SIZE; x++)
@@ -139,8 +168,7 @@ public class Chunk {
         return p;
     }
 
-    public boolean genMesh(ChunkManager chunkman) {
-        verts.reset();
+    private void calcShadow(ChunkManager chunkman) {
         for (int x = 0; x < SIZE; x++) {
             for (int y = 0; y < SIZE; y++) {
                 float scale = map[x][y];
@@ -153,11 +181,11 @@ public class Chunk {
                     for (int y1 = y - 3; y1 <= y; y1++) {
                         float other = 0;
                         if (x1 < 0 || y1 < 0) {
-                            float neighborval = chunkman.getValAbs(x1, SIZE - y1 - 1, absx, absy);
+                            /*float neighborval = chunkman.getValAbs(x1, SIZE - y1 - 1, absx, absy);
                             if (neighborval == ChunkManager.OUTSIDE)
                                 other = getNoise((x1 + absx * SIZE), (-y1 + absy * SIZE));
                             else
-                                other = neighborval;
+                                other = neighborval;*/
                         } else
                             other = map[x1][y1];
                         float diff = other - scale;
@@ -168,20 +196,22 @@ public class Chunk {
                 tmp.scl(Math.max(0, 1 - dark));
                 if (scale <= 0)
                     tmp.scl(Math.min(1, 0.5f - scale * 0.25f));
-                float z = Math.min(1, Math.max(0, scale * (1.0f / 2.5f)));
-                // x,y,z should be in range 0-1 (min-max)
-                //TODO could encode occlusion + colormap uv in alpha
-                verts.add(Color.toFloatBits((float) x / SIZE, (float) (SIZE - y - 1) / SIZE, z, 1f));
-                verts.add(Color.toFloatBits(tmp.x, tmp.y, tmp.z, 1f));
                 colors[x][y].set(tmp.x, tmp.y, tmp.z, 1);
             }
         }
-        shouldDraw = verts.size() > 0;
-        if (shouldDraw)
-            m.setVertices(verts.arr, 0, verts.size());
+    }
+
+    public boolean genMesh(ChunkManager chunkman) {
+        calcShadow(chunkman);
+        renderStyle.genMesh(chunkman, map, colors);
+        shouldDraw = renderStyle.getVerts().size() > 0;
+        if (shouldDraw) {
+            renderStyle.setMesh(m);
+        }
         isReady = true;
         return shouldDraw;
     }
+
 
     private float[] getCol(float scale) {
         /*if (scale < -1.4)
@@ -205,4 +235,249 @@ public class Chunk {
         m.dispose();
     }
 
+    public enum Renderstyle {SPRITE, TERRAIN, MINECRAFT}
+
+
+    public interface ChunkRenderStyle {
+        void genMesh(ChunkManager chunkman, float[][] map, Color[][] cols);
+
+        int indsNum();
+
+        int vertNum();
+
+        void setMesh(Mesh m);
+
+        int getType();
+
+        MaxArray.MaxArrayFloat getVerts();
+    }
+
+    public static class SpriteStyle implements ChunkRenderStyle {
+        public final MaxArray.MaxArrayFloat verts = new MaxArray.MaxArrayFloat((int) Math.pow(Config.TILES_PER_CHUNK, 2) * 2);
+
+        @Override
+        public void genMesh(ChunkManager chunkman, float[][] map, Color[][] cols) {
+            verts.reset();
+            for (int x = 0; x < SIZE; x++) {
+                for (int y = 0; y < SIZE; y++) {
+                    Color col = cols[x][y];
+                    float z = Math.min(1, Math.max(0, map[x][y] * (1.0f / 2.5f)));
+                    // x,y,z should be in range 0-1 (min-max)
+                    //TODO could encode occlusion + colormap uv in alpha
+                    verts.add(Color.toFloatBits((float) x / SIZE, (float) (SIZE - y - 1) / SIZE, z, 1f));
+                    verts.add(Color.toFloatBits(col.r, col.g, col.b, 1f));
+                }
+            }
+        }
+
+        @Override
+        public int indsNum() {
+            return 0;
+        }
+
+        @Override
+        public int vertNum() {
+            return verts.maxSize();
+        }
+
+        @Override
+        public void setMesh(Mesh m) {
+            m.setVertices(verts.arr, 0, verts.size());
+        }
+
+        @Override
+        public int getType() {
+            return GL20.GL_POINTS;
+        }
+
+        @Override
+        public MaxArray.MaxArrayFloat getVerts() {
+            return verts;
+        }
+    }
+
+    public class TerrainStyle implements ChunkRenderStyle {
+        public final MaxArray.MaxArrayFloat verts = new MaxArray.MaxArrayFloat((int) Math.pow(SIZE + 1, 2) * 2);
+        public final MaxArray.MaxArrayShort inds = new MaxArray.MaxArrayShort(SIZE * (SIZE * 2 + 2));
+        private boolean shouldSetIndices = true;
+
+        @Override
+        public void genMesh(ChunkManager chunkman, float[][] map, Color[][] cols) {
+            verts.reset();
+            // add vertices
+            for (int x = 0; x <= SIZE; x++) {
+                for (int y = 0; y <= SIZE; y++) {
+                    Color col;
+                    float val;
+                    if (x < SIZE && y < SIZE) {
+                        col = cols[x][y];
+                        val = map[x][y];
+                    } else {
+                        /*ChunkManager.TileResult tr = chunkman.getValAbs2(x, SIZE - y - 1, absx, absy);
+                        if (tr == null) {
+                            val = getNoise((x + absx * SIZE), (-y + absy * SIZE));
+                            col = Color.WHITE;
+                        } else {
+                            val = tr.c.getVal(tr.innerx, tr.innery);
+                            col = tr.c.colors[tr.innerx][tr.innery];
+                        }*/
+                        col = Color.GOLD;
+                        val = 0;
+                    }
+                    float z = Math.min(1, Math.max(0, val * (1.0f / 2.5f)));
+                    verts.add(Color.toFloatBits((float) x / SIZE, (float) (SIZE - y) / SIZE, z, 1f));
+                    verts.add(Color.toFloatBits(col.r, col.g, col.b, 1f));
+                }
+            }
+        }
+
+        @Override
+        public int indsNum() {
+            return inds.maxSize();
+        }
+
+        @Override
+        public int vertNum() {
+            return verts.maxSize();
+        }
+
+        @Override
+        public void setMesh(Mesh m) {
+            m.setVertices(verts.arr, 0, verts.size());
+            //TODO use update Vertices!!!!
+            //m.updateVertices()
+            if (shouldSetIndices) {
+                createIndices();
+                m.setIndices(inds.arr, 0, inds.size());
+                shouldSetIndices = false;
+            }
+        }
+
+        private void createIndices() {
+            /* indices of vertices with SIZE=4
+                0 - 4 - 8 - ....
+                |   |   |
+                1 - 5 - 9 - ....
+                |   |   |
+                2 - 6 - 10- ....
+                |   |   |
+                3 - 7 - 11- ....
+
+               use one TRIANGLE_STRIP for efficient encoding
+                0 ->4 ->8 - ....
+                | / | \ |
+                1 ->5 ->9 - ....
+                | / | \ |
+                2 ->6 ->10- ....
+                | / | \ |
+                3 ->7 ->11- ....
+
+               thus we get the following indices buffer:
+               0,4,1,5,2,6,3,7,7,11,6,10,5,9,4,8 */
+            int STITCH_SIZE = SIZE + 1;
+            // start with 0,8,16,24,... because we run down and then up again
+            for (int start = 0; start <= STITCH_SIZE * (STITCH_SIZE - 2); ) {
+                // run down: (0,4),(1,5),(2,6),(3,7)
+                for (int y = start; y < start + STITCH_SIZE; y++)
+                    inds.add((short) y, (short) (y + STITCH_SIZE));
+                start += STITCH_SIZE;
+                if (start / STITCH_SIZE >= STITCH_SIZE - 1) break;
+                // run up: (7,11),(6,10),(5,9),(4,8)
+                for (int y = start + STITCH_SIZE - 1; y >= start; y--)
+                    inds.add((short) y, (short) (y + STITCH_SIZE));
+                start += STITCH_SIZE;
+            }
+        }
+
+        @Override
+        public int getType() {
+            //return GL20.GL_LINE_STRIP;
+            return GL20.GL_TRIANGLE_STRIP;
+        }
+
+        @Override
+        public MaxArray.MaxArrayFloat getVerts() {
+            return verts;
+        }
+    }
+
+    public static class MineCraftStyle implements ChunkRenderStyle {
+        public final MaxArray.MaxArrayFloat verts = new MaxArray.MaxArrayFloat((int) Math.pow(Config.TILES_PER_CHUNK, 2) * 8);
+        public final MaxArray.MaxArrayShort inds = new MaxArray.MaxArrayShort((int) Math.pow(Config.TILES_PER_CHUNK, 2) * 24);
+
+        @Override
+        public void genMesh(ChunkManager chunkman, float[][] map, Color[][] cols) {
+            verts.reset();
+            inds.reset();
+            for (int x = 0; x < SIZE; x++) {
+                for (int y = 0; y < SIZE; y++) {
+                    Color col = cols[x][y];
+                    float z = Math.min(1, Math.max(0, map[x][y] * (1.0f / 2.5f)));
+
+                    short currentinds = (short) (verts.size() / 2);
+                    // x,y,z should be in range 0-1 (min-max)
+                    //TODO could encode occlusion + colormap uv in alpha
+                    float color = Color.toFloatBits(col.r, col.g, col.b, 1f);
+                    /*
+
+                       0 - 1
+                      / x /|
+                     2 - 3 8 - 9
+                    / x /|/ x /
+                   4 - 5 10 -11
+                  / x /|/ x /
+                 6 - 7 12 -13
+                     |/ x /
+                     14 -15
+
+                     */
+                    verts.add(Color.toFloatBits((float) x / SIZE, (float) (SIZE - y - 1) / SIZE, z, 1f));
+                    verts.add(color);
+                    verts.add(Color.toFloatBits((float) (x + 1) / SIZE, (float) (SIZE - y - 1) / SIZE, z, 1f));
+                    verts.add(color);
+                    verts.add(Color.toFloatBits((float) (x + 1) / SIZE, (float) (SIZE - y) / SIZE, z, 1f));
+                    verts.add(color);
+                    verts.add(Color.toFloatBits((float) x / SIZE, (float) (SIZE - y) / SIZE, z, 1f));
+                    verts.add(color);
+                    inds.add((short) (currentinds + 0), (short) (currentinds + 1), (short) (currentinds + 2));
+                    inds.add((short) (currentinds + 0), (short) (currentinds + 2), (short) (currentinds + 3));
+                    if (y > 0) {
+                        inds.add((short) (currentinds + 3), (short) (currentinds + 2), (short) (currentinds - 4));
+                        inds.add((short) (currentinds - 4), (short) (currentinds - 3), (short) (currentinds + 2));
+                    }
+                    if (x > 0) {
+                        int leftindex = currentinds - 4 * (Config.TILES_PER_CHUNK);
+                        inds.add((short) (currentinds + 0), (short) (currentinds + 3), (short) (leftindex + 1));
+                        inds.add((short) (leftindex + 1), (short) (leftindex + 2), (short) (currentinds + 3));
+                    }
+                }
+            }
+        }
+
+        @Override
+        public int indsNum() {
+            return inds.maxSize();
+        }
+
+        @Override
+        public int vertNum() {
+            return verts.maxSize();
+        }
+
+        @Override
+        public void setMesh(Mesh m) {
+            m.setVertices(verts.arr, 0, verts.size());
+            m.setIndices(inds.arr, 0, inds.size());
+        }
+
+        @Override
+        public int getType() {
+            return GL20.GL_TRIANGLES;
+        }
+
+        @Override
+        public MaxArray.MaxArrayFloat getVerts() {
+            return verts;
+        }
+    }
 }

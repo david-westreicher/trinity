@@ -77,7 +77,11 @@ public class RenderModels extends IteratingSystem {
             TMP_QUAT.setEulerAnglesRad(0, 0, transform.radiant);
         }
         mi.transform.rotate(TMP_QUAT);
+        //TODO observation through apitrace:
+        //TODO   env is not efficiently batched -> light direction, ambient uniforms, normal matrix, ... are set per instance :(
+        //TODO   => implement large VBO with many instances approach (uniform matrix4[instances] posInst; gl_Position = proj*posInst[pos.w]*posAttr;)
         mb.render(mi, env);
+        //mb.render(mi);
     }
 
     @Override

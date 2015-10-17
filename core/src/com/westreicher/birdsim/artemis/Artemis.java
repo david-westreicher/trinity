@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
+import com.westreicher.birdsim.artemis.components.Game;
 import com.westreicher.birdsim.artemis.factories.UberFactory;
 import com.westreicher.birdsim.artemis.managers.InputManager;
 import com.westreicher.birdsim.artemis.managers.ModelManager;
@@ -50,6 +51,7 @@ public class Artemis extends World {
     public static final ArrayList<Class> LOGIC_SYSTEMS = new ArrayList<Class>();
     public static final String VIRTUAL_CAM_TAG = "virtualcam";
     public static final String CHUNKMANAGER_TAG = "chunkmanager";
+    public static final String GAME_TAG = "game";
     public static final String PLAYER_GROUP = "players";
     public static final String PARTICLE_SYS_TAG = "particlesystem";
 
@@ -70,7 +72,6 @@ public class Artemis extends World {
         config.setSystem(TextureManager.class);
         config.setSystem(InputManager.class);
         config.setSystem(PostProcessingShaders.class);
-
 
         config.setSystem(HandlePause.class);
         //LOGIC
@@ -103,6 +104,7 @@ public class Artemis extends World {
         a.setInvocationStrategy(new FixedTimestepStrategy(a));
         addCamAndViewport(a);
         addChunkManager(a);
+        addGameComponent(a);
         return a;
     }
 
@@ -124,6 +126,13 @@ public class Artemis extends World {
         new EntityBuilder(a)
                 .with(new ChunkManager())
                 .tag(CHUNKMANAGER_TAG)
+                .build();
+    }
+
+    private static void addGameComponent(Artemis a) {
+        new EntityBuilder(a)
+                .with(new Game())
+                 .tag(GAME_TAG)
                 .build();
     }
 

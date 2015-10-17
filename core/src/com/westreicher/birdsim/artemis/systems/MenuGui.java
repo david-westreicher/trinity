@@ -65,6 +65,7 @@ public class MenuGui extends EntityProcessingSystem {
     protected void initialize() {
         batch = new SpriteBatch();
         stage = new Stage();
+        // TODO check controller support
         InputProcessor input = Gdx.input.getInputProcessor();
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
         inputMultiplexer.addProcessor(input);
@@ -95,7 +96,7 @@ public class MenuGui extends EntityProcessingSystem {
         skin.add("default", textButtonStyle);
 
         final TextButton button = new TextButton("Exit", skin);
-        table.add(button);
+        table.add(button).width(600).height(60);
 
         button.addListener(new ChangeListener() {
             public void changed (ChangeEvent event, Actor actor) {

@@ -7,6 +7,7 @@ import com.artemis.utils.Bag;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.FPSLogger;
 import com.westreicher.birdsim.Config;
+import com.westreicher.birdsim.UI.Settings;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,6 +37,8 @@ public class FixedTimestepStrategy extends InvocationStrategy {
     private long skipTicks;
     public boolean isPaused;
     private List<ProfileInfo> profileVals = new ArrayList<ProfileInfo>();
+
+    private static final Settings settings = new Settings();
 
     public FixedTimestepStrategy(World world) {
         nextTick = System.nanoTime(); //System.currentTimeMillis() * 1000000L;//
@@ -81,7 +84,7 @@ public class FixedTimestepStrategy extends InvocationStrategy {
             nextTick += skipTicks;
             loops++;
             currenttick++;
-            if (Config.PROFILE) {
+            if (settings.isDebug()) {
                 if (currenttick % 600 == 0)
                     logProfiler();
                 FPS_LOGGER.log();

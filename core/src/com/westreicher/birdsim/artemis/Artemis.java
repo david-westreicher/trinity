@@ -40,6 +40,7 @@ import com.westreicher.birdsim.artemis.systems.RenderProfiler;
 import com.westreicher.birdsim.artemis.systems.StartRendering;
 import com.westreicher.birdsim.artemis.systems.TranslateMapAndSpawn;
 import com.westreicher.birdsim.artemis.systems.UpdateSlotSystem;
+import com.westreicher.birdsim.UI.Settings;
 
 import java.util.ArrayList;
 
@@ -54,6 +55,7 @@ public class Artemis extends World {
     public static final String GAME_TAG = "game";
     public static final String PLAYER_GROUP = "players";
     public static final String PARTICLE_SYS_TAG = "particlesystem";
+    private static final Settings settings = new Settings();
 
     private Artemis(WorldConfiguration config) {
         super(config);
@@ -96,7 +98,8 @@ public class Artemis extends World {
         config.setSystem(RenderChunks.class);
         //config.setSystem(RenderModelsGlow.class);
         config.setSystem(RenderGui.class);
-        if (Config.PROFILE) config.setSystem(RenderProfiler.class);
+
+        config.setSystem(RenderProfiler.class);
 
         config.setSystem(MenuGui.class);
 

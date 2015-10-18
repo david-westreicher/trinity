@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.compression.lzma.Base;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.westreicher.birdsim.UI.Settings;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.FixedTimestepStrategy;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
@@ -38,6 +39,11 @@ public class RenderProfiler extends BaseSystem {
     private SpriteBatch spritebatch;
     private BitmapFont font;
     private ShapeRenderer shapes;
+    private static final Settings settings = new Settings();
+
+    public RenderProfiler(){
+        setEnabled(settings.isDebug());
+    }
 
     @Override
     protected void initialize() {

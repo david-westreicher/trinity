@@ -10,7 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.westreicher.birdsim.Config;
+import com.westreicher.birdsim.artemis.Artemis;
 
 /**
  * Created by juanolon on 17/10/15.
@@ -27,14 +27,13 @@ public class MenuBuilder {
 
         skin = new Skin();
 
-        Settings settings = new Settings();
-
         // Generate a 1x1 white texture and store it in the skin named "white".
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(Color.WHITE);
         pixmap.fill();
         skin.add("white", new Texture(pixmap));
 
+        // TODO define trinity style
         skin.add("default", new BitmapFont());
 
         // Create a button with the "default" TextButtonStyle. A 3rd parameter can be used to specify a name other than "default".
@@ -46,7 +45,7 @@ public class MenuBuilder {
         textButtonStyle.font = skin.getFont("default");
         skin.add("default", textButtonStyle);
 
-        if (settings.isDebug()) root.setDebug(true);
+        if (Artemis.settings.isDebug()) root.setDebug(true);
 
         stage.addActor(root);
     }

@@ -1,29 +1,16 @@
 package com.westreicher.birdsim.artemis.systems;
 
-import com.artemis.Aspect;
 import com.artemis.BaseSystem;
-import com.artemis.ComponentMapper;
-import com.artemis.Entity;
 import com.artemis.managers.TagManager;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.utils.compression.lzma.Base;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.westreicher.birdsim.UI.Settings;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.FixedTimestepStrategy;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
-import com.westreicher.birdsim.artemis.components.Position2;
-import com.westreicher.birdsim.artemis.components.Speed2;
-import com.westreicher.birdsim.artemis.components.StaticText;
-import com.westreicher.birdsim.artemis.factories.TextEntity;
 
-import java.util.AbstractQueue;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,10 +26,9 @@ public class RenderProfiler extends BaseSystem {
     private SpriteBatch spritebatch;
     private BitmapFont font;
     private ShapeRenderer shapes;
-    private static final Settings settings = new Settings();
 
     public RenderProfiler(){
-        setEnabled(settings.isDebug());
+        setEnabled(Artemis.settings.isDebug());
     }
 
     @Override

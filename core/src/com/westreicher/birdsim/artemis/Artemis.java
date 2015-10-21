@@ -55,7 +55,7 @@ public class Artemis extends World {
     public static final String GAME_TAG = "game";
     public static final String PLAYER_GROUP = "players";
     public static final String PARTICLE_SYS_TAG = "particlesystem";
-    private static final Settings settings = new Settings();
+    public static final Settings settings = new Settings();
 
     private Artemis(WorldConfiguration config) {
         super(config);

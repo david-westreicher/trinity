@@ -11,7 +11,6 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.westreicher.birdsim.UI.MenuAction;
-import com.westreicher.birdsim.UI.Settings;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.Game;
 import com.westreicher.birdsim.UI.MenuBuilder;
@@ -46,18 +45,15 @@ public class MenuGui extends EntityProcessingSystem {
         inputMultiplexer.addProcessor(stage);
         Gdx.input.setInputProcessor(inputMultiplexer);
 
-
-        final Settings settings = new Settings();
-
         MenuBuilder menu = new MenuBuilder(stage);
         menu
         .addButton("Debug", new MenuAction() {
             @Override
             public void act() {
-                settings.setDebug(!settings.isDebug()).flush();
-                world.getSystem(RenderProfiler.class).setEnabled(settings.isDebug());
+                Artemis.settings.setDebug(!Artemis.settings.isDebug()).flush();
+                world.getSystem(RenderProfiler.class).setEnabled(Artemis.settings.isDebug());
             }
-        }, settings.isDebug())
+        }, Artemis.settings.isDebug())
         .addButton("Exit", new MenuAction() {
             @Override
             public void act() {

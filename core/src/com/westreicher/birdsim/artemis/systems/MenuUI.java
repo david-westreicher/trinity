@@ -19,13 +19,13 @@ import com.westreicher.birdsim.UI.MenuBuilder;
  * Created by juanolon on 03/10/15.
  */
 @Wire
-public class MenuGui extends EntityProcessingSystem {
+public class MenuUI extends EntityProcessingSystem {
     Stage stage;
 
     protected Game game;
     protected ComponentMapper<Game> mGame;
 
-    public MenuGui() {
+    public MenuUI() {
         super(Aspect.all(Game.class));
     }
 

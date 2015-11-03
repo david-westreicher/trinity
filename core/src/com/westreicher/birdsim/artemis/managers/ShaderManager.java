@@ -53,7 +53,9 @@ public class ShaderManager extends Manager {
 
     private static String getChunkVert(boolean pointsprites) {
         return ""//
-                + "attribute vec3 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
+                + ((Config.ALLOW_NEGATIVE_CHUNK_DATA) ?
+                "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" :
+                "attribute vec3 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n") //
                 + "attribute vec3 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
                 + "varying vec3 col;\n" //
                 + "uniform mat4 u_projTrans;\n" //
@@ -66,7 +68,9 @@ public class ShaderManager extends Manager {
                 + "\n" //
                 + "void main()\n" //
                 + "{\n" //
-                + "  vec3 pos = " + ShaderProgram.POSITION_ATTRIBUTE + "*chunksize + trans;\n" //
+                + "  vec3 pos = " + ShaderProgram.POSITION_ATTRIBUTE + ".xyz*chunksize + trans;\n" //
+                + ((!Config.ALLOW_NEGATIVE_CHUNK_DATA) ? "" : ""
+                + "  pos.z -= " + ShaderProgram.POSITION_ATTRIBUTE + ".w*chunksize;\n") //
                 + "  pos.z *= heightscale;\n" //
                 + "  float dotproduct = 1.0;\n" //
                 + (Config.POST_PROCESSING ? ""//

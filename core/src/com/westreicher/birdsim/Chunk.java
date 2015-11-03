@@ -1,5 +1,6 @@
 package com.westreicher.birdsim;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
@@ -150,7 +151,7 @@ public class Chunk {
         }
         //TODO use VertexBufferObjectSubData
         m = new Mesh(Mesh.VertexDataType.VertexBufferObjectSubData, false, renderStyle.vertNum(), renderStyle.indsNum(),
-                new VertexAttribute(VertexAttributes.Usage.ColorPacked, 3, ShaderProgram.POSITION_ATTRIBUTE),
+                new VertexAttribute(VertexAttributes.Usage.ColorPacked, Config.ALLOW_NEGATIVE_CHUNK_DATA ? 4 : 3, ShaderProgram.POSITION_ATTRIBUTE),
                 new VertexAttribute(VertexAttributes.Usage.ColorPacked, 3, ShaderProgram.COLOR_ATTRIBUTE));
         for (int x = 0; x < SIZE; x++)
             for (int y = 0; y < SIZE; y++)
@@ -361,11 +362,15 @@ public class Chunk {
                     } else {
                         ChunkManager.TileResult tr = chunkman.getValAbs2(x, SIZE - y - 1, absx, absy);
                         if (tr == null) throw new RuntimeException("OUTSIDE");
-                        val = tr.c.getVal(tr.innerx, tr.innery);
+                        val = tr.c.map[tr.innerx][tr.innery];
                         col = tr.c.colors[tr.innerx][tr.innery];
                     }
-                    float z = Math.min(1, Math.max(0, val * (1.0f / 2.5f)));
-                    verts.add(Color.toFloatBits((float) x / SIZE, (float) (SIZE - y) / SIZE, z, 1f));
+                    float normval = val * (1.0f / 2.5f);
+
+                    float z = Math.min(1, Math.max(0, normval));
+                    float zneg = Math.min(1, Math.max(0, -normval));
+
+                    verts.add(Color.toFloatBits((float) x / SIZE, (float) (SIZE - y) / SIZE, z, zneg));
                     verts.add(Color.toFloatBits(col.r, col.g, col.b, 1f));
                 }
             }

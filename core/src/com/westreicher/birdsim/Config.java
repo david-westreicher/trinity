@@ -24,6 +24,7 @@ public class Config {
     //the chunk-state updates per tick, 10 for performant systems (desktop,...?)
     //TODO make gui with slider (1-10)
     public static final int CHUNK_UPDATES_PER_TICK = 1;
+    public static final boolean ALLOW_NEGATIVE_CHUNK_DATA = false;
     public static boolean IS_DESKTOP = true;
     public static Chunk.Renderstyle CHUNK_RENDER_STYLE = Chunk.Renderstyle.TERRAIN;
 }

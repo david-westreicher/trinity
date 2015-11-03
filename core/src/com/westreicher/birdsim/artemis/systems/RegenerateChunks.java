@@ -44,7 +44,7 @@ public class RegenerateChunks extends IteratingSystem {
     protected void process(int e) {
         ChunkManager cm = chunkMapper.get(e);
         spiral.reset();
-        int maxupdates = 1;
+        int maxupdates = Config.CHUNK_UPDATES_PER_TICK;
         while (true) {
             Vector2 spos = spiral.next();
             int x = ((int) spos.x) + Config.CHUNKNUMS / 2;
@@ -65,14 +65,6 @@ public class RegenerateChunks extends IteratingSystem {
 
             if (c.stateAdvance(neighbs, cm))
                 if (--maxupdates <= 0) break;
-            /*
-            if (!c.isReady) {
-                if (cm.chunks[x][y].genMesh(cm))
-                    maxupdates -= 1;
-                if (maxupdates <= 0)
-                    break;
-            }
-            */
         }
     }
 

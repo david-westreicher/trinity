@@ -117,8 +117,9 @@ public class UberFactory extends Manager {
         mEntityType.get(e).type = EntityType.Types.PLAYER;
         mSlotComponent.get(e).gunType.type = SlotSystem.GunType.MACHINEGUN;
         mSlotComponent.get(e).gunType.multiplier = 1;
-        //mSlotComponent.get(e).gunSpecial.type = SlotSystem.GunSpecialty.DAMAGE;
-        //mSlotComponent.get(e).gunSpecial.multiplier = 1;
+        mSlotComponent.get(e).gunType.type = SlotSystem.GunType.ROCKETGUN;
+        mSlotComponent.get(e).gunSpecial.type = SlotSystem.GunSpecialty.DAMAGE;
+        mSlotComponent.get(e).gunSpecial.multiplier = 1;
         return e;
     }
 

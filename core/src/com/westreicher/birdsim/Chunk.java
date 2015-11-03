@@ -1,6 +1,5 @@
 package com.westreicher.birdsim;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
@@ -24,6 +23,11 @@ public class Chunk {
 
     public boolean shouldDraw() {
         return shoulddraw;
+        //return state == State.MESH;
+    }
+
+    public boolean hasData() {
+        return state.ordinal() >= State.HEIGHT.ordinal();
     }
 
     private enum State {INIT, HEIGHT, SHADOW, MESH}
@@ -175,16 +179,25 @@ public class Chunk {
     }
 
     public float getVal(int x, int y) {
+        if (state == State.INIT) {
+            throw new RuntimeException("has no data yet");
+        }
         return Math.max(0, map[x][y]);
     }
 
     public void mulVal(int x, int y, float percent) {
         map[x][y] *= percent;
+        if (state == State.INIT) {
+            throw new RuntimeException("has no data yet");
+        }
         state = State.HEIGHT;
     }
 
     public void addVal(int x, int y, float val) {
         map[x][y] += val;
+        if (state == State.INIT) {
+            throw new RuntimeException("has no data yet");
+        }
         state = State.HEIGHT;
     }
 

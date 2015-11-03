@@ -94,6 +94,7 @@ public class ChunkManager extends Component {
         float yoffset = posy + tpc / 2.0f;
         int divx = (int) Math.floor(xoffset / tpc);
         int divy = (int) Math.floor(yoffset / tpc);
+        //TODO potentially dangerous -> nice modulo
         while (xoffset >= Config.TILES_PER_CHUNK)
             xoffset -= Config.TILES_PER_CHUNK;
         while (xoffset < 0)
@@ -108,9 +109,11 @@ public class ChunkManager extends Component {
         int yChunk = divy + (CHUNKNUMS / 2);
         if (xChunk < 0 || yChunk < 0 || xChunk >= CHUNKNUMS || yChunk >= CHUNKNUMS)
             return null;
+        TILE_RESULT.c = chunks[xChunk][yChunk];
+        if (!TILE_RESULT.c.hasData())
+            return null;
         TILE_RESULT.chunkx = xChunk;
         TILE_RESULT.chunky = yChunk;
-        TILE_RESULT.c = chunks[xChunk][yChunk];
         TILE_RESULT.innerx = innerx;
         TILE_RESULT.innery = innery;
         return TILE_RESULT;

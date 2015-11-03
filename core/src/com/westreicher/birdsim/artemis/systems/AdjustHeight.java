@@ -22,7 +22,6 @@ public class AdjustHeight extends IteratingSystem {
     private Vector3 cam;
     private ComponentMapper<RenderTransform> transformMapper;
     private ComponentMapper<ModelComponent> modelMapper;
-    private float delta;
 
     public AdjustHeight() {
         super(Aspect.all(RenderTransform.class, ModelComponent.class));
@@ -32,7 +31,6 @@ public class AdjustHeight extends IteratingSystem {
     protected void begin() {
         cm = world.getSystem(TagManager.class).getEntity(Artemis.CHUNKMANAGER_TAG).getComponent(ChunkManager.class);
         cam = world.getSystem(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG).getComponent(CameraComponent.class).cam.position;
-        delta = world.getDelta();
     }
 
     @Override

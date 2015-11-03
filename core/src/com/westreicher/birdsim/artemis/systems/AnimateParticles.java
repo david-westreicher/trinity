@@ -54,9 +54,13 @@ public class AnimateParticles extends IteratingSystem {
             ChunkManager.TileResult tr = cm.setTileResult(particles.pos[ix], particles.pos[iy]);
             if (tr == null)
                 continue;
-            float terrainHeight = Math.max(0, tr.c.getVal(tr.innerx, tr.innery)) * Config.TERRAIN_HEIGHT;
+            float terrainHeight = tr.c.getVal(tr.innerx, tr.innery) * Config.TERRAIN_HEIGHT;
 
             if (terrainHeight + 1 > particles.pos[iz]) {
+                if (terrainHeight <= 0) {
+                    particles.lives[i] = 0;
+                    continue;
+                }
                 particles.speed[ix] *= DAMPING;
                 particles.speed[iy] *= DAMPING;
                 particles.speed[iz] *= -DAMPING;
@@ -88,7 +92,7 @@ public class AnimateParticles extends IteratingSystem {
         particles.col[ix] = TMP_COLOR.r;
         particles.col[iy] = TMP_COLOR.g;
         particles.col[iz] = TMP_COLOR.b;
-        particles.lives[pointer] = 1000;
+        particles.lives[pointer] = (int) (200 * Math.random()) + 100;
         particles.freeParticlePointer = (pointer + 1) % ParticleComponent.PARTICLE_NUM;
     }
 

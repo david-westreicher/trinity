@@ -53,11 +53,11 @@ public class RenderParticles extends IteratingSystem {
         int particlenum = 0;
         verts.reset();
         for (int i = 0; i < ParticleComponent.PARTICLE_NUM; i++) {
+            if (parts.lives[i] <= 0)
+                continue;
             int ix = i * 3 + 0;
             int iy = i * 3 + 1;
             int iz = i * 3 + 2;
-            if (parts.lives[i] <= 0)
-                continue;
             float posx = parts.pos[ix] + parts.speed[ix] * delta;
             float posy = parts.pos[iy] + parts.speed[iy] * delta;
             float posz = parts.pos[iz] + parts.speed[iz] * delta;

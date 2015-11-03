@@ -2,7 +2,6 @@ package com.westreicher.birdsim.artemis.managers;
 
 import com.artemis.Manager;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.westreicher.birdsim.Chunk;
 import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.util.BatchShaderProgram;
 
@@ -69,6 +68,7 @@ public class ShaderManager extends Manager {
                 + "{\n" //
                 + "  vec3 pos = " + ShaderProgram.POSITION_ATTRIBUTE + "*chunksize + trans;\n" //
                 + "  pos.z *= heightscale;\n" //
+                + "  float dotproduct = 1.0;\n" //
                 + (Config.POST_PROCESSING ? ""//
                 + "    vec2 dst = pos.xy-virtualcam;\n" //
                 + "    float dist = " + Config.SPHERE_RADIUS_SQUARED + "-dst.x*dst.x-dst.y*dst.y;\n"//
@@ -76,9 +76,9 @@ public class ShaderManager extends Manager {
                 + "      float denom = sqrt(dist);\n"//
                 + "      pos.z+=denom;\n"//
                 + "      float denominv = 1.0/denom;\n"// take the dot product of normal (dst.x/denom,dst.y/denom,-(1/140)*denom) and lightvec(-1,1,-1)
-                + "      float dotproduct = (-dst.x+dst.y)*denominv+denom*" + (1.0 / Config.SPHERE_RADIUS) + ";\n"//
-                + "      col =  " + ShaderProgram.COLOR_ATTRIBUTE + "*dotproduct;\n" //
+                + "      dotproduct = (-dst.x+dst.y)*denominv+denom*" + (1.0 / Config.SPHERE_RADIUS) + ";\n"//
                 + "    }else pos.z = 0.0;\n" : "")//
+                + "  col =  " + ShaderProgram.COLOR_ATTRIBUTE + "*dotproduct;\n" //
                 + "  gl_Position =  u_projTrans * vec4(pos,1.0);\n" //
                 + (pointsprites ? "gl_PointSize = pointsize;\n" : "") //
                 + "}\n";

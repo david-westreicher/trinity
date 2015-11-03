@@ -18,6 +18,74 @@ import java.util.Random;
  */
 public class Chunk {
 
+    private State state;
+
+    private static final State[] states = State.values();
+
+    public boolean shouldDraw() {
+        return shoulddraw;
+    }
+
+    private enum State {INIT, HEIGHT, SHADOW, MESH}
+
+    public boolean stateAdvance(Chunk[] neighbs, ChunkManager cm) {
+        int thisstate = state.ordinal();
+        //already last state
+        if (thisstate == states.length - 1) return false;
+        if (state.ordinal() >= state.HEIGHT.ordinal())
+            for (int i = 0; i < neighbs.length; i++) {
+                Chunk otherc = neighbs[i];
+                int otherstatei = otherc.state.ordinal();
+                //can't advance because of neighbor
+                if (otherstatei < thisstate) return false;
+            }
+        //advance state
+        State nextstate = states[(thisstate + 1) % states.length];
+        switch (nextstate) {
+            case INIT:
+                //reset();
+                throw new RuntimeException("should never be in INIT after advance");
+            case HEIGHT:
+                calcNoise();
+                break;
+            case SHADOW:
+                calcShadow(cm);
+                break;
+            case MESH:
+                renderStyle.genMesh(cm, map, colors);
+                renderStyle.setMesh(m);
+                shoulddraw = true;
+                break;
+        }
+        //Gdx.app.log("chunk", absx + "," + absy + ": " + state + "->" + nextstate);
+        state = nextstate;
+        return true;
+    }
+
+    private void calcNoise() {
+        for (int x = 0; x < SIZE; x += 2)
+            for (int y = 0; y < SIZE; y += 2)
+                map[x][y] = getNoise((x + absx * SIZE), (-y + absy * SIZE));
+        {
+            int xlast = SIZE - 1;
+            for (int y = 0; y < SIZE; y++)
+                map[xlast][y] = getNoise((xlast + absx * SIZE), (-y + absy * SIZE));
+        }
+        {
+            int ylast = SIZE - 1;
+            for (int x = 0; x < SIZE; x++)
+                map[x][ylast] = getNoise((x + absx * SIZE), (-ylast + absy * SIZE));
+        }
+        for (int x = 0; x < SIZE; x += 2)
+            for (int y = 1; y < SIZE - 1; y += 2)
+                map[x][y] = (map[x][y - 1] + map[x][y + 1]) / 2f;
+        for (int x = 1; x < SIZE - 1; x += 2)
+            for (int y = 0; y < SIZE; y += 2)
+                map[x][y] = (map[x - 1][y] + map[x + 1][y]) / 2f;
+        for (int x = 1; x < SIZE - 1; x += 2)
+            for (int y = 1; y < SIZE; y += 2)
+                map[x][y] = (map[x - 1][y] + map[x + 1][y]) / 2f;
+    }
 
     /**
      * TODO
@@ -28,7 +96,7 @@ public class Chunk {
      * COLOR: the color was calculated and saved in the colors[][]
      * SHADOW: the shadow was calculated and saved in the shadows[][]
      * MESH: the vertex data (height+color+shadow) was synced to the GPU
-     * <p>
+     * <p/>
      * the state will be resetted: * to INIT if the chunk will be reused at the border
      * * to HEIGHT if the height data was changed (explosion, building, ...)
      * ? should the state be resetted for dependent neighbours too ?
@@ -55,13 +123,12 @@ public class Chunk {
     private float[][] map = new float[SIZE][SIZE];
     public Color[][] colors = new Color[SIZE][SIZE];
     public Mesh m;
-    public boolean isReady = false;
     private static final Vector3 tmp = new Vector3();
     public Random rand = new Random();
-    public boolean shouldDraw;
     public long absx;
     public long absy;
     private float randdark;
+    private boolean shoulddraw;
     public final ChunkRenderStyle renderStyle;
 
     public Chunk() {
@@ -104,7 +171,7 @@ public class Chunk {
         for (int x = 0; x < SIZE; x += 1)
             for (int y = 0; y < SIZE; y += 1)
                 map[x][y] = 0;
-        isReady = false;
+        state = State.INIT;
     }
 
     public float getVal(int x, int y) {
@@ -113,45 +180,23 @@ public class Chunk {
 
     public void mulVal(int x, int y, float percent) {
         map[x][y] *= percent;
-        isReady = false;
+        state = State.HEIGHT;
     }
 
     public void addVal(int x, int y, float val) {
         map[x][y] += val;
-        isReady = false;
+        state = State.HEIGHT;
     }
 
 
-    public void setPos(long absx, long absy) {
+    public void resetPos(long absx, long absy) {
         rand.setSeed(getSeed(absx, absy));
         randdark = (float) rand.nextDouble();
         randdark = (float) rand.nextDouble();
-        for (int x = 0; x < SIZE; x += 2)
-            for (int y = 0; y < SIZE; y += 2)
-                map[x][y] = getNoise((x + absx * SIZE), (-y + absy * SIZE));
-        {
-            int xlast = SIZE - 1;
-            for (int y = 0; y < SIZE; y++)
-                map[xlast][y] = getNoise((xlast + absx * SIZE), (-y + absy * SIZE));
-        }
-        {
-            int ylast = SIZE - 1;
-            for (int x = 0; x < SIZE; x++)
-                map[x][ylast] = getNoise((x + absx * SIZE), (-ylast + absy * SIZE));
-        }
-        for (int x = 0; x < SIZE; x += 2)
-            for (int y = 1; y < SIZE - 1; y += 2)
-                map[x][y] = (map[x][y - 1] + map[x][y + 1]) / 2f;
-        for (int x = 1; x < SIZE - 1; x += 2)
-            for (int y = 0; y < SIZE; y += 2)
-                map[x][y] = (map[x - 1][y] + map[x + 1][y]) / 2f;
-        for (int x = 1; x < SIZE - 1; x += 2)
-            for (int y = 1; y < SIZE; y += 2)
-                map[x][y] = (map[x - 1][y] + map[x + 1][y]) / 2f;
-        isReady = false;
-        shouldDraw = false;
         this.absx = absx;
         this.absy = absy;
+        state = State.INIT;
+        shoulddraw = false;
     }
 
     private long getSeed(long x, long y) {
@@ -181,11 +226,12 @@ public class Chunk {
                     for (int y1 = y - 3; y1 <= y; y1++) {
                         float other = 0;
                         if (x1 < 0 || y1 < 0) {
-                            /*float neighborval = chunkman.getValAbs(x1, SIZE - y1 - 1, absx, absy);
+                            float neighborval = chunkman.getValAbs(x1, SIZE - y1 - 1, absx, absy);
                             if (neighborval == ChunkManager.OUTSIDE)
-                                other = getNoise((x1 + absx * SIZE), (-y1 + absy * SIZE));
+                                throw new RuntimeException("OUTSIDE");
+                                //other = getNoise((x1 + absx * SIZE), (-y1 + absy * SIZE));
                             else
-                                other = neighborval;*/
+                                other = neighborval;
                         } else
                             other = map[x1][y1];
                         float diff = other - scale;
@@ -200,18 +246,6 @@ public class Chunk {
             }
         }
     }
-
-    public boolean genMesh(ChunkManager chunkman) {
-        calcShadow(chunkman);
-        renderStyle.genMesh(chunkman, map, colors);
-        shouldDraw = renderStyle.getVerts().size() > 0;
-        if (shouldDraw) {
-            renderStyle.setMesh(m);
-        }
-        isReady = true;
-        return shouldDraw;
-    }
-
 
     private float[] getCol(float scale) {
         /*if (scale < -1.4)
@@ -236,7 +270,6 @@ public class Chunk {
     }
 
     public enum Renderstyle {SPRITE, TERRAIN, MINECRAFT}
-
 
     public interface ChunkRenderStyle {
         void genMesh(ChunkManager chunkman, float[][] map, Color[][] cols);
@@ -313,16 +346,10 @@ public class Chunk {
                         col = cols[x][y];
                         val = map[x][y];
                     } else {
-                        /*ChunkManager.TileResult tr = chunkman.getValAbs2(x, SIZE - y - 1, absx, absy);
-                        if (tr == null) {
-                            val = getNoise((x + absx * SIZE), (-y + absy * SIZE));
-                            col = Color.WHITE;
-                        } else {
-                            val = tr.c.getVal(tr.innerx, tr.innery);
-                            col = tr.c.colors[tr.innerx][tr.innery];
-                        }*/
-                        col = Color.GOLD;
-                        val = 0;
+                        ChunkManager.TileResult tr = chunkman.getValAbs2(x, SIZE - y - 1, absx, absy);
+                        if (tr == null) throw new RuntimeException("OUTSIDE");
+                        val = tr.c.getVal(tr.innerx, tr.innery);
+                        col = tr.c.colors[tr.innerx][tr.innery];
                     }
                     float z = Math.min(1, Math.max(0, val * (1.0f / 2.5f)));
                     verts.add(Color.toFloatBits((float) x / SIZE, (float) (SIZE - y) / SIZE, z, 1f));

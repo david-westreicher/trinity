@@ -65,7 +65,7 @@ public class TranslateMapAndSpawn extends IteratingSystem {
                 Chunk c = cm.chunks[endx][y];
                 long realX = (endx - (CHUNKNUMS / 2)) + cm.pos[0];
                 long realY = (y - (CHUNKNUMS / 2)) + cm.pos[1];
-                c.setPos(realX, realY);
+                c.resetPos(realX, realY);
                 maybespawn(endx, y, c);
             }
         }
@@ -81,7 +81,7 @@ public class TranslateMapAndSpawn extends IteratingSystem {
                 Chunk c = cm.chunks[x][endy];
                 long realX = (x - (CHUNKNUMS / 2)) + cm.pos[0];
                 long realY = (endy - (CHUNKNUMS / 2)) + cm.pos[1];
-                c.setPos(realX, realY);
+                c.resetPos(realX, realY);
                 maybespawn(x, endy, c);
             }
         }

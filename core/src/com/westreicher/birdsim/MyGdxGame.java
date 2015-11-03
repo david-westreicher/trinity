@@ -2,11 +2,12 @@ package com.westreicher.birdsim;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.westreicher.birdsim.artemis.Artemis;
 
 public class MyGdxGame extends ApplicationAdapter {
-    private Artemis artemis;
 
+    private Artemis artemis;
 
     @Override
     public void resize(int width, int height) {

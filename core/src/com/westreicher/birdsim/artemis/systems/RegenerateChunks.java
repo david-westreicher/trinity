@@ -18,6 +18,19 @@ public class RegenerateChunks extends IteratingSystem {
     ComponentMapper<ChunkManager> chunkMapper;
     private Spiral spiral;
 
+    private static final int[][] possNeigh = new int[][]{//
+            new int[]{0, -1},//
+            new int[]{1, -1},//
+            new int[]{1, 0},//
+            new int[]{1, 1},//
+            new int[]{0, 1},//
+            new int[]{-1, 1},//
+            new int[]{-1, 0},//
+            new int[]{-1, 1},//
+    };
+    private static final Chunk[] neighbs = new Chunk[possNeigh.length];
+
+
     public RegenerateChunks() {
         super(Aspect.all(ChunkManager.class));
     }
@@ -39,14 +52,33 @@ public class RegenerateChunks extends IteratingSystem {
             if (x < 0 || y < 0 || x >= Config.CHUNKNUMS || y >= Config.CHUNKNUMS)
                 break;
             Chunk c = cm.chunks[x][y];
+            //fill neigh
+            int neighbors = 0;
+            for (int i = 0; i < possNeigh.length; i++) {
+                int nx = x + possNeigh[i][0];
+                int ny = y + possNeigh[i][1];
+                //border chunk
+                if (nx < 0 || ny < 0 || nx >= Config.CHUNKNUMS || ny >= Config.CHUNKNUMS) break;
+                neighbs[neighbors++] = cm.chunks[nx][ny];
+            }
+            if (neighbors < possNeigh.length) continue;
+
+            if (c.stateAdvance(neighbs, cm))
+                if (--maxupdates <= 0) break;
+            /*
             if (!c.isReady) {
                 if (cm.chunks[x][y].genMesh(cm))
                     maxupdates -= 1;
                 if (maxupdates <= 0)
                     break;
             }
+            */
         }
     }
 
-
+    @Override
+    protected void dispose() {
+        for (int i = 0; i < neighbs.length; i++)
+            neighbs[i] = null;
+    }
 }

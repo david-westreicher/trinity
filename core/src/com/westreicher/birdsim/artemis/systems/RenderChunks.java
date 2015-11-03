@@ -80,10 +80,10 @@ public class RenderChunks extends IteratingSystem {
             Vector2 spos = spiral.next();
             int x = ((int) spos.x) + Config.CHUNKNUMS / 2;
             int y = ((int) spos.y) + Config.CHUNKNUMS / 2;
-            if (x < 1 || y < 1 || x >= Config.CHUNKNUMS - 1 || y >= Config.CHUNKNUMS - 1)
+            if (x < 0 || y < 0 || x >= Config.CHUNKNUMS || y >= Config.CHUNKNUMS)
                 break;
             Chunk mi = cm.chunks[x][y];
-            if (mi.shouldDraw) {
+            if (mi.shouldDraw()) {
                 tmpfloat[0] = (x - (Config.CHUNKNUMS / 2)) * Config.TILES_PER_CHUNK - Config.TILES_PER_CHUNK / 2;
                 tmpfloat[1] = (y - (Config.CHUNKNUMS / 2)) * Config.TILES_PER_CHUNK - Config.TILES_PER_CHUNK / 2;
                 shader.setUniform3fv("trans", tmpfloat, 0, 3);

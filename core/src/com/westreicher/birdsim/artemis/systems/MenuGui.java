@@ -11,9 +11,9 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.westreicher.birdsim.UI.MenuAction;
+import com.westreicher.birdsim.UI.MenuBuilder;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.Game;
-import com.westreicher.birdsim.UI.MenuBuilder;
 
 /**
  * Created by juanolon on 03/10/15.
@@ -41,25 +41,26 @@ public class MenuGui extends EntityProcessingSystem {
         // TODO check controller support
         InputProcessor input = Gdx.input.getInputProcessor();
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
-        inputMultiplexer.addProcessor(input);
+        if (input != null)
+            inputMultiplexer.addProcessor(input);
         inputMultiplexer.addProcessor(stage);
         Gdx.input.setInputProcessor(inputMultiplexer);
 
         MenuBuilder menu = new MenuBuilder(stage);
         menu
-        .addButton("Debug", new MenuAction() {
-            @Override
-            public void act() {
-                Artemis.settings.setDebug(!Artemis.settings.isDebug()).flush();
-                world.getSystem(RenderProfiler.class).setEnabled(Artemis.settings.isDebug());
-            }
-        }, Artemis.settings.isDebug())
-        .addButton("Exit", new MenuAction() {
-            @Override
-            public void act() {
-                closeMenu();
-            }
-        }, false)
+                .addButton("Debug", new MenuAction() {
+                    @Override
+                    public void act() {
+                        Artemis.settings.setDebug(!Artemis.settings.isDebug()).flush();
+                        world.getSystem(RenderProfiler.class).setEnabled(Artemis.settings.isDebug());
+                    }
+                }, Artemis.settings.isDebug())
+                .addButton("Exit", new MenuAction() {
+                    @Override
+                    public void act() {
+                        closeMenu();
+                    }
+                }, false)
         ;
     }
 
@@ -67,19 +68,19 @@ public class MenuGui extends EntityProcessingSystem {
     protected void process(Entity e) {
         Game game = mGame.get(e);
 
-        if (game.isPaused){
+        if (game.isPaused) {
             stage.act(Gdx.graphics.getDeltaTime());
             stage.draw();
         }
     }
 
     @Override
-    public void dispose () {
+    public void dispose() {
         stage.dispose();
         super.dispose();
     }
 
-    private void closeMenu(){
+    private void closeMenu() {
         // get entity game, set status to pause
         game.isPaused = false;
         Gdx.app.exit();

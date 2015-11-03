@@ -20,7 +20,7 @@ public class ChunkManager extends Component {
                 long realX = (x - (CHUNKNUMS / 2)) + pos[0];
                 long realY = (y - (CHUNKNUMS / 2)) + pos[1];
                 chunks[x][y] = new Chunk();
-                chunks[x][y].setPos(realX, realY);
+                chunks[x][y].resetPos(realX, realY);
             }
         }
     }

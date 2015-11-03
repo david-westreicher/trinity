@@ -12,7 +12,7 @@ public class Config {
     public static final boolean POST_PROCESSING = true;
     public static final boolean DEBUG = true;
     public static final int TILES_PER_CHUNK = 40;
-    public static final int CHUNKNUMS = 4 * 2 + 1;
+    public static final int CHUNKNUMS = 5 * 2 + 1;
     public static final float MOVE_SPEED = 1f;
     public static final float TERRAIN_HEIGHT = 8;
     public static final boolean SPAWN_STUFF = true;

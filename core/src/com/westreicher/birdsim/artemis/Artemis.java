@@ -11,6 +11,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.Config;
+import com.westreicher.birdsim.UI.Settings;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
 import com.westreicher.birdsim.artemis.components.Game;
 import com.westreicher.birdsim.artemis.factories.UberFactory;
@@ -40,7 +41,6 @@ import com.westreicher.birdsim.artemis.systems.RenderProfiler;
 import com.westreicher.birdsim.artemis.systems.StartRendering;
 import com.westreicher.birdsim.artemis.systems.TranslateMapAndSpawn;
 import com.westreicher.birdsim.artemis.systems.UpdateSlotSystem;
-import com.westreicher.birdsim.UI.Settings;
 
 import java.util.ArrayList;
 
@@ -135,7 +135,7 @@ public class Artemis extends World {
     private static void addGameComponent(Artemis a) {
         new EntityBuilder(a)
                 .with(new Game())
-                 .tag(GAME_TAG)
+                .tag(GAME_TAG)
                 .build();
     }
 

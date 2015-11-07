@@ -133,6 +133,7 @@ public class RenderChunks extends IteratingSystem {
     }
 
     private void drawShadows() {
+        shader = world.getSystem(ShaderManager.class).getShader(ShaderManager.Shaders.CHUNK_SPRITES);
         Gdx.gl20.glDepthFunc(GL20.GL_LEQUAL);
         shadowMesh.setVertices(verts.arr, 0, verts.size());
         tmpfloat[0] = 0;

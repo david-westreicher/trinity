@@ -24,9 +24,20 @@ public class Animation extends IteratingSystem {
     protected void process(int entityId) {
         ModelComponent model = mModelComponent.get(entityId);
         AnimationComponent animation = mAnimationComponent.get(entityId);
-        model.scale *= 0.92;
-        model.col = ColorAttr.WHITE;
-        if (model.scale < 0.1)
-            world.delete(entityId);
+        switch (animation.type) {
+            case DEATH:
+                model.scale *= 0.92;
+                model.col = ColorAttr.WHITE;
+                if (model.scale < 0.1)
+                    world.delete(entityId);
+                break;
+            case WHITE:
+                model.col = ColorAttr.WHITE;
+                if (animation.duration-- <= 0) {
+                    mAnimationComponent.remove(entityId);
+                    model.col = animation.savedcol;
+                }
+                break;
+        }
     }
 }

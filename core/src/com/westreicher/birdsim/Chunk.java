@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.westreicher.birdsim.util.MaxArray;
 import com.westreicher.birdsim.util.SimplexNoise;
 
+import java.util.HashMap;
 import java.util.Random;
 
 /**
@@ -18,6 +19,7 @@ import java.util.Random;
  */
 public class Chunk {
 
+    private static final Vector3 LIGHT_VEC = new Vector3(-1, 1, -1).nor();
     private State state;
 
     private static final State[] states = State.values();
@@ -109,7 +111,7 @@ public class Chunk {
     private enum Tiles {
         SAND(0.929f, 0.788f, 0.686f),
         GRASS(0.271f, 0.545f, 0f),
-        MOUNTAIN(0.612f, 0.667f, 0.776f),
+        MOUNTAIN(0.5f, 0.5f, 0.6f),
         SNOW(0.9f, 0.9f, 0.9f),
         WATER(0.251f, 0.643f, 0.875f),
         DARKWATER(0.1f, 0.3f, 0.4f),
@@ -129,6 +131,7 @@ public class Chunk {
     public Color[][] colors = new Color[SIZE][SIZE];
     public Mesh m;
     private static final Vector3 tmp = new Vector3();
+    private static final Vector3 tmp2 = new Vector3();
     public Random rand = new Random();
     public long absx;
     public long absy;
@@ -227,27 +230,33 @@ public class Chunk {
         return p;
     }
 
-    private void calcShadow(ChunkManager chunkman) {
+    private float getOutsideVal(ChunkManager cm, int x, int y) {
+        if (x < 0 || y < 0 || x >= SIZE || y >= SIZE) {
+            float neighborval = cm.getValAbs(x, SIZE - y - 1, absx, absy);
+            if (neighborval == ChunkManager.OUTSIDE)
+                throw new RuntimeException("OUTSIDE");
+            return neighborval;
+        }
+        return map[x][y];
+    }
+
+    private void calcShadow(ChunkManager cm) {
         for (int x = 0; x < SIZE; x++) {
             for (int y = 0; y < SIZE; y++) {
                 float scale = map[x][y];
-                //if (!MyGdxGame.isDesktop && scale > -1 && scale < 0)
-                //    continue;
                 tmp.set(getCol(scale));
-                //if (scale > 0) {
-                float dark = 0;//randdark;
+                if (scale > 0) {
+                    float gradx = (getOutsideVal(cm, x - 1, y) - getOutsideVal(cm, x + 1, y)) / 2.0f;
+                    float grady = (getOutsideVal(cm, x, y - 1) - getOutsideVal(cm, x, y + 1)) / 2.0f;
+                    tmp2.set(gradx, -grady, -1.0f / Config.TERRAIN_HEIGHT);
+                    tmp2.nor();
+                    float dot = Math.max(0.2f, tmp2.dot(LIGHT_VEC));
+                    tmp.scl(dot);
+                }
+                float dark = 0;
                 for (int x1 = x - 3; x1 <= x; x1++) {
                     for (int y1 = y - 3; y1 <= y; y1++) {
-                        float other = 0;
-                        if (x1 < 0 || y1 < 0) {
-                            float neighborval = chunkman.getValAbs(x1, SIZE - y1 - 1, absx, absy);
-                            if (neighborval == ChunkManager.OUTSIDE)
-                                throw new RuntimeException("OUTSIDE");
-                                //other = getNoise((x1 + absx * SIZE), (-y1 + absy * SIZE));
-                            else
-                                other = neighborval;
-                        } else
-                            other = map[x1][y1];
+                        float other = getOutsideVal(cm, x1, y1);
                         float diff = other - scale;
                         if (other > 0 && diff > 0)
                             dark += diff * 0.2f;

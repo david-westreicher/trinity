@@ -9,10 +9,12 @@ import com.artemis.annotations.Wire;
 import com.artemis.utils.IntBag;
 import com.badlogic.gdx.Gdx;
 import com.westreicher.birdsim.SlotSystem;
+import com.westreicher.birdsim.artemis.components.AnimationComponent;
 import com.westreicher.birdsim.artemis.components.Collidable;
 import com.westreicher.birdsim.artemis.components.EntityType;
 import com.westreicher.birdsim.artemis.components.Health;
 import com.westreicher.birdsim.artemis.components.MapCoordinate;
+import com.westreicher.birdsim.artemis.components.ModelComponent;
 import com.westreicher.birdsim.artemis.components.SlotComponent;
 
 /**
@@ -26,6 +28,8 @@ public class EntityCollisions extends BaseEntitySystem {
     protected ComponentMapper<EntityType> mEntityType;
     protected ComponentMapper<Health> mHealth;
     protected ComponentMapper<SlotComponent> mSlotComponent;
+    protected ComponentMapper<AnimationComponent> mAnimationComponent;
+    protected ComponentMapper<ModelComponent> mModelComponent;
 
     public EntityCollisions() {
         super(Aspect.all(MapCoordinate.class, Collidable.class, EntityType.class));
@@ -165,7 +169,11 @@ public class EntityCollisions extends BaseEntitySystem {
         int damage = slot.gunType.type.damage * slot.gunSpecial.getMultiplier(SlotSystem.GunSpecialty.DAMAGE);
         mHealth.get(enemy).health -= damage;
         mHealth.get(bullet).health = 0;
-        Gdx.app.log("damage", ""+damage);
+        Gdx.app.log("damage", "" + damage);
         Gdx.input.vibrate(10 * damage);
+        AnimationComponent anim = mAnimationComponent.create(enemy);
+        anim.duration = 10;
+        anim.type = AnimationComponent.Types.WHITE;
+        anim.savedcol = mModelComponent.get(enemy).col;
     }
 }

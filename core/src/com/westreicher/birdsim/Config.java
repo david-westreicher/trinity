@@ -12,7 +12,7 @@ public class Config {
     public static final boolean POST_PROCESSING = true;
     public static final boolean DEBUG = true;
     public static final int TILES_PER_CHUNK = 40;
-    public static final int CHUNKNUMS = 5 * 2 + 1;
+    public static final int CHUNKNUMS = 6 * 2 + 1;
     public static final float MOVE_SPEED = 1f;
     public static final float TERRAIN_HEIGHT = 8;
     public static final boolean SPAWN_STUFF = true;
@@ -25,6 +25,7 @@ public class Config {
     //TODO make gui with slider (1-10)
     public static final int CHUNK_UPDATES_PER_TICK = 1;
     public static final boolean ALLOW_NEGATIVE_CHUNK_DATA = false;
+    public static final int CHUNK_DRAW_DISTANCE = 3;
     public static boolean IS_DESKTOP = true;
     public static Chunk.Renderstyle CHUNK_RENDER_STYLE = Chunk.Renderstyle.TERRAIN;
 }

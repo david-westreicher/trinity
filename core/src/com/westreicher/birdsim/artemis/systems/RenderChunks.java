@@ -80,7 +80,7 @@ public class RenderChunks extends IteratingSystem {
             Vector2 spos = spiral.next();
             int x = ((int) spos.x) + Config.CHUNKNUMS / 2;
             int y = ((int) spos.y) + Config.CHUNKNUMS / 2;
-            if (Math.max(Math.abs(spos.x), Math.abs(spos.y)) > 2)
+            if (Math.max(Math.abs(spos.x), Math.abs(spos.y)) > Config.CHUNK_DRAW_DISTANCE)
                 break;
             Chunk mi = cm.chunks[x][y];
             if (mi.shouldDraw()) {

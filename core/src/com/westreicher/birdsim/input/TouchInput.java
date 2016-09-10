@@ -20,6 +20,7 @@ public class TouchInput extends AbstractInput {
     private float startShootX;
     private float startShootY;
 
+
     public TouchInput() {
         Gdx.input.setCatchBackKey(true);
         Gdx.input.setInputProcessor(new InputAdapter() {
@@ -35,6 +36,7 @@ public class TouchInput extends AbstractInput {
 
     @Override
     public void update() {
+        // joysticks
         movx = 0;
         movy = 0;
         shootx = 0;
@@ -55,6 +57,9 @@ public class TouchInput extends AbstractInput {
         }
         isshooting = shootx != 0 || shooty != 0;
         ismoving = movx != 0 || movy != 0;
+
+        // slot buttons
+        
     }
 
     private float distance(float x1, float y1, float x2, float y2) {

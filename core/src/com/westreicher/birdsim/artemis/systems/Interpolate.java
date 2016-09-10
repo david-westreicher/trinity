@@ -10,22 +10,22 @@ import com.badlogic.gdx.graphics.Camera;
 import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
-import com.westreicher.birdsim.artemis.components.MapCoordinate;
-import com.westreicher.birdsim.artemis.components.RenderTransform;
-import com.westreicher.birdsim.artemis.components.Speed2;
+import com.westreicher.birdsim.artemis.components.MapCoordinateComponent;
+import com.westreicher.birdsim.artemis.components.RenderTransformComponent;
+import com.westreicher.birdsim.artemis.components.Speed2Component;
 
 /**
  * Created by david on 9/28/15.
  */
 @Wire
 public class Interpolate extends IteratingSystem {
-    private ComponentMapper<MapCoordinate> coordMapper;
-    private ComponentMapper<Speed2> speedMapper;
-    private ComponentMapper<RenderTransform> transformMapper;
+    private ComponentMapper<MapCoordinateComponent> coordMapper;
+    private ComponentMapper<Speed2Component> speedMapper;
+    private ComponentMapper<RenderTransformComponent> transformMapper;
     private float delta;
 
     public Interpolate() {
-        super(Aspect.all(MapCoordinate.class, RenderTransform.class));
+        super(Aspect.all(MapCoordinateComponent.class, RenderTransformComponent.class));
     }
 
     @Override
@@ -35,10 +35,10 @@ public class Interpolate extends IteratingSystem {
 
     @Override
     protected void process(int e) {
-        MapCoordinate pos = coordMapper.get(e);
-        RenderTransform transform = transformMapper.get(e);
+        MapCoordinateComponent pos = coordMapper.get(e);
+        RenderTransformComponent transform = transformMapper.get(e);
         if (speedMapper.has(e)) {
-            Speed2 speed = speedMapper.get(e);
+            Speed2Component speed = speedMapper.get(e);
             transform.x = pos.x + speed.x * delta;
             transform.y = pos.y + speed.y * delta;
             if (speed.x != 0 || speed.y != 0) {
@@ -59,7 +59,7 @@ public class Interpolate extends IteratingSystem {
 
     private void interpolateCam() {
         Entity camentity = world.getSystem(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG);
-        RenderTransform pos = camentity.getComponent(RenderTransform.class);
+        RenderTransformComponent pos = camentity.getComponent(RenderTransformComponent.class);
         Camera cam = camentity.getComponent(CameraComponent.class).cam;
         if (Config.FIRST_PERSON) {
             cam.position.set(pos.x, pos.y - 20, cam.position.z);

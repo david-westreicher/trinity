@@ -3,15 +3,13 @@ package com.westreicher.birdsim.artemis.components;
 import com.artemis.PooledComponent;
 
 /**
- * Created by david on 9/28/15.
+ * Created by david on 9/29/15.
  */
-public class Speed2 extends PooledComponent {
-    public float x;
-    public float y;
+public class HealthComponent extends PooledComponent {
+    public int health = 10;
 
     @Override
     protected void reset() {
-        x = 0;
-        y = 0;
+        health = 10;
     }
 }

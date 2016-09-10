@@ -18,7 +18,7 @@ import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
 import com.westreicher.birdsim.artemis.components.ModelComponent;
-import com.westreicher.birdsim.artemis.components.RenderTransform;
+import com.westreicher.birdsim.artemis.components.RenderTransformComponent;
 
 /**
  * Created by david on 9/28/15.
@@ -26,7 +26,7 @@ import com.westreicher.birdsim.artemis.components.RenderTransform;
 @Wire
 public class RenderModels extends IteratingSystem {
     private static final Quaternion TMP_QUAT = new Quaternion();
-    private ComponentMapper<RenderTransform> interpMapper;
+    private ComponentMapper<RenderTransformComponent> interpMapper;
     private ComponentMapper<ModelComponent> modelMapper;
     protected ModelBatch mb;
     //TODO hacky, maybe use nicer pool
@@ -36,7 +36,7 @@ public class RenderModels extends IteratingSystem {
     private Camera cam;
 
     public RenderModels() {
-        super(Aspect.all(RenderTransform.class, ModelComponent.class));
+        super(Aspect.all(RenderTransformComponent.class, ModelComponent.class));
     }
 
     @Override
@@ -65,7 +65,7 @@ public class RenderModels extends IteratingSystem {
         Material mat = materialpool[entindex++];
         mat.set(model.col.attr);
         model.type.part.material = mat;
-        RenderTransform transform = interpMapper.get(e);
+        RenderTransformComponent transform = interpMapper.get(e);
         mi.transform.setToTranslation(transform.x, transform.y, transform.z);
         mi.transform.scl(model.scale);
 

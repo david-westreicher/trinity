@@ -13,7 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.westreicher.birdsim.UI.MenuAction;
 import com.westreicher.birdsim.UI.MenuBuilder;
 import com.westreicher.birdsim.artemis.Artemis;
-import com.westreicher.birdsim.artemis.components.Game;
+import com.westreicher.birdsim.artemis.components.GameComponent;
 
 /**
  * Created by juanolon on 03/10/15.
@@ -22,16 +22,16 @@ import com.westreicher.birdsim.artemis.components.Game;
 public class MenuUI extends EntityProcessingSystem {
     Stage stage;
 
-    protected Game game;
-    protected ComponentMapper<Game> mGame;
+    protected GameComponent gameComponent;
+    protected ComponentMapper<GameComponent> mGame;
 
     public MenuUI() {
-        super(Aspect.all(Game.class));
+        super(Aspect.all(GameComponent.class));
     }
 
     @Override
     protected void begin() {
-        game = world.getManager(TagManager.class).getEntity(Artemis.GAME_TAG).getComponent(Game.class);
+        gameComponent = world.getManager(TagManager.class).getEntity(Artemis.GAME_TAG).getComponent(GameComponent.class);
     }
 
     @Override
@@ -66,9 +66,9 @@ public class MenuUI extends EntityProcessingSystem {
 
     @Override
     protected void process(Entity e) {
-        Game game = mGame.get(e);
+        GameComponent gameComponent = mGame.get(e);
 
-        if (game.isPaused) {
+        if (gameComponent.isPaused) {
             stage.act(Gdx.graphics.getDeltaTime());
             stage.draw();
         }
@@ -81,8 +81,8 @@ public class MenuUI extends EntityProcessingSystem {
     }
 
     private void closeMenu() {
-        // get entity game, set status to pause
-        game.isPaused = false;
+        // get entity gameComponent, set status to pause
+        gameComponent.isPaused = false;
         Gdx.app.exit();
     }
 }

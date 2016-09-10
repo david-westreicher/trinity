@@ -11,7 +11,7 @@ import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
 import com.westreicher.birdsim.artemis.components.ModelComponent;
-import com.westreicher.birdsim.artemis.components.RenderTransform;
+import com.westreicher.birdsim.artemis.components.RenderTransformComponent;
 
 /**
  * Created by david on 9/28/15.
@@ -20,11 +20,11 @@ import com.westreicher.birdsim.artemis.components.RenderTransform;
 public class AdjustHeight extends IteratingSystem {
     private ChunkManager cm;
     private Vector3 cam;
-    private ComponentMapper<RenderTransform> transformMapper;
+    private ComponentMapper<RenderTransformComponent> transformMapper;
     private ComponentMapper<ModelComponent> modelMapper;
 
     public AdjustHeight() {
-        super(Aspect.all(RenderTransform.class, ModelComponent.class));
+        super(Aspect.all(RenderTransformComponent.class, ModelComponent.class));
     }
 
     @Override
@@ -35,7 +35,7 @@ public class AdjustHeight extends IteratingSystem {
 
     @Override
     protected void process(int e) {
-        RenderTransform transform = transformMapper.get(e);
+        RenderTransformComponent transform = transformMapper.get(e);
         ModelComponent model = modelMapper.get(e);
         float val = cm.getVal(transform.x, transform.y);
         if (val == ChunkManager.OUTSIDE) {

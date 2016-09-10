@@ -7,9 +7,9 @@ import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.westreicher.birdsim.artemis.components.Position2;
-import com.westreicher.birdsim.artemis.components.Speed2;
-import com.westreicher.birdsim.artemis.components.StaticText;
+import com.westreicher.birdsim.artemis.components.Position2Component;
+import com.westreicher.birdsim.artemis.components.Speed2Component;
+import com.westreicher.birdsim.artemis.components.StaticTextComponent;
 import com.westreicher.birdsim.artemis.factories.TextEntity;
 
 /**
@@ -22,13 +22,13 @@ public class TextRendering extends IteratingSystem {
     private SpriteBatch spritebatch;
     private BitmapFont font;
 
-    ComponentMapper<Position2> positionMapper;
-    ComponentMapper<Speed2> speedMapper;
-    ComponentMapper<StaticText> textMapper;
+    ComponentMapper<Position2Component> positionMapper;
+    ComponentMapper<Speed2Component> speedMapper;
+    ComponentMapper<StaticTextComponent> textMapper;
     private float delta;
 
     public TextRendering() {
-        super(Aspect.all(Position2.class, Speed2.class, StaticText.class));
+        super(Aspect.all(Position2Component.class, Speed2Component.class, StaticTextComponent.class));
     }
 
     @Override
@@ -41,7 +41,7 @@ public class TextRendering extends IteratingSystem {
             float y = (float) Math.random() * 700;
             float xspeed = ((float) Math.random() - 0.5f);
             float yspeed = ((float) Math.random() - 0.5f);
-            te.position2(x, y).speed2(xspeed, yspeed).staticText("Lives").create();
+            te.position2Component(x, y).speed2Component(xspeed, yspeed).staticTextComponent("Lives").create();
         }
     }
 
@@ -53,8 +53,8 @@ public class TextRendering extends IteratingSystem {
 
     @Override
     protected void process(int e) {
-        Position2 pos = positionMapper.get(e);
-        Speed2 speed = speedMapper.get(e);
+        Position2Component pos = positionMapper.get(e);
+        Speed2Component speed = speedMapper.get(e);
         float drawx = pos.x + speed.x * delta;
         float drawy = pos.y + speed.y * delta;
         font.draw(spritebatch, textMapper.get(e).text, drawx, drawy);

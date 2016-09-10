@@ -4,14 +4,13 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.IteratingSystem;
-import com.badlogic.gdx.Gdx;
 import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.SlotSystem;
 import com.westreicher.birdsim.artemis.FixedTimestepStrategy;
 import com.westreicher.birdsim.artemis.components.InputComponent;
-import com.westreicher.birdsim.artemis.components.MapCoordinate;
+import com.westreicher.birdsim.artemis.components.MapCoordinateComponent;
 import com.westreicher.birdsim.artemis.components.SlotComponent;
-import com.westreicher.birdsim.artemis.components.Speed2;
+import com.westreicher.birdsim.artemis.components.Speed2Component;
 import com.westreicher.birdsim.artemis.factories.UberFactory;
 import com.westreicher.birdsim.artemis.managers.InputManager;
 import com.westreicher.birdsim.input.AbstractInput;
@@ -23,8 +22,8 @@ import java.util.ArrayList;
  */
 @Wire
 public class HandleGameInput extends IteratingSystem {
-    private ComponentMapper<Speed2> speedMapper;
-    private ComponentMapper<MapCoordinate> posMapper;
+    private ComponentMapper<Speed2Component> speedMapper;
+    private ComponentMapper<MapCoordinateComponent> posMapper;
     private ComponentMapper<InputComponent> inputMapper;
     protected ComponentMapper<SlotComponent> mSlotComponent;
     private long tick;
@@ -32,7 +31,7 @@ public class HandleGameInput extends IteratingSystem {
     private UberFactory factory;
 
     public HandleGameInput() {
-        super(Aspect.all(InputComponent.class, MapCoordinate.class, Speed2.class));
+        super(Aspect.all(InputComponent.class, MapCoordinateComponent.class, Speed2Component.class));
     }
 
     @Override
@@ -43,8 +42,8 @@ public class HandleGameInput extends IteratingSystem {
 
     @Override
     protected void process(int e) {
-        MapCoordinate pos = posMapper.get(e);
-        Speed2 speed = speedMapper.get(e);
+        MapCoordinateComponent pos = posMapper.get(e);
+        Speed2Component speed = speedMapper.get(e);
         InputComponent input = inputMapper.get(e);
         SlotComponent slot = mSlotComponent.get(e);
         AbstractInput playerinput = players.get(input.id);

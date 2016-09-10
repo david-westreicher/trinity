@@ -1,14 +1,8 @@
 package com.westreicher.birdsim.artemis.systems;
 
 import com.artemis.BaseSystem;
-import com.artemis.Entity;
-import com.artemis.managers.TagManager;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
-import com.westreicher.birdsim.artemis.Artemis;
-import com.westreicher.birdsim.artemis.components.CameraComponent;
-import com.westreicher.birdsim.artemis.components.RenderTransform;
 
 /**
  * Created by david on 9/28/15.

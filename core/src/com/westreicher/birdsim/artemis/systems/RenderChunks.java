@@ -20,7 +20,7 @@ import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
 import com.westreicher.birdsim.artemis.components.ModelComponent;
-import com.westreicher.birdsim.artemis.components.RenderTransform;
+import com.westreicher.birdsim.artemis.components.RenderTransformComponent;
 import com.westreicher.birdsim.artemis.managers.ShaderManager;
 import com.westreicher.birdsim.util.BatchShaderProgram;
 import com.westreicher.birdsim.util.MaxArray;
@@ -33,7 +33,7 @@ import com.westreicher.birdsim.util.Spiral;
 public class RenderChunks extends IteratingSystem {
     private static final float[] tmpfloat = new float[3];
     private static final Color TMP_COL = new Color();
-    ComponentMapper<RenderTransform> transformMapper;
+    ComponentMapper<RenderTransformComponent> transformMapper;
     ComponentMapper<ModelComponent> modelMapper;
     private Mesh shadowMesh;
     private MaxArray.MaxArrayFloat verts;
@@ -43,7 +43,7 @@ public class RenderChunks extends IteratingSystem {
 
 
     public RenderChunks() {
-        super(Aspect.all(RenderTransform.class, ModelComponent.class));
+        super(Aspect.all(RenderTransformComponent.class, ModelComponent.class));
     }
 
     @Override
@@ -96,7 +96,7 @@ public class RenderChunks extends IteratingSystem {
     @Override
     protected void process(int e) {
         if (!Config.DRAW_SHADOWS) return;
-        RenderTransform rt = transformMapper.get(e);
+        RenderTransformComponent rt = transformMapper.get(e);
         ModelComponent model = modelMapper.get(e);
         int scale = Math.max(1, (int) (model.scale / 2));
         float scaleSq = (scale - 1) * (scale - 1);

@@ -5,7 +5,7 @@ import com.artemis.PooledComponent;
 /**
  * Created by david on 9/28/15.
  */
-public class MapCoordinate extends PooledComponent {
+public class MapCoordinateComponent extends PooledComponent {
     public float x;
     public float y;
 

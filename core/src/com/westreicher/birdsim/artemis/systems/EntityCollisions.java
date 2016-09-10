@@ -3,17 +3,16 @@ package com.westreicher.birdsim.artemis.systems;
 import com.artemis.Aspect;
 import com.artemis.BaseEntitySystem;
 import com.artemis.ComponentMapper;
-import com.artemis.EntitySystem;
 import com.artemis.World;
 import com.artemis.annotations.Wire;
 import com.artemis.utils.IntBag;
 import com.badlogic.gdx.Gdx;
 import com.westreicher.birdsim.SlotSystem;
 import com.westreicher.birdsim.artemis.components.AnimationComponent;
-import com.westreicher.birdsim.artemis.components.Collidable;
-import com.westreicher.birdsim.artemis.components.EntityType;
-import com.westreicher.birdsim.artemis.components.Health;
-import com.westreicher.birdsim.artemis.components.MapCoordinate;
+import com.westreicher.birdsim.artemis.components.CollidableComponent;
+import com.westreicher.birdsim.artemis.components.EntityTypeComponent;
+import com.westreicher.birdsim.artemis.components.HealthComponent;
+import com.westreicher.birdsim.artemis.components.MapCoordinateComponent;
 import com.westreicher.birdsim.artemis.components.ModelComponent;
 import com.westreicher.birdsim.artemis.components.SlotComponent;
 
@@ -23,16 +22,16 @@ import com.westreicher.birdsim.artemis.components.SlotComponent;
 @Wire
 public class EntityCollisions extends BaseEntitySystem {
 
-    protected ComponentMapper<MapCoordinate> mMapCoordinate;
-    protected ComponentMapper<Collidable> mCollidable;
-    protected ComponentMapper<EntityType> mEntityType;
-    protected ComponentMapper<Health> mHealth;
+    protected ComponentMapper<MapCoordinateComponent> mMapCoordinate;
+    protected ComponentMapper<CollidableComponent> mCollidable;
+    protected ComponentMapper<EntityTypeComponent> mEntityType;
+    protected ComponentMapper<HealthComponent> mHealth;
     protected ComponentMapper<SlotComponent> mSlotComponent;
     protected ComponentMapper<AnimationComponent> mAnimationComponent;
     protected ComponentMapper<ModelComponent> mModelComponent;
 
     public EntityCollisions() {
-        super(Aspect.all(MapCoordinate.class, Collidable.class, EntityType.class));
+        super(Aspect.all(MapCoordinateComponent.class, CollidableComponent.class, EntityTypeComponent.class));
     }
 
     @Override
@@ -47,12 +46,12 @@ public class EntityCollisions extends BaseEntitySystem {
         int[] entities = ents.getData();
         for (int i = 0; i < numents - 1; i++) {
             int one = entities[i];
-            MapCoordinate coord1 = mMapCoordinate.get(one);
-            Collidable coll1 = mCollidable.get(one);
+            MapCoordinateComponent coord1 = mMapCoordinate.get(one);
+            CollidableComponent coll1 = mCollidable.get(one);
             for (int j = i + 1; j < numents; j++) {
                 int two = entities[j];
-                MapCoordinate coord2 = mMapCoordinate.get(two);
-                Collidable coll2 = mCollidable.get(two);
+                MapCoordinateComponent coord2 = mMapCoordinate.get(two);
+                CollidableComponent coll2 = mCollidable.get(two);
                 double xdist = coord1.x - coord2.x;
                 double ydist = coord1.y - coord2.y;
                 double dist = Math.sqrt(xdist * xdist + ydist * ydist);
@@ -65,10 +64,10 @@ public class EntityCollisions extends BaseEntitySystem {
     }
 
     private void collide(int one, int two) {
-        EntityType.Types oneType = mEntityType.get(one).type;
-        EntityType.Types twoType = mEntityType.get(two).type;
+        EntityTypeComponent.Types oneType = mEntityType.get(one).type;
+        EntityTypeComponent.Types twoType = mEntityType.get(two).type;
         if (oneType.ordinal() > twoType.ordinal()) {
-            EntityType.Types tmp = oneType;
+            EntityTypeComponent.Types tmp = oneType;
             oneType = twoType;
             twoType = tmp;
             int tmpe = one;

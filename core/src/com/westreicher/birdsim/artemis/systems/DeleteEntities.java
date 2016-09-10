@@ -10,13 +10,13 @@ import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.SlotSystem;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.AnimationComponent;
-import com.westreicher.birdsim.artemis.components.Collidable;
-import com.westreicher.birdsim.artemis.components.EntityType;
-import com.westreicher.birdsim.artemis.components.Health;
-import com.westreicher.birdsim.artemis.components.MapCoordinate;
+import com.westreicher.birdsim.artemis.components.CollidableComponent;
+import com.westreicher.birdsim.artemis.components.EntityTypeComponent;
+import com.westreicher.birdsim.artemis.components.HealthComponent;
+import com.westreicher.birdsim.artemis.components.MapCoordinateComponent;
 import com.westreicher.birdsim.artemis.components.ModelComponent;
 import com.westreicher.birdsim.artemis.components.SlotComponent;
-import com.westreicher.birdsim.artemis.components.TerrainCollision;
+import com.westreicher.birdsim.artemis.components.TerrainCollisionComponent;
 import com.westreicher.birdsim.artemis.factories.UberFactory;
 
 import java.util.Random;
@@ -28,15 +28,15 @@ import java.util.Random;
 public class DeleteEntities extends IteratingSystem {
     private static final Random TMP_RAND = new Random();
     private static final float EDGE = Config.TILES_PER_CHUNK * Config.CHUNKNUMS / 2;
-    private ComponentMapper<Health> healthMapper;
-    private ComponentMapper<MapCoordinate> posMapper;
+    private ComponentMapper<HealthComponent> healthMapper;
+    private ComponentMapper<MapCoordinateComponent> posMapper;
     protected ComponentMapper<ModelComponent> mModelComponent;
-    protected ComponentMapper<EntityType> mEntityType;
+    protected ComponentMapper<EntityTypeComponent> mEntityType;
     protected ComponentMapper<SlotComponent> mSlotComponent;
     private ChunkManager cm;
 
     public DeleteEntities() {
-        super(Aspect.all(Health.class, MapCoordinate.class, EntityType.class));
+        super(Aspect.all(HealthComponent.class, MapCoordinateComponent.class, EntityTypeComponent.class));
     }
 
     @Override
@@ -46,10 +46,10 @@ public class DeleteEntities extends IteratingSystem {
 
     @Override
     protected void process(int e) {
-        Health health = healthMapper.get(e);
-        MapCoordinate pos = posMapper.get(e);
-        EntityType.Types type = mEntityType.get(e).type;
-        if (health.health <= 0) {
+        HealthComponent healthComponent = healthMapper.get(e);
+        MapCoordinateComponent pos = posMapper.get(e);
+        EntityTypeComponent.Types type = mEntityType.get(e).type;
+        if (healthComponent.health <= 0) {
             switch (type) {
                 case BULLET:
                     SlotComponent slot = mSlotComponent.get(e);
@@ -79,9 +79,9 @@ public class DeleteEntities extends IteratingSystem {
 
     private void deathAnim(int e) {
         world.edit(e).
-                remove(Health.class).
-                remove(Collidable.class).
-                remove(TerrainCollision.class).
+                remove(HealthComponent.class).
+                remove(CollidableComponent.class).
+                remove(TerrainCollisionComponent.class).
                 create(AnimationComponent.class);
     }
 }

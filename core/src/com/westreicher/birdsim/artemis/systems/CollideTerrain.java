@@ -8,11 +8,11 @@ import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.math.Vector3;
 import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.artemis.Artemis;
-import com.westreicher.birdsim.artemis.components.EntityType;
-import com.westreicher.birdsim.artemis.components.Health;
-import com.westreicher.birdsim.artemis.components.MapCoordinate;
-import com.westreicher.birdsim.artemis.components.Speed2;
-import com.westreicher.birdsim.artemis.components.TerrainCollision;
+import com.westreicher.birdsim.artemis.components.EntityTypeComponent;
+import com.westreicher.birdsim.artemis.components.HealthComponent;
+import com.westreicher.birdsim.artemis.components.MapCoordinateComponent;
+import com.westreicher.birdsim.artemis.components.Speed2Component;
+import com.westreicher.birdsim.artemis.components.TerrainCollisionComponent;
 
 /**
  * Created by david on 9/30/15.
@@ -20,15 +20,15 @@ import com.westreicher.birdsim.artemis.components.TerrainCollision;
 @Wire
 public class CollideTerrain extends IteratingSystem {
     private static final int MOVEMENT_TESTS = 4;
-    ComponentMapper<TerrainCollision> tcMapper;
-    ComponentMapper<MapCoordinate> posMapper;
-    ComponentMapper<Speed2> speedMapper;
-    protected ComponentMapper<Health> mHealth;
-    protected ComponentMapper<EntityType> mEntityType;
+    ComponentMapper<TerrainCollisionComponent> tcMapper;
+    ComponentMapper<MapCoordinateComponent> posMapper;
+    ComponentMapper<Speed2Component> speedMapper;
+    protected ComponentMapper<HealthComponent> mHealth;
+    protected ComponentMapper<EntityTypeComponent> mEntityType;
     private ChunkManager cm;
 
     public CollideTerrain() {
-        super(Aspect.all(TerrainCollision.class, Speed2.class, MapCoordinate.class, EntityType.class));
+        super(Aspect.all(TerrainCollisionComponent.class, Speed2Component.class, MapCoordinateComponent.class, EntityTypeComponent.class));
     }
 
     @Override
@@ -38,22 +38,22 @@ public class CollideTerrain extends IteratingSystem {
 
     @Override
     protected void process(int e) {
-        MapCoordinate pos = posMapper.get(e);
-        EntityType.Types type = mEntityType.get(e).type;
+        MapCoordinateComponent pos = posMapper.get(e);
+        EntityTypeComponent.Types type = mEntityType.get(e).type;
         float val = cm.getVal(pos.x, pos.y);
         if (val <= 0) return;
-        if (type == EntityType.Types.BULLET) {
+        if (type == EntityTypeComponent.Types.BULLET) {
             mHealth.get(e).health = 0;
         } else {
             //PLAYER/ENEMY
-            Speed2 speed = speedMapper.get(e);
+            Speed2Component speed = speedMapper.get(e);
             pos.x -= speed.x;
             pos.y -= speed.y;
             if (!tryToMove(pos, speed)) {
-                if (type == EntityType.Types.PLAYER) {
+                if (type == EntityTypeComponent.Types.PLAYER) {
                     speed.x = 0;
                     speed.y = 0;
-                } else if (type == EntityType.Types.ENEMY) {
+                } else if (type == EntityTypeComponent.Types.ENEMY) {
                     speed.x = (float) (Math.random() - 0.5);
                     speed.y = (float) (Math.random() - 0.5);
                 }
@@ -61,7 +61,7 @@ public class CollideTerrain extends IteratingSystem {
         }
     }
 
-    private boolean tryToMove(MapCoordinate pos, Speed2 speed) {
+    private boolean tryToMove(MapCoordinateComponent pos, Speed2Component speed) {
         float speedlength = Vector3.dst(0, 0, 0, speed.x, speed.y, 0);
         float radiant = (float) Math.atan2(speed.y, speed.x);
         float frac = (float) ((Math.PI / 2.0) / MOVEMENT_TESTS);

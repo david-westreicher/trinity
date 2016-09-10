@@ -13,7 +13,7 @@ import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.UI.Settings;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
-import com.westreicher.birdsim.artemis.components.Game;
+import com.westreicher.birdsim.artemis.components.GameComponent;
 import com.westreicher.birdsim.artemis.factories.UberFactory;
 import com.westreicher.birdsim.artemis.managers.InputManager;
 import com.westreicher.birdsim.artemis.managers.ModelManager;
@@ -53,7 +53,7 @@ public class Artemis extends World {
     public static final ArrayList<Class> LOGIC_SYSTEMS = new ArrayList<Class>();
     public static final String VIRTUAL_CAM_TAG = "virtualcam";
     public static final String CHUNKMANAGER_TAG = "chunkmanager";
-    public static final String GAME_TAG = "game";
+    public static final String GAME_TAG = "gameComponent";
     public static final String PLAYER_GROUP = "players";
     public static final String PARTICLE_SYS_TAG = "particlesystem";
     public static final Settings settings = new Settings();
@@ -136,7 +136,7 @@ public class Artemis extends World {
 
     private static void addGameComponent(Artemis a) {
         new EntityBuilder(a)
-                .with(new Game())
+                .with(new GameComponent())
                 .tag(GAME_TAG)
                 .build();
     }

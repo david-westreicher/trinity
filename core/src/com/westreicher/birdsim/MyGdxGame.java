@@ -26,7 +26,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
     @Override
     public void dispose() {
-        Gdx.app.log("game", "dispose");
+        Gdx.app.log("gameComponent", "dispose");
         artemis.dispose();
     }
 }

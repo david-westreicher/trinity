@@ -1,16 +1,14 @@
 package com.westreicher.birdsim.artemis.systems;
 
 import com.artemis.Aspect;
-import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.managers.GroupManager;
 import com.artemis.managers.TagManager;
 import com.artemis.systems.EntityProcessingSystem;
-import com.badlogic.gdx.Gdx;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.FixedTimestepStrategy;
-import com.westreicher.birdsim.artemis.components.Game;
+import com.westreicher.birdsim.artemis.components.GameComponent;
 import com.westreicher.birdsim.artemis.components.InputComponent;
 import com.westreicher.birdsim.artemis.managers.InputManager;
 import com.westreicher.birdsim.input.AbstractInput;
@@ -22,17 +20,17 @@ import java.util.ArrayList;
  */
 public class HandlePause extends EntityProcessingSystem {
 
-    protected Game game;
-    protected ComponentMapper<Game> mGame;
+    protected GameComponent gameComponent;
+    protected ComponentMapper<GameComponent> mGame;
 
 
     public HandlePause() {
-        super(Aspect.all(Game.class));
+        super(Aspect.all(GameComponent.class));
     }
 
     @Override
     protected void begin() {
-        game = world.getManager(TagManager.class).getEntity(Artemis.GAME_TAG).getComponent(Game.class);
+        gameComponent = world.getManager(TagManager.class).getEntity(Artemis.GAME_TAG).getComponent(GameComponent.class);
     }
 
     @Override
@@ -49,12 +47,12 @@ public class HandlePause extends EntityProcessingSystem {
             }
         }
 
-        Game game = mGame.get(en);
+        GameComponent gameComponent = mGame.get(en);
         FixedTimestepStrategy strat = (FixedTimestepStrategy) world.getInvocationStrategy();
-        game.isPaused = strat.isPaused;
-        boolean shouldToggle = shouldpause != game.isPaused;
+        gameComponent.isPaused = strat.isPaused;
+        boolean shouldToggle = shouldpause != gameComponent.isPaused;
         if (shouldToggle) {
-            if (game.isPaused)
+            if (gameComponent.isPaused)
                 strat.continueLogic();
             else
                 strat.pauseLogic();

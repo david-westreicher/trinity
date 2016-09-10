@@ -4,8 +4,8 @@ import com.artemis.Component;
 import com.artemis.Entity;
 import com.artemis.utils.Bag;
 import com.badlogic.gdx.Gdx;
-import com.westreicher.birdsim.artemis.components.EntityType;
-import com.westreicher.birdsim.artemis.components.MapCoordinate;
+import com.westreicher.birdsim.artemis.components.EntityTypeComponent;
+import com.westreicher.birdsim.artemis.components.MapCoordinateComponent;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -49,11 +49,11 @@ public class Util {
         for (Component c : e.getComponents(TMP_BAG)) {
             if (c != null)
                 Gdx.app.log("components: ", c.getClass().getSimpleName());
-            if (c instanceof MapCoordinate) {
-                Gdx.app.log("components: ", ((MapCoordinate) c).x + "," + ((MapCoordinate) c).y);
+            if (c instanceof MapCoordinateComponent) {
+                Gdx.app.log("components: ", ((MapCoordinateComponent) c).x + "," + ((MapCoordinateComponent) c).y);
             }
-            if (c instanceof EntityType) {
-                Gdx.app.log("components: ", ((EntityType) c).type.toString());
+            if (c instanceof EntityTypeComponent) {
+                Gdx.app.log("components: ", ((EntityTypeComponent) c).type.toString());
             }
         }
     }

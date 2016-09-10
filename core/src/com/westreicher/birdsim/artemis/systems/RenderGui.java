@@ -11,7 +11,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.CameraComponent;
-import com.westreicher.birdsim.artemis.components.Health;
+import com.westreicher.birdsim.artemis.components.HealthComponent;
 import com.westreicher.birdsim.artemis.managers.TextureManager;
 
 /**
@@ -51,7 +51,7 @@ public class RenderGui extends BaseSystem {
         Texture thumbTex = world.getSystem(TextureManager.class).get(TextureManager.Textures.THUMB);
         for (int i = 0; i < players.size(); i++) {
             Entity player = players.get(i);
-            for (int j = 0; j < player.getComponent(Health.class).health; j++) {
+            for (int j = 0; j < player.getComponent(HealthComponent.class).health; j++) {
                 spritebatch.draw(thumbTex, size * j, size * i, size * 2, size * 2);
             }
         }

@@ -10,7 +10,7 @@ import com.westreicher.birdsim.Chunk;
 import com.westreicher.birdsim.ChunkManager;
 import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.artemis.Artemis;
-import com.westreicher.birdsim.artemis.components.MapCoordinate;
+import com.westreicher.birdsim.artemis.components.MapCoordinateComponent;
 import com.westreicher.birdsim.artemis.factories.UberFactory;
 
 import java.util.Random;
@@ -24,17 +24,17 @@ public class TranslateMapAndSpawn extends IteratingSystem {
     private static final int CHUNKNUMS = Config.CHUNKNUMS;
     private int dx;
     private int dy;
-    private ComponentMapper<MapCoordinate> coordMapper;
+    private ComponentMapper<MapCoordinateComponent> coordMapper;
     private UberFactory factory;
 
     public TranslateMapAndSpawn() {
-        super(Aspect.all(MapCoordinate.class));
+        super(Aspect.all(MapCoordinateComponent.class));
     }
 
     @Override
     protected boolean checkProcessing() {
         Entity camentity = world.getSystem(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG);
-        MapCoordinate coord = camentity.getComponent(MapCoordinate.class);
+        MapCoordinateComponent coord = camentity.getComponent(MapCoordinateComponent.class);
         this.dx = 0;
         this.dy = 0;
         if (Math.abs(coord.x) > Config.TILES_PER_CHUNK / 2.0)
@@ -103,7 +103,7 @@ public class TranslateMapAndSpawn extends IteratingSystem {
 
     @Override
     protected void process(int e) {
-        MapCoordinate coord = coordMapper.get(e);
+        MapCoordinateComponent coord = coordMapper.get(e);
         coord.x -= dx * Config.TILES_PER_CHUNK;
         coord.y -= dy * Config.TILES_PER_CHUNK;
     }

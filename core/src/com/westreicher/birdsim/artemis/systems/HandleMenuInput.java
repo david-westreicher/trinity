@@ -4,9 +4,8 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.systems.EntityProcessingSystem;
-import com.badlogic.gdx.Gdx;
 import com.westreicher.birdsim.artemis.FixedTimestepStrategy;
-import com.westreicher.birdsim.artemis.components.Game;
+import com.westreicher.birdsim.artemis.components.GameComponent;
 import com.westreicher.birdsim.artemis.components.InputComponent;
 import com.westreicher.birdsim.artemis.managers.InputManager;
 import com.westreicher.birdsim.input.AbstractInput;
@@ -25,7 +24,7 @@ public class HandleMenuInput extends EntityProcessingSystem {
     private ArrayList<AbstractInput> players;
 
     public HandleMenuInput() {
-        super(Aspect.all(InputComponent.class, Game.class));
+        super(Aspect.all(InputComponent.class, GameComponent.class));
     }
 
     @Override

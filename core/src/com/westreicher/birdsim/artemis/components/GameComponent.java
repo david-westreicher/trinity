@@ -5,8 +5,8 @@ import com.artemis.Component;
 /**
  * Created by juanolon on 04/10/15.
  */
-public class Game extends Component {
+public class GameComponent extends Component {
     public boolean isPaused = false;
-    // hanlde game over this component
+    // hanlde gameComponent over this component
     // get settings?
 }

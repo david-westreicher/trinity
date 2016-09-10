@@ -11,8 +11,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.westreicher.birdsim.Config;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.components.InputComponent;
-import com.westreicher.birdsim.artemis.components.MapCoordinate;
-import com.westreicher.birdsim.artemis.components.Speed2;
+import com.westreicher.birdsim.artemis.components.MapCoordinateComponent;
+import com.westreicher.birdsim.artemis.components.Speed2Component;
 import com.westreicher.birdsim.artemis.managers.InputManager;
 import com.westreicher.birdsim.input.AbstractInput;
 
@@ -23,21 +23,21 @@ import com.westreicher.birdsim.input.AbstractInput;
 public class PositionCam extends BaseSystem {
     private static final Vector2 TMP_VEC = new Vector2();
     private static final Vector2 TMP_VEC2 = new Vector2();
-    ComponentMapper<MapCoordinate> coordMapper;
-    ComponentMapper<Speed2> speedMapper;
+    ComponentMapper<MapCoordinateComponent> coordMapper;
+    ComponentMapper<Speed2Component> speedMapper;
     ComponentMapper<InputComponent> inputMapper;
 
     @Override
     protected void processSystem() {
         Entity camentity = world.getSystem(TagManager.class).getEntity(Artemis.VIRTUAL_CAM_TAG);
-        MapCoordinate campos = camentity.getComponent(MapCoordinate.class);
-        Speed2 camspeed = camentity.getComponent(Speed2.class);
+        MapCoordinateComponent campos = camentity.getComponent(MapCoordinateComponent.class);
+        Speed2Component camspeed = camentity.getComponent(Speed2Component.class);
         ImmutableBag<Entity> players = world.getSystem(GroupManager.class).getEntities(Artemis.PLAYER_GROUP);
         TMP_VEC.set(0, 0);
         TMP_VEC2.set(0, 0);
         for (Entity e : players) {
-            MapCoordinate pos = coordMapper.get(e);
-            Speed2 speed = speedMapper.get(e);
+            MapCoordinateComponent pos = coordMapper.get(e);
+            Speed2Component speed = speedMapper.get(e);
             AbstractInput input = world.getSystem(InputManager.class).players.get(inputMapper.get(e).id);
             TMP_VEC.add(pos.x, pos.y);
             if (input.isShooting()) {

@@ -10,9 +10,9 @@ import com.artemis.utils.ImmutableBag;
 import com.westreicher.birdsim.SlotSystem;
 import com.westreicher.birdsim.artemis.Artemis;
 import com.westreicher.birdsim.artemis.FixedTimestepStrategy;
-import com.westreicher.birdsim.artemis.components.MapCoordinate;
+import com.westreicher.birdsim.artemis.components.MapCoordinateComponent;
 import com.westreicher.birdsim.artemis.components.SlotComponent;
-import com.westreicher.birdsim.artemis.components.Speed2;
+import com.westreicher.birdsim.artemis.components.Speed2Component;
 
 /**
  * Created by david on 9/25/15.
@@ -22,11 +22,11 @@ public class MovementSystem extends IteratingSystem {
     private boolean hasSlowmo;
 
     public MovementSystem() {
-        super(Aspect.all(MapCoordinate.class, Speed2.class));
+        super(Aspect.all(MapCoordinateComponent.class, Speed2Component.class));
     }
 
-    ComponentMapper<MapCoordinate> coordMapper;
-    ComponentMapper<Speed2> speedMapper;
+    ComponentMapper<MapCoordinateComponent> coordMapper;
+    ComponentMapper<Speed2Component> speedMapper;
     protected ComponentMapper<SlotComponent> mSlotComponent;
 
     @Override
@@ -48,8 +48,8 @@ public class MovementSystem extends IteratingSystem {
 
     @Override
     protected void process(int e) {
-        MapCoordinate pos = coordMapper.get(e);
-        Speed2 speed = speedMapper.get(e);
+        MapCoordinateComponent pos = coordMapper.get(e);
+        Speed2Component speed = speedMapper.get(e);
         pos.x += speed.x;
         pos.y += speed.y;
     }

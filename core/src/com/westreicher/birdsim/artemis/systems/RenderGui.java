@@ -56,7 +56,7 @@ public class RenderGui extends BaseSystem {
      */
     private void drawSlotSelect(int w, int h){
         Texture thumbTex = world.getSystem(TextureManager.class).get(TextureManager.Textures.THUMB);
-        int size = 50;
+        int size = 50; // TODO: scale to display size
         float y = h * 0.85f;
         spritebatch.draw(thumbTex, w * 0.85f - size, y - size, size * 2, size * 2, 0, 0, 1, 1);
         spritebatch.draw(thumbTex, w * 0.75f - size, y - size, size * 2, size * 2, 0, 0, 1, 1);

@@ -7,4 +7,8 @@ import com.artemis.Component;
  */
 public class InputComponent extends Component {
     public int id;
+    public boolean isMoving;
+    public boolean isShooting;
+    public float moveRadiant;
+    public float shootRadiant;
 }

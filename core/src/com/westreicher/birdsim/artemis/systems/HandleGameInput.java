@@ -46,10 +46,8 @@ public class HandleGameInput extends IteratingSystem {
         Speed2Component speed = speedMapper.get(e);
         InputComponent input = inputMapper.get(e);
         SlotComponent slot = mSlotComponent.get(e);
-        AbstractInput playerinput = players.get(input.id);
-        playerinput.update();
-        if (playerinput.isMoving()) {
-            float rad = playerinput.getMoveRadiant();
+        if (input.isMoving) {
+            float rad = input.moveRadiant;
             float movspeed = Config.MOVE_SPEED * (slot.special.type == SlotSystem.Specialty.FASTER ? 1.5f : 1);
             speed.x = (float) Math.cos(rad) * movspeed;
             speed.y = (float) Math.sin(rad) * movspeed;
@@ -58,8 +56,8 @@ public class HandleGameInput extends IteratingSystem {
             speed.y = 0;
         }
 
-        if (playerinput.isShooting() && tick % Math.max(1, (slot.gunType.type.frequency / slot.gunSpecial.getMultiplier(SlotSystem.GunSpecialty.FREQUENCY))) == 0) {
-            float rad = playerinput.getShootRadiant();
+        if (input.isShooting && tick % Math.max(1, (slot.gunType.type.frequency / slot.gunSpecial.getMultiplier(SlotSystem.GunSpecialty.FREQUENCY))) == 0) {
+            float rad = input.shootRadiant;
             float tmpradiant = rad;
             for (int i = 0; i < slot.gunType.multiplier; i++) {
                 float bullspeed = slot.gunSpecial.getMultiplier(SlotSystem.GunSpecialty.SPEED) * slot.gunType.type.speed;

@@ -16,11 +16,11 @@ import java.util.ArrayList;
  * Created by david on 9/29/15.
  */
 @Wire
-public class UpdateInputComponent extends IteratingSystem {
+public class UpdateInput extends IteratingSystem {
     private ComponentMapper<InputComponent> inputMapper;
     private ArrayList<AbstractInput> players;
 
-    public UpdateInputComponent() {
+    public UpdateInput() {
         super(Aspect.all(InputComponent.class, MapCoordinateComponent.class, Speed2Component.class));
     }
 

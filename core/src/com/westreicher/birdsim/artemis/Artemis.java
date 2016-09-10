@@ -28,7 +28,7 @@ import com.westreicher.birdsim.artemis.systems.DeleteEntities;
 import com.westreicher.birdsim.artemis.systems.EntityCollisions;
 import com.westreicher.birdsim.artemis.systems.GameUI;
 import com.westreicher.birdsim.artemis.systems.HandleGameInput;
-import com.westreicher.birdsim.artemis.systems.UpdateInputComponent;
+import com.westreicher.birdsim.artemis.systems.UpdateInput;
 import com.westreicher.birdsim.artemis.systems.HandlePause;
 import com.westreicher.birdsim.artemis.systems.Interpolate;
 import com.westreicher.birdsim.artemis.systems.MenuUI;
@@ -80,7 +80,7 @@ public class Artemis extends World {
         config.setSystem(HandlePause.class);
         //LOGIC
         addLogic(config, UpdateSlotSystem.class);
-        addLogic(config, UpdateInputComponent.class);
+        addLogic(config, UpdateInput.class);
         addLogic(config, HandleGameInput.class);
         addLogic(config, MovementSystem.class);
         addLogic(config, TranslateMapAndSpawn.class);

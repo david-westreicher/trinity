@@ -32,7 +32,6 @@ public class DeleteEntities extends IteratingSystem {
     private ComponentMapper<MapCoordinateComponent> posMapper;
     protected ComponentMapper<ModelComponent> mModelComponent;
     protected ComponentMapper<EntityTypeComponent> mEntityType;
-    protected ComponentMapper<SlotComponent> mSlotComponent;
     private ChunkManager cm;
 
     public DeleteEntities() {
@@ -52,8 +51,8 @@ public class DeleteEntities extends IteratingSystem {
         if (healthComponent.health <= 0) {
             switch (type) {
                 case BULLET:
-                    SlotComponent slot = mSlotComponent.get(e);
-                    int worlddamage = slot.gunType.type.worlddamage * slot.gunSpecial.getMultiplier(SlotSystem.GunSpecialty.DAMAGE);
+                    // TODO old from slot
+                    int worlddamage = 0;
                     for (int i = 0; i < worlddamage * 3 + 1; i++)
                         world.getSystem(AnimateParticles.class).spawnParticle(pos.x + (float) TMP_RAND.nextGaussian() * worlddamage / 4, pos.y + (float) TMP_RAND.nextGaussian() * worlddamage / 4);
                     if (worlddamage > 0)

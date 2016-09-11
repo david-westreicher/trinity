@@ -155,7 +155,7 @@ public class UberFactory extends Manager {
         return e;
     }
 
-    public int shoot(World w, float x, float y, float xspeed, float yspeed, SlotComponent sc) {
+    public int shoot(World w, float x, float y, float xspeed, float yspeed) {
         int e = w.create();
         bulletCreator.transmute(e);
         MapCoordinateComponent coord = coordMapper.get(e);
@@ -166,11 +166,10 @@ public class UberFactory extends Manager {
         speed.y = yspeed;
         ModelComponent model = modelMapper.get(e);
         model.type = ModelManager.Models.BULLET;
-        model.col = sc.gunType.type == SlotSystem.GunType.MACHINEGUN ? ColorAttr.TEAL : ColorAttr.RED;
-        model.scale = sc.gunType.type.scale * sc.gunSpecial.getMultiplier(SlotSystem.GunSpecialty.DAMAGE);
+        model.col = ColorAttr.TEAL;
+        model.scale = 4;
         collidableMapper.get(e).scale = model.scale;
         mEntityType.get(e).type = EntityTypeComponent.Types.BULLET;
-        mSlotComponent.get(e).set(sc);
         return e;
     }
 

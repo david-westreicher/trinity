@@ -8,13 +8,7 @@ import com.artemis.annotations.Wire;
 import com.artemis.utils.IntBag;
 import com.badlogic.gdx.Gdx;
 import com.westreicher.birdsim.SlotSystem;
-import com.westreicher.birdsim.artemis.components.AnimationComponent;
-import com.westreicher.birdsim.artemis.components.CollidableComponent;
-import com.westreicher.birdsim.artemis.components.EntityTypeComponent;
-import com.westreicher.birdsim.artemis.components.HealthComponent;
-import com.westreicher.birdsim.artemis.components.MapCoordinateComponent;
-import com.westreicher.birdsim.artemis.components.ModelComponent;
-import com.westreicher.birdsim.artemis.components.SlotComponent;
+import com.westreicher.birdsim.artemis.components.*;
 
 /**
  * Created by david on 10/1/15.
@@ -119,7 +113,7 @@ public class EntityCollisions extends BaseEntitySystem {
 
     private void playerItem(int player, int item) {
         mHealth.get(item).health = 0;
-        SlotComponent playerSlot = mSlotComponent.get(player);
+//        SlotComponent playerSlot = mSlotComponent.get(player);
 
         int poss = (int) (Math.random() * 5);
         if (poss == 4) {
@@ -132,7 +126,7 @@ public class EntityCollisions extends BaseEntitySystem {
             playerItem(player, item);
             return;
             //}
-        } else if (poss == 2) {
+        } /*else if (poss == 2) {
             SlotSystem.Specialty randomSpecialty = SlotSystem.randomSpecialty();
             Gdx.app.log("item", randomSpecialty.toString());
             if (playerSlot.special.type == randomSpecialty) {
@@ -161,11 +155,14 @@ public class EntityCollisions extends BaseEntitySystem {
             }
         }
         Gdx.app.log("item", playerSlot.toString());
+        */
     }
 
     private void bulletEnemy(int bullet, int enemy) {
         SlotComponent slot = mSlotComponent.get(bullet);
-        int damage = slot.gunType.type.damage * slot.gunSpecial.getMultiplier(SlotSystem.GunSpecialty.DAMAGE);
+//        int damage = slot.gunType.type.damage * slot.gunSpecial.getMultiplier(SlotSystem.GunSpecialty.DAMAGE);
+        // TODO old from slot
+        int damage = 1;
         mHealth.get(enemy).health -= damage;
         mHealth.get(bullet).health = 0;
         Gdx.app.log("damage", "" + damage);

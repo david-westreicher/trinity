@@ -31,18 +31,36 @@ public class RenderGui extends BaseSystem {
         spritebatch.begin();
         if (!Config.IS_DESKTOP)
             drawThumbs(v.getScreenWidth(), v.getScreenHeight());
+        drawSlotSelect(v.getScreenWidth(), v.getScreenHeight());
         drawLives();
         spritebatch.end();
     }
 
+    /**
+     * Draw Joysticks left and right
+     * @param w Screen width
+     * @param h Screen height
+     */
     private void drawThumbs(int w, int h) {
-        if (Config.IS_DESKTOP)
-            return;
         Texture thumbTex = world.getSystem(TextureManager.class).get(TextureManager.Textures.THUMB);
         int size = 50;
         float y = h * 0.3f;
         spritebatch.draw(thumbTex, w * 0.15f - size, y - size, size * 2, size * 2, 0, 0, 1, 1);
         spritebatch.draw(thumbTex, w * 0.85f - size, y - size, size * 2, size * 2, 0, 0, 1, 1);
+    }
+
+    /**
+     * Draw Slot Selection - Weapons
+     * @param w Screen width
+     * @param h Screen height
+     */
+    private void drawSlotSelect(int w, int h){
+        Texture thumbTex = world.getSystem(TextureManager.class).get(TextureManager.Textures.THUMB);
+        int size = 50; // TODO: scale to display size
+        float y = h * 0.85f;
+        spritebatch.draw(thumbTex, w * 0.85f - size, y - size, size * 2, size * 2, 0, 0, 1, 1);
+        spritebatch.draw(thumbTex, w * 0.75f - size, y - size, size * 2, size * 2, 0, 0, 1, 1);
+        spritebatch.draw(thumbTex, w * 0.65f - size, y - size, size * 2, size * 2, 0, 0, 1, 1);
     }
 
     private void drawLives() {

@@ -23,6 +23,7 @@ import com.westreicher.birdsim.artemis.components.ModelComponent;
 import com.westreicher.birdsim.artemis.components.ParticleComponent;
 import com.westreicher.birdsim.artemis.components.RenderTransformComponent;
 import com.westreicher.birdsim.artemis.components.SlotComponent;
+import com.westreicher.birdsim.artemis.components.SlotStateComponent;
 import com.westreicher.birdsim.artemis.components.Speed2Component;
 import com.westreicher.birdsim.artemis.components.TerrainCollisionComponent;
 import com.westreicher.birdsim.artemis.managers.ModelManager;
@@ -63,6 +64,7 @@ public class UberFactory extends Manager {
                 add(EntityTypeComponent.class).
                 add(HealthComponent.class).
                 add(SlotComponent.class).
+                add(SlotStateComponent.class).
                 build();
 
         enemyCreator = new EntityTransmuterFactory(world).

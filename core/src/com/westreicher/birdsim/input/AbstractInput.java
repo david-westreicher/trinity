@@ -1,6 +1,7 @@
 package com.westreicher.birdsim.input;
 
 import com.artemis.World;
+import com.westreicher.birdsim.artemis.components.SlotStateComponent;
 
 /**
  * Created by david on 9/21/15.
@@ -14,6 +15,7 @@ public abstract class AbstractInput {
     protected float shooty;
     protected boolean ismoving;
     protected boolean isshooting;
+    protected SlotStateComponent.STATE slot = SlotStateComponent.STATE.BULLET;
 
     public abstract void update();
 
@@ -36,6 +38,8 @@ public abstract class AbstractInput {
     public float getShootRadiant() {
         return (float) Math.atan2(-shooty, shootx);
     }
+
+    public SlotStateComponent.STATE getSlot() { return slot; }
 
     public void resize(World w) {
     }

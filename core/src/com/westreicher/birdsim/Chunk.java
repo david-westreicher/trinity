@@ -243,6 +243,8 @@ public class Chunk {
     private void calcShadow(ChunkManager cm) {
         for (int x = 0; x < SIZE; x++) {
             for (int y = 0; y < SIZE; y++) {
+
+                // positive scale is above sea level
                 float scale = map[x][y];
                 tmp.set(getCol(scale));
                 if (scale > 0) {
@@ -250,7 +252,9 @@ public class Chunk {
                     float grady = (getOutsideVal(cm, x, y - 1) - getOutsideVal(cm, x, y + 1)) / 2.0f;
                     tmp2.set(gradx, -grady, -1.0f / Config.TERRAIN_HEIGHT);
                     tmp2.nor();
-                    float dot = Math.max(0.2f, tmp2.dot(LIGHT_VEC));
+
+                    // SHADOW FUNCTION
+                    float dot = Math.max(0.5f, tmp2.dot(LIGHT_VEC));
                     tmp.scl(dot);
                 }
                 float dark = 0;
@@ -263,8 +267,12 @@ public class Chunk {
                     }
                 }
                 tmp.scl(Math.max(0, 1 - dark));
+
+                // water (negative scale)
                 if (scale <= 0)
-                    tmp.scl(Math.min(1, 0.5f - scale * 0.25f));
+                    // WATER COLOR FUNCTION
+                    tmp.scl(Math.min(1, 0.95f - scale * -0.25f));
+
                 colors[x][y].set(tmp.x, tmp.y, tmp.z, 1);
             }
         }

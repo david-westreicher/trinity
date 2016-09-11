@@ -12,17 +12,17 @@ import com.westreicher.birdsim.artemis.factories.UberFactory;
 /**
  * Created by juanolon on 9/11/16.
  */
-public class HandleBulletInput extends IteratingSystem {
+public class HandleDroneInput extends IteratingSystem {
     private long tick;
     private ComponentMapper<MapCoordinateComponent> posMapper;
     private ComponentMapper<InputComponent> inputMapper;
     private ComponentMapper<SlotStateComponent> slotMapper;
     private UberFactory factory;
 
-    public HandleBulletInput() {
+    public HandleDroneInput() {
         super(Aspect.all(InputComponent.class, SlotStateComponent.class));
     }
-
+    
     @Override
     protected void begin() {
         tick = ((FixedTimestepStrategy) world.getInvocationStrategy()).currenttick;
@@ -30,7 +30,7 @@ public class HandleBulletInput extends IteratingSystem {
     @Override
     protected void process(int e) {
         SlotStateComponent slot = slotMapper.get(e);
-        if(slot.state == SlotStateComponent.STATE.BULLET) {
+        if(slot.state == SlotStateComponent.STATE.DRONE) {
             MapCoordinateComponent pos = posMapper.get(e);
             InputComponent input = inputMapper.get(e);
 

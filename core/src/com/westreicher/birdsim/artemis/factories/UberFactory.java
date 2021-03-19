@@ -22,6 +22,7 @@ import com.westreicher.birdsim.artemis.components.MapCoordinateComponent;
 import com.westreicher.birdsim.artemis.components.ModelComponent;
 import com.westreicher.birdsim.artemis.components.ParticleComponent;
 import com.westreicher.birdsim.artemis.components.RenderTransformComponent;
+import com.westreicher.birdsim.artemis.components.ShipComponent;
 import com.westreicher.birdsim.artemis.components.SlotComponent;
 import com.westreicher.birdsim.artemis.components.Speed2Component;
 import com.westreicher.birdsim.artemis.components.TerrainCollisionComponent;
@@ -39,6 +40,7 @@ public class UberFactory extends Manager {
     private ComponentMapper<InputComponent> inputMapper;
     private ComponentMapper<TerrainCollisionComponent> tcMapper;
     private ComponentMapper<ModelComponent> modelMapper;
+    private ComponentMapper<ShipComponent> shipMapper;
     private ComponentMapper<Speed2Component> speedMapper;
     protected ComponentMapper<HealthComponent> mHealth;
     private ComponentMapper<CollidableComponent> collidableMapper;
@@ -49,6 +51,7 @@ public class UberFactory extends Manager {
     private EntityTransmuter itemCreator;
     private EntityTransmuter bulletCreator;
     private EntityTransmuter particleCreator;
+    private EntityTransmuter shipCreator;
 
     @Override
     protected void initialize() {
@@ -63,6 +66,16 @@ public class UberFactory extends Manager {
                 add(EntityTypeComponent.class).
                 add(HealthComponent.class).
                 add(SlotComponent.class).
+                build();
+
+        shipCreator = new EntityTransmuterFactory(world).
+                add(MapCoordinateComponent.class).
+                add(Speed2Component.class).
+                add(RenderTransformComponent.class).
+                add(ModelComponent.class).
+                add(HealthComponent.class).
+                add(EntityTypeComponent.class).
+                add(ShipComponent.class).
                 build();
 
         enemyCreator = new EntityTransmuterFactory(world).
@@ -112,7 +125,7 @@ public class UberFactory extends Manager {
         ModelComponent model = modelMapper.get(e);
         model.type = ModelManager.Models.PLAYER;
         model.col = ColorAttr.RED;
-        model.scale = 10;
+        model.scale = 4;
         collidableMapper.get(e).scale = model.scale;
         mEntityType.get(e).type = EntityTypeComponent.Types.PLAYER;
         mSlotComponent.get(e).gunType.type = SlotSystem.GunType.MACHINEGUN;
@@ -120,6 +133,24 @@ public class UberFactory extends Manager {
         mSlotComponent.get(e).gunType.type = SlotSystem.GunType.ROCKETGUN;
         mSlotComponent.get(e).gunSpecial.type = SlotSystem.GunSpecialty.DAMAGE;
         mSlotComponent.get(e).gunSpecial.multiplier = 1;
+        for (int i = 0; i < 10; i++)
+            createShip(w, id);
+        return e;
+    }
+
+    private Entity createShip(World w, int playerid) {
+        Entity e = w.createEntity();
+        shipCreator.transmute(e);
+        MapCoordinateComponent coord = coordMapper.get(e);
+        coord.x = (float) (Math.random() * 20 - 10);
+        coord.y = (float) (Math.random() * 20 - 10);
+        shipMapper.get(e).playerid = playerid;
+        shipMapper.get(e).size = 5;
+        ModelComponent model = modelMapper.get(e);
+        model.type = ModelManager.Models.PLAYER;
+        model.col = ColorAttr.BLUE;
+        model.scale = 10;
+        mEntityType.get(e).type = EntityTypeComponent.Types.SHIP;
         return e;
     }
 

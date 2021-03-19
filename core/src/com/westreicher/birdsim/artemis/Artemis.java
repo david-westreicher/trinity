@@ -20,29 +20,7 @@ import com.westreicher.birdsim.artemis.managers.ModelManager;
 import com.westreicher.birdsim.artemis.managers.PostProcessingShaders;
 import com.westreicher.birdsim.artemis.managers.ShaderManager;
 import com.westreicher.birdsim.artemis.managers.TextureManager;
-import com.westreicher.birdsim.artemis.systems.AdjustHeight;
-import com.westreicher.birdsim.artemis.systems.AnimateParticles;
-import com.westreicher.birdsim.artemis.systems.Animation;
-import com.westreicher.birdsim.artemis.systems.CollideTerrain;
-import com.westreicher.birdsim.artemis.systems.DeleteEntities;
-import com.westreicher.birdsim.artemis.systems.EntityCollisions;
-import com.westreicher.birdsim.artemis.systems.GameUI;
-import com.westreicher.birdsim.artemis.systems.HandleGameInput;
-import com.westreicher.birdsim.artemis.systems.UpdateInput;
-import com.westreicher.birdsim.artemis.systems.HandlePause;
-import com.westreicher.birdsim.artemis.systems.Interpolate;
-import com.westreicher.birdsim.artemis.systems.MenuUI;
-import com.westreicher.birdsim.artemis.systems.MovementSystem;
-import com.westreicher.birdsim.artemis.systems.PositionCam;
-import com.westreicher.birdsim.artemis.systems.RegenerateChunks;
-import com.westreicher.birdsim.artemis.systems.RenderChunks;
-import com.westreicher.birdsim.artemis.systems.RenderGui;
-import com.westreicher.birdsim.artemis.systems.RenderModels;
-import com.westreicher.birdsim.artemis.systems.RenderParticles;
-import com.westreicher.birdsim.artemis.systems.RenderProfiler;
-import com.westreicher.birdsim.artemis.systems.StartRendering;
-import com.westreicher.birdsim.artemis.systems.TranslateMapAndSpawn;
-import com.westreicher.birdsim.artemis.systems.UpdateSlotSystem;
+import com.westreicher.birdsim.artemis.systems.*;
 
 import java.util.ArrayList;
 
@@ -82,6 +60,7 @@ public class Artemis extends World {
         addLogic(config, UpdateSlotSystem.class);
         addLogic(config, UpdateInput.class);
         addLogic(config, HandleGameInput.class);
+        addLogic(config, SwarmSystem.class);
         addLogic(config, MovementSystem.class);
         addLogic(config, TranslateMapAndSpawn.class);
         addLogic(config, RegenerateChunks.class);
@@ -89,7 +68,8 @@ public class Artemis extends World {
         addLogic(config, EntityCollisions.class);
         addLogic(config, DeleteEntities.class);
         addLogic(config, Animation.class);
-        addLogic(config, PositionCam.class);
+        //addLogic(config, PositionCam.class);
+        addLogic(config, PositionCamSwarm.class);
         addLogic(config, AnimateParticles.class);
 
         //RENDERING

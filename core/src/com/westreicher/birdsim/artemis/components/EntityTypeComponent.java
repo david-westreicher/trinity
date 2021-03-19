@@ -13,5 +13,5 @@ public class EntityTypeComponent extends PooledComponent {
 
     }
 
-    public enum Types {PLAYER, BULLET, ITEM, ENEMY}
+    public enum Types {PLAYER, BULLET, ITEM, SHIP, ENEMY}
 }
